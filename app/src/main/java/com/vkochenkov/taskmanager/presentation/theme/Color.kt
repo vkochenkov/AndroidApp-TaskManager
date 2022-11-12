@@ -1,4 +1,4 @@
-package com.vkochenkov.taskmanager.ui.theme
+package com.vkochenkov.taskmanager.presentation.theme
 
 import androidx.compose.ui.graphics.Color
 

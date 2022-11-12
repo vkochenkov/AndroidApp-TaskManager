@@ -1,12 +1,16 @@
 package com.vkochenkov.taskmanager.presentation.screen.details
 
 import androidx.compose.runtime.Composable
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavHostController
+import org.koin.androidx.compose.koinViewModel
+import org.koin.core.parameter.parametersOf
 
 @Composable
-fun DetailsScreen() {
+fun DetailsScreen(
+    navController: NavHostController
+) {
 
-    val viewModel: DetailsViewModel = hiltViewModel()
+    val viewModel: DetailsViewModel = koinViewModel { parametersOf(navController) }
 
     DetailsBody(
         viewModel.state.value,

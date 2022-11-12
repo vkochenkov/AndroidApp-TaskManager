@@ -5,14 +5,13 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle
-import com.vkochenkov.taskmanager.presentation.BaseViewModel
-import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
+import androidx.lifecycle.ViewModel
+import androidx.navigation.NavHostController
 
-@HiltViewModel
-class MainViewModel @Inject constructor (
+class MainViewModel(
+    navHostController: NavHostController,
     savedStateHandle: SavedStateHandle
-): BaseViewModel() {
+): ViewModel() {
 
     private var _state: MutableState<MainBodyState> = mutableStateOf(MainBodyState.ShowData("str"))
     val state: State<MainBodyState> get() = _state
@@ -22,6 +21,7 @@ class MainViewModel @Inject constructor (
 
         when(action) {
             is MainActions.OpenDetails -> {
+                savedStateHandle.keys()
                 navHostController.navigate("details")
             }
         }

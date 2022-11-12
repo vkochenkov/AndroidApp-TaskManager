@@ -3,12 +3,14 @@ package com.vkochenkov.taskmanager.presentation.screen.details
 import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
-import com.vkochenkov.taskmanager.presentation.BaseViewModel
-import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
+import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModel
+import androidx.navigation.NavHostController
 
-@HiltViewModel
-class DetailsViewModel @Inject constructor(): BaseViewModel() {
+class DetailsViewModel(
+    navHostController: NavHostController,
+    savedStateHandle: SavedStateHandle
+): ViewModel() {
 
     private var _state: MutableState<DetailsBodyState> = mutableStateOf(DetailsBodyState.ShowData("test"))
     val state get() = _state

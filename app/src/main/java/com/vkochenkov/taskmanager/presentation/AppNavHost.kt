@@ -1,4 +1,4 @@
-package com.vkochenkov.taskmanager.presentation.screen
+package com.vkochenkov.taskmanager.presentation
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
@@ -11,6 +11,7 @@ import com.vkochenkov.taskmanager.presentation.screen.main.MainScreen
 @Composable
 fun AppNavHost(
     navController: NavHostController = rememberNavController(),
+    // todo move to enum
     startDestination: String = "main"
 ) {
     NavHost(
@@ -18,6 +19,6 @@ fun AppNavHost(
         startDestination = startDestination
     ) {
         composable("main") { MainScreen(navController) }
-        composable("details") { DetailsScreen() }
+        composable("details") { DetailsScreen(navController) }
     }
 }

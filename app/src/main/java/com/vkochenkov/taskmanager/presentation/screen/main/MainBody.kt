@@ -5,7 +5,7 @@ import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.vkochenkov.taskmanager.ui.theme.TaskManagerTheme
+import com.vkochenkov.taskmanager.presentation.theme.TaskManagerTheme
 
 @Composable
 fun MainBody(
