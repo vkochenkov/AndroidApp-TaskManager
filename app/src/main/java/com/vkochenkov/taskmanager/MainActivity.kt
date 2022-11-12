@@ -3,7 +3,7 @@ package com.vkochenkov.taskmanager
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import com.vkochenkov.taskmanager.presentation.screen.main.MainScreen
+import com.vkochenkov.taskmanager.presentation.screen.AppNavHost
 import com.vkochenkov.taskmanager.ui.theme.TaskManagerTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -13,7 +13,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             TaskManagerTheme {
-                MainScreen()
+                AppNavHost()
             }
         }
     }

@@ -4,5 +4,5 @@ sealed class MainBodyState {
 
     data class ShowData(
         var title: String
-    ): MainBodyState()
+    ) : MainBodyState()
 }

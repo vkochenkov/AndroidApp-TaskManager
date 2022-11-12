@@ -1,4 +1,4 @@
-package com.vkochenkov.taskmanager.presentation.screen.main
+package com.vkochenkov.taskmanager.presentation.screen.details
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.*
@@ -8,9 +8,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.vkochenkov.taskmanager.ui.theme.TaskManagerTheme
 
 @Composable
-fun MainBody(
-    state: MainBodyState,
-    onAction: (MainActions) -> Unit
+fun DetailsBody(
+    state: DetailsBodyState,
+    onAction: (DetailsActions) -> Unit
 ) {
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -18,10 +18,10 @@ fun MainBody(
     ) {
         Scaffold {
             Button(onClick = {
-                onAction.invoke(MainActions.OpenDetails)
+                onAction.invoke(DetailsActions.OnClick)
             }) {
-                if (state is MainBodyState.ShowData) {
-                    Text(text = "open details and state value is = ${state.title}")
+                if (state is DetailsBodyState.ShowData) {
+                    Text(text = "New screen")
                 }
             }
         }
@@ -32,8 +32,8 @@ fun MainBody(
 @Composable
 fun Preview() {
     TaskManagerTheme {
-        MainBody(
-            MainBodyState.ShowData("fffff")
+        DetailsBody(
+            DetailsBodyState.ShowData("fffff")
         ) {}
     }
 }
