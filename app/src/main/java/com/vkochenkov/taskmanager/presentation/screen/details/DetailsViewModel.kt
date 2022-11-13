@@ -12,7 +12,9 @@ class DetailsViewModel(
     savedStateHandle: SavedStateHandle
 ): ViewModel() {
 
-    private var _state: MutableState<DetailsBodyState> = mutableStateOf(DetailsBodyState.ShowData("test"))
+    private val taskId: String = checkNotNull(savedStateHandle["id"])
+
+    private var _state: MutableState<DetailsBodyState> = mutableStateOf(DetailsBodyState.ShowData(taskId))
     val state get() = _state
 
     val onAction = { action: DetailsActions ->

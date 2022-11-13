@@ -1,13 +1,16 @@
 package com.vkochenkov.taskmanager.presentation.screen.main
 
-import android.annotation.SuppressLint
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import com.vkochenkov.taskmanager.data.model.Task
 import com.vkochenkov.taskmanager.presentation.theme.TaskManagerTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -16,21 +19,58 @@ fun MainBody(
     state: MainBodyState,
     onAction: (MainActions) -> Unit
 ) {
+    // todo use pager?
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
     ) {
         Scaffold { padding ->
-            Column(modifier = Modifier.padding(padding)) {
-                Button(onClick = {
-                    onAction.invoke(MainActions.OpenDetails)
-                }) {
-                    if (state is MainBodyState.ShowData) {
-                        Text(text = "open details and state value is = ${state.title}")
-                    }
-                }
+            when (state) {
+                is MainBodyState.HasContent -> HasContentState(padding, state.tasksList, onAction)
+                else -> EmptyContentState(padding)
             }
         }
+    }
+}
+
+@Composable
+fun HasContentState(
+    padding: PaddingValues,
+    tasksList: List<Task>,
+    onAction: (MainActions) -> Unit
+) {
+    LazyColumn(modifier = Modifier.padding(padding)) {
+        for (task in tasksList) {
+            item {
+                TaskCard(task, onAction)
+            }
+        }
+    }
+}
+
+@Composable
+fun TaskCard(
+    task: Task,
+    onAction: (MainActions) -> Unit
+) {
+    Card(
+        modifier = Modifier.clickable {
+            onAction.invoke(MainActions.OpenDetails(task.id))
+        }
+    ) {
+        Text(text = task.title)
+        task.description?.let {
+            Text(text = it)
+        }
+    }
+}
+
+@Composable
+fun EmptyContentState(
+    padding: PaddingValues
+) {
+    Column() {
+        Text(text = "empty content")
     }
 }
 
@@ -38,8 +78,6 @@ fun MainBody(
 @Composable
 fun Preview() {
     TaskManagerTheme {
-        MainBody(
-            MainBodyState.ShowData("fffff")
-        ) {}
+        // todo
     }
 }

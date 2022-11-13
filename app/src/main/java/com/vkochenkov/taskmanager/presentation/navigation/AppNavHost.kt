@@ -2,23 +2,30 @@ package com.vkochenkov.taskmanager.presentation
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import com.vkochenkov.taskmanager.presentation.navigation.Destination
 import com.vkochenkov.taskmanager.presentation.screen.details.DetailsScreen
 import com.vkochenkov.taskmanager.presentation.screen.main.MainScreen
 
 @Composable
 fun AppNavHost(
     navController: NavHostController = rememberNavController(),
-    // todo move to enum
-    startDestination: String = "main"
+    startDestination: String = Destination.MAIN.toString()
 ) {
     NavHost(
         navController = navController,
         startDestination = startDestination
     ) {
-        composable("main") { MainScreen(navController) }
-        composable("details") { DetailsScreen(navController) }
+        composable(Destination.MAIN.toString()) { MainScreen(navController) }
+        composable(
+            route = "${Destination.DETAILS}?id={id}",
+            arguments = listOf(navArgument("id") { type = NavType.StringType })
+        ) {
+            DetailsScreen(navController)
+        }
     }
 }

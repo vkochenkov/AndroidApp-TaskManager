@@ -2,5 +2,5 @@ package com.vkochenkov.taskmanager.presentation.screen.main
 
 sealed class MainActions {
 
-    object OpenDetails: MainActions()
+    data class OpenDetails(val id: String) : MainActions()
 }

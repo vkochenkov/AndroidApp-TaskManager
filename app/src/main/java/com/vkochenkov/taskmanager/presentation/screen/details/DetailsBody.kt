@@ -25,7 +25,7 @@ fun DetailsBody(
                     onAction.invoke(DetailsActions.OnClick)
                 }) {
                     if (state is DetailsBodyState.ShowData) {
-                        Text(text = "New screen")
+                        Text(text = state.title)
                     }
                 }
             }

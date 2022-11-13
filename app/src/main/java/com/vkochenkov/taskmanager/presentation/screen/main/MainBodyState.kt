@@ -1,8 +1,12 @@
 package com.vkochenkov.taskmanager.presentation.screen.main
 
+import com.vkochenkov.taskmanager.data.model.Task
+
 sealed class MainBodyState {
 
-    data class ShowData(
-        var title: String
+    data class HasContent(
+        var tasksList: List<Task>
     ) : MainBodyState()
+
+    object EmptyContent: MainBodyState()
 }
