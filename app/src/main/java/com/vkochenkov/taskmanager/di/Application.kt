@@ -1,4 +1,4 @@
-package com.vkochenkov.taskmanager
+package com.vkochenkov.taskmanager.di
 
 import android.app.Application
 import com.vkochenkov.taskmanager.di.appModule

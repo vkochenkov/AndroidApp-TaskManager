@@ -16,12 +16,10 @@ class MainViewModel(
     repository: TasksRepository
 ) : ViewModel() {
 
-    private var _state: MutableState<MainBodyState> = mutableStateOf(MainBodyState.EmptyContent)
+    private var _state: MutableState<MainBodyState> = mutableStateOf(MainBodyState.ShowContent(null))
     val state: State<MainBodyState> get() = _state
 
     val onAction = { action: MainActions ->
-        Log.d("vladd", "onAction invoke")
-
         when (action) {
             is MainActions.OpenDetails -> {
                 navHostController.navigate("${Destination.DETAILS}?id=${action.id}")
@@ -30,7 +28,7 @@ class MainViewModel(
     }
 
     init {
-        _state.value = MainBodyState.HasContent(
+        _state.value = MainBodyState.ShowContent(
             repository.getAllTasks()
         )
     }

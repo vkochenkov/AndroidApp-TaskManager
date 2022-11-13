@@ -4,9 +4,7 @@ import com.vkochenkov.taskmanager.data.model.Task
 
 sealed class MainBodyState {
 
-    data class HasContent(
-        var tasksList: List<Task>
+    data class ShowContent(
+        var tasksList: List<Task>?
     ) : MainBodyState()
-
-    object EmptyContent: MainBodyState()
 }

@@ -32,62 +32,76 @@ fun MainBody(
     ) {
         Scaffold { padding ->
             when (state) {
-                is MainBodyState.HasContent -> HasContentState(padding, state.tasksList, onAction)
-                else -> EmptyContentState(padding)
+                is MainBodyState.ShowContent -> ShowContent(padding, state.tasksList, onAction)
+                else -> ErrorState(padding)
             }
         }
     }
 }
 
 @Composable
-fun HasContentState(
+private fun ShowContent(
     padding: PaddingValues,
-    tasksList: List<Task>,
+    tasksList: List<Task>?,
     onAction: (MainActions) -> Unit
 ) {
-    LazyColumn(
-        modifier = Modifier
-            .padding(padding)
-            .padding(horizontal = 16.dp)
-    ) {
-        item {
-            Spacer(modifier = Modifier.size(8.dp))
-        }
-        for (task in tasksList) {
+    if (!tasksList.isNullOrEmpty()) {
+        LazyColumn(
+            modifier = Modifier
+                .padding(padding)
+                .padding(horizontal = 16.dp)
+        ) {
             item {
-                TaskCard(task, onAction)
                 Spacer(modifier = Modifier.size(8.dp))
             }
+            for (task in tasksList) {
+                item {
+                    TaskCard(task, onAction)
+                    Spacer(modifier = Modifier.size(8.dp))
+                }
+            }
         }
+    } else {
+        Text(text = "no content")
     }
 }
 
 @Composable
-fun EmptyContentState(
+private fun ErrorState(
     padding: PaddingValues
 ) {
     Column() {
-        Text(text = "empty content")
+        Text(text = "error")
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TaskCard(
+private fun TaskCard(
     task: Task,
     onAction: (MainActions) -> Unit
 ) {
     Card(
         modifier = Modifier
-            .fillMaxWidth()
-            .clickable {
-                onAction.invoke(MainActions.OpenDetails(task.id))
-            }
+            .fillMaxWidth(),
+        onClick = {
+            onAction.invoke(MainActions.OpenDetails(task.id))
+        }
     ) {
         Column(
-            modifier = Modifier.padding(8.dp)
+            modifier = Modifier.padding(10.dp).fillMaxWidth()
         ) {
+            Text(
+                text = task.title,
+                fontSize = 18.sp,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+            Spacer(modifier = Modifier.size(4.dp))
             Row(
-                verticalAlignment = Alignment.CenterVertically
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.End
             ) {
                 val color = when (task.priority) {
                     Task.Priority.LOW -> {
@@ -100,25 +114,19 @@ fun TaskCard(
                         Color.Red
                     }
                 }
+                Text(
+                    text = task.priority.toString(),
+                    fontFamily = FontFamily.Monospace,
+                    fontSize = 12.sp
+                )
+                Spacer(modifier = Modifier.size(4.dp))
                 Box(
                     modifier = Modifier
                         .size(12.dp)
                         .border(border = BorderStroke(1.dp, Color.Black), shape = CircleShape)
                         .background(color = color, shape = CircleShape)
                 )
-                Spacer(modifier = Modifier.size(4.dp))
-                Text(
-                    text = task.priority.toString(),
-                    fontFamily = FontFamily.Monospace,
-                    fontSize = 12.sp
-                )
             }
-            Text(
-                text = task.title,
-                fontSize = 18.sp,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis
-            )
         }
     }
 }
@@ -128,7 +136,7 @@ fun TaskCard(
 fun Preview() {
     TaskManagerTheme {
         MainBody(
-            MainBodyState.HasContent(
+            MainBodyState.ShowContent(
                 listOf(
                     Task(
                         "1",
