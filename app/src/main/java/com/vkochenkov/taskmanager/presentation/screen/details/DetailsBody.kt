@@ -21,13 +21,7 @@ fun DetailsBody(
     ) {
         Scaffold { padding ->
             Column(modifier = Modifier.padding(padding)) {
-                Button(onClick = {
-                    onAction.invoke(DetailsActions.OnClick)
-                }) {
-                    if (state is DetailsBodyState.ShowData) {
-                        Text(text = state.title)
-                    }
-                }
+                // todo
             }
         }
     }

@@ -1,6 +1,5 @@
 package com.vkochenkov.taskmanager.presentation.screen.details
 
-import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle
@@ -18,8 +17,6 @@ class DetailsViewModel(
     val state get() = _state
 
     val onAction = { action: DetailsActions ->
-        Log.d("vladd", "onAction invoke")
-
         when(action) {
             is DetailsActions.OnClick -> _state.value = DetailsBodyState.ShowData("new title")
         }
