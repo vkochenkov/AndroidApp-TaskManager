@@ -10,7 +10,8 @@ fun MainScreen(
     navController: NavHostController
 ) {
 
-    val viewModel: MainViewModel = koinViewModel { parametersOf(navController) }
+    val viewModel: MainViewModel = koinViewModel()
+    viewModel.navController = navController
 
     MainBody(
         viewModel.state.value,

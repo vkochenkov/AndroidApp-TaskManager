@@ -4,16 +4,14 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.ViewModel
-import androidx.navigation.NavHostController
 import com.vkochenkov.taskmanager.data.TasksRepository
+import com.vkochenkov.taskmanager.presentation.base.BaseViewModel
 import com.vkochenkov.taskmanager.presentation.navigation.Destination
 
 class MainViewModel(
-    val navController: NavHostController,
     savedStateHandle: SavedStateHandle,
     val repository: TasksRepository
-) : ViewModel() {
+) : BaseViewModel() {
 
     private var _state: MutableState<MainBodyState> =
         mutableStateOf(MainBodyState.ShowContent(null))

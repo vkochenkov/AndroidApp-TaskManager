@@ -10,16 +10,14 @@ val appModule = module {
 
     single { TasksRepository() }
 
-    viewModel { params ->
+    viewModel {
         MainViewModel(
-            navController = params.get(),
             savedStateHandle = get(),
             repository = get()
         )
     }
-    viewModel { params ->
+    viewModel {
         DetailsViewModel(
-            navController = params.get(),
             savedStateHandle = get(),
             repository = get()
         )

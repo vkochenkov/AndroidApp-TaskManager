@@ -24,7 +24,7 @@ import androidx.compose.ui.unit.sp
 import com.vkochenkov.taskmanager.R
 import com.vkochenkov.taskmanager.data.model.Task
 import com.vkochenkov.taskmanager.presentation.theme.TaskManagerTheme
-import com.vkochenkov.taskmanager.utils.getPriorityColor
+import com.vkochenkov.taskmanager.presentation.utils.getPriorityColor
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

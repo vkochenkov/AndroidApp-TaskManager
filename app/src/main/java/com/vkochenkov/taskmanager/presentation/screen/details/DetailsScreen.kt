@@ -10,7 +10,9 @@ fun DetailsScreen(
     navController: NavHostController
 ) {
 
-    val viewModel: DetailsViewModel = koinViewModel { parametersOf(navController) }
+    val viewModel: DetailsViewModel = koinViewModel()
+    viewModel.navController = navController
+
 
     DetailsBody(
         viewModel.state.value,

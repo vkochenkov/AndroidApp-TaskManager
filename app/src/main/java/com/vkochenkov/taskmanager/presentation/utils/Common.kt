@@ -1,4 +1,4 @@
-package com.vkochenkov.taskmanager.utils
+package com.vkochenkov.taskmanager.presentation.utils
 
 import androidx.compose.ui.graphics.Color
 import com.vkochenkov.taskmanager.data.model.Task

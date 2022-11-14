@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.sp
 import com.vkochenkov.taskmanager.R
 import com.vkochenkov.taskmanager.data.model.Task
 import com.vkochenkov.taskmanager.presentation.theme.TaskManagerTheme
-import com.vkochenkov.taskmanager.utils.getPriorityColor
+import com.vkochenkov.taskmanager.presentation.utils.getPriorityColor
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -101,7 +101,6 @@ private fun TaskCard(
         modifier = Modifier
             .fillMaxWidth(),
         onClick = {
-            // todo fix problem when screen rotate
             // todo also see problem with incorrect paddings between cards
             onAction.invoke(MainActions.OpenDetails(task.id))
         }

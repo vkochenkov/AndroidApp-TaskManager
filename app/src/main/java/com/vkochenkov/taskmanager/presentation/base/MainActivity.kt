@@ -1,4 +1,4 @@
-package com.vkochenkov.taskmanager
+package com.vkochenkov.taskmanager.presentation.base
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity

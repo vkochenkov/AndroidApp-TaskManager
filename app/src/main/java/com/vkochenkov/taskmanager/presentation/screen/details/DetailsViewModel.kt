@@ -4,16 +4,14 @@ import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.ViewModel
-import androidx.navigation.NavHostController
 import com.vkochenkov.taskmanager.data.TasksRepository
 import com.vkochenkov.taskmanager.data.model.Task
+import com.vkochenkov.taskmanager.presentation.base.BaseViewModel
 
 class DetailsViewModel(
-    val navController: NavHostController,
     savedStateHandle: SavedStateHandle,
     val repository: TasksRepository
-) : ViewModel() {
+) : BaseViewModel() {
 
     private val taskIdFromNav: String? = savedStateHandle["id"]
     private var currentTask: Task? = null
