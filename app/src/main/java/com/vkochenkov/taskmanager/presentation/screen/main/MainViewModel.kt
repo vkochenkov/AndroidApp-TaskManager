@@ -1,6 +1,5 @@
 package com.vkochenkov.taskmanager.presentation.screen.main
 
-import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
@@ -11,9 +10,9 @@ import com.vkochenkov.taskmanager.data.TasksRepository
 import com.vkochenkov.taskmanager.presentation.navigation.Destination
 
 class MainViewModel(
-    navHostController: NavHostController,
+    val navController: NavHostController,
     savedStateHandle: SavedStateHandle,
-    repository: TasksRepository
+    val repository: TasksRepository
 ) : ViewModel() {
 
     private var _state: MutableState<MainBodyState> = mutableStateOf(MainBodyState.ShowContent(null))
@@ -22,7 +21,7 @@ class MainViewModel(
     val onAction = { action: MainActions ->
         when (action) {
             is MainActions.OpenDetails -> {
-                navHostController.navigate("${Destination.DETAILS}?id=${action.id}")
+                navController.navigate("${Destination.DETAILS}?id=${action.id}")
             }
         }
     }

@@ -12,14 +12,14 @@ val appModule = module {
 
     viewModel { params ->
         MainViewModel(
-            navHostController = params.get(),
+            navController = params.get(),
             savedStateHandle = get(),
             repository = get()
         )
     }
     viewModel { params ->
         DetailsViewModel(
-            navHostController = params.get(),
+            navController = params.get(),
             savedStateHandle = get(),
             repository = get()
         )

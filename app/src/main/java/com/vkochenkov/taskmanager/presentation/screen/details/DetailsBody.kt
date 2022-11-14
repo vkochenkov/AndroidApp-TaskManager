@@ -1,6 +1,8 @@
 package com.vkochenkov.taskmanager.presentation.screen.details
 
 import android.content.res.Configuration
+import android.util.Log
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -30,6 +32,21 @@ fun DetailsBody(
     state: DetailsBodyState,
     onAction: (DetailsActions) -> Unit
 ) {
+
+    val onTaskChanged = { task: Task ->
+        onAction.invoke(DetailsActions.OnTaskChanged(task))
+    }
+
+    var onHandleBack by remember {
+        mutableStateOf(true)
+    }
+
+    BackHandler(enabled = onHandleBack, onBack = {
+        Log.d("vladd", "back")
+        onHandleBack = false
+        onAction.invoke(DetailsActions.OnNavigateBack)
+    })
+
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
@@ -69,7 +86,7 @@ fun DetailsBody(
         ) { padding ->
             when (state) {
                 is DetailsBodyState.ShowContent -> {
-                    ShowContent(padding, state.task, onAction)
+                    ShowContent(padding, state.task, onTaskChanged, onAction)
                 }
             }
         }
@@ -81,6 +98,7 @@ fun DetailsBody(
 private fun ShowContent(
     padding: PaddingValues,
     task: Task?,
+    onTaskChanged: (Task) -> Unit,
     onAction: (DetailsActions) -> Unit
 ) {
     // todo improve UI
@@ -122,7 +140,10 @@ private fun ShowContent(
                 },
                 modifier = Modifier.fillMaxWidth(),
                 value = title,
-                onValueChange = { title = it })
+                onValueChange = {
+                    title = it
+                    onTaskChanged.invoke(task.copy(title = title))
+                })
             Spacer(modifier = Modifier.size(8.dp))
             OutlinedTextField(
                 label = {
@@ -134,7 +155,10 @@ private fun ShowContent(
                 },
                 modifier = Modifier.fillMaxWidth(),
                 value = description,
-                onValueChange = { description = it })
+                onValueChange = {
+                    description = it
+                    onTaskChanged.invoke(task.copy(description = it))
+                })
 
         } else {
             // todo empty task

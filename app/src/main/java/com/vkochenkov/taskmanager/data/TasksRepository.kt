@@ -4,7 +4,7 @@ import com.vkochenkov.taskmanager.data.model.Task
 
 class TasksRepository {
 
-    private var data = listOf(
+    private var data = mutableListOf(
         Task(
             "0",
             "погулять с собакой погулять с собакой",
@@ -37,6 +37,14 @@ class TasksRepository {
             data[id.toInt()]
         } catch (ex: Exception) {
             null
+        }
+    }
+
+    fun saveTask(task: Task) {
+        try {
+            data[task.id.toInt()] = task
+        } catch (ex: Exception) {
+            data.add(task)
         }
     }
 }
