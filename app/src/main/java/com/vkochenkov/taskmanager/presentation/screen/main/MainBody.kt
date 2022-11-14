@@ -4,13 +4,10 @@ import android.content.res.Configuration
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
@@ -18,6 +15,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.vkochenkov.taskmanager.data.model.Task
 import com.vkochenkov.taskmanager.presentation.theme.TaskManagerTheme
+import com.vkochenkov.taskmanager.utils.getPriorityColor
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -88,44 +86,32 @@ private fun TaskCard(
             onAction.invoke(MainActions.OpenDetails(task.id))
         }
     ) {
-        Column(
-            modifier = Modifier.padding(10.dp).fillMaxWidth()
-        ) {
-            Text(
-                text = task.title,
-                fontSize = 18.sp,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis
+        Box(modifier = Modifier.fillMaxHeight()) {
+            //todo move to side without top
+            Box(
+                modifier = Modifier
+                    .height(16.dp)
+                    .fillMaxWidth()
+                    .background(
+                        color = getPriorityColor(task.priority), shape = RoundedCornerShape(
+                            topStart = 0.dp,
+                            bottomStart = 0.dp
+                        )
+                    )
             )
-            Spacer(modifier = Modifier.size(4.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.End
+            Column(
+                modifier = Modifier
+                    .padding(horizontal = 10.dp)
+                    .fillMaxWidth()
             ) {
-                val color = when (task.priority) {
-                    Task.Priority.LOW -> {
-                        Color.Green
-                    }
-                    Task.Priority.NORMAL -> {
-                        Color.Yellow
-                    }
-                    Task.Priority.HIGH -> {
-                        Color.Red
-                    }
-                }
+                Spacer(modifier = Modifier.size(16.dp))
                 Text(
-                    text = task.priority.toString(),
-                    fontFamily = FontFamily.Monospace,
-                    fontSize = 12.sp
+                    text = task.title,
+                    fontSize = 18.sp,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
                 )
-                Spacer(modifier = Modifier.size(4.dp))
-                Box(
-                    modifier = Modifier
-                        .size(12.dp)
-                        .border(border = BorderStroke(1.dp, Color.Black), shape = CircleShape)
-                        .background(color = color, shape = CircleShape)
-                )
+                Spacer(modifier = Modifier.size(8.dp))
             }
         }
     }
