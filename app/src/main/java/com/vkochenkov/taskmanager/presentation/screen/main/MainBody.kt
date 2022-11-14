@@ -61,16 +61,13 @@ private fun ShowContent(
     if (!tasksList.isNullOrEmpty()) {
         LazyColumn(
             modifier = Modifier
-                .padding(padding)
-                .padding(horizontal = 16.dp)
+                .padding(padding),
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            item {
-                Spacer(modifier = Modifier.size(8.dp))
-            }
             for (task in tasksList) {
                 item {
                     TaskCard(task, onAction)
-                    Spacer(modifier = Modifier.size(8.dp))
                 }
             }
         }
@@ -94,18 +91,19 @@ private fun TaskCard(
     task: Task,
     onAction: (MainActions) -> Unit
 ) {
-    val cardHeight = remember { mutableStateOf(0.dp) }
+    val minClickableCardSize = 48.dp
+    val cardHeight = remember { mutableStateOf(minClickableCardSize) }
     val localDensity = LocalDensity.current
 
     Card(
         modifier = Modifier
-            .fillMaxWidth(),
+            .fillMaxWidth()
+            .defaultMinSize(minHeight = minClickableCardSize),
         onClick = {
-            // todo also see problem with incorrect paddings between cards
             onAction.invoke(MainActions.OpenDetails(task.id))
         }
     ) {
-        Box(modifier = Modifier.fillMaxHeight()) {
+        Box {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.End
@@ -122,12 +120,14 @@ private fun TaskCard(
                         )
                 )
             }
+            // todo remove column
             Column(
                 modifier = Modifier
                     .padding(start = 10.dp, end = 16.dp)
                     .fillMaxWidth()
                     .onGloballyPositioned {
-                        cardHeight.value = with(localDensity) { it.size.height.toDp() }
+                        val newSize = with(localDensity) { it.size.height.toDp() }
+                        cardHeight.value = if (newSize>minClickableCardSize) newSize else minClickableCardSize
                     },
             ) {
                 Spacer(modifier = Modifier.size(8.dp))
