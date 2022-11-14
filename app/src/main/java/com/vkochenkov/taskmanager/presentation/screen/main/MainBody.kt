@@ -7,7 +7,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
@@ -79,6 +83,9 @@ private fun TaskCard(
     task: Task,
     onAction: (MainActions) -> Unit
 ) {
+    val cardHeight = remember { mutableStateOf(0.dp) }
+    val localDensity = LocalDensity.current
+
     Card(
         modifier = Modifier
             .fillMaxWidth(),
@@ -87,24 +94,31 @@ private fun TaskCard(
         }
     ) {
         Box(modifier = Modifier.fillMaxHeight()) {
-            //todo move to side without top
-            Box(
-                modifier = Modifier
-                    .height(16.dp)
-                    .fillMaxWidth()
-                    .background(
-                        color = getPriorityColor(task.priority), shape = RoundedCornerShape(
-                            topStart = 0.dp,
-                            bottomStart = 0.dp
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End
+            ) {
+                Box(
+                    modifier = Modifier
+                        .width(16.dp)
+                        .height(cardHeight.value)
+                        .background(
+                            color = getPriorityColor(task.priority), shape = RoundedCornerShape(
+                                topStart = 0.dp,
+                                bottomStart = 0.dp
+                            )
                         )
-                    )
-            )
+                )
+            }
             Column(
                 modifier = Modifier
-                    .padding(horizontal = 10.dp)
+                    .padding(start = 10.dp, end = 16.dp)
                     .fillMaxWidth()
+                    .onGloballyPositioned {
+                        cardHeight.value = with(localDensity) { it.size.height.toDp() }
+                    },
             ) {
-                Spacer(modifier = Modifier.size(16.dp))
+                Spacer(modifier = Modifier.size(8.dp))
                 Text(
                     text = task.title,
                     fontSize = 18.sp,
