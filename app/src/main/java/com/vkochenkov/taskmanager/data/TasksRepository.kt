@@ -34,17 +34,14 @@ class TasksRepository {
 
     fun getTask(id: String): Task? {
         return try {
-            data[id.toInt()]
+            data.find { it.id == id }
         } catch (ex: Exception) {
             null
         }
     }
 
     fun saveTask(task: Task) {
-        try {
-            data[task.id.toInt()] = task
-        } catch (ex: Exception) {
-            data.add(task)
-        }
+        data.removeAll { it.id == task.id }
+        data.add(task)
     }
 }

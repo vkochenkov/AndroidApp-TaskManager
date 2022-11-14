@@ -12,11 +12,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.vkochenkov.taskmanager.R
 import com.vkochenkov.taskmanager.data.model.Task
 import com.vkochenkov.taskmanager.presentation.theme.TaskManagerTheme
 import com.vkochenkov.taskmanager.utils.getPriorityColor
@@ -32,7 +34,16 @@ fun MainBody(
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
     ) {
-        Scaffold { padding ->
+        Scaffold(
+            floatingActionButton = {
+                FloatingActionButton(
+                    onClick = {
+                        onAction.invoke(MainActions.AddNewTask)
+                    }) {
+                    Text(text = stringResource(R.string.main_btn_add_task))
+                }
+            }
+        ) { padding ->
             when (state) {
                 is MainBodyState.ShowContent -> ShowContent(padding, state.tasksList, onAction)
                 else -> ErrorState(padding)
@@ -90,6 +101,8 @@ private fun TaskCard(
         modifier = Modifier
             .fillMaxWidth(),
         onClick = {
+            // todo fix problem when screen rotate
+            // todo also see problem with incorrect paddings between cards
             onAction.invoke(MainActions.OpenDetails(task.id))
         }
     ) {

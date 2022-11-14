@@ -23,7 +23,10 @@ fun AppNavHost(
         composable(Destination.MAIN.toString()) { MainScreen(navController) }
         composable(
             route = "${Destination.DETAILS}?id={id}",
-            arguments = listOf(navArgument("id") { type = NavType.StringType })
+            arguments = listOf(navArgument("id") {
+                type = NavType.StringType
+                nullable = true
+            })
         ) {
             DetailsScreen(navController)
         }

@@ -3,4 +3,5 @@
     <string name="details_title_hint">Title</string>
     <string name="details_description_hint">Description</string>
     <string name="details_priority">"Priority: "</string>
+    <string name="main_btn_add_task">Add task</string>
 </resources>

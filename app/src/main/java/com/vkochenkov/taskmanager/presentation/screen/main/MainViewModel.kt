@@ -15,15 +15,28 @@ class MainViewModel(
     val repository: TasksRepository
 ) : ViewModel() {
 
-    private var _state: MutableState<MainBodyState> = mutableStateOf(MainBodyState.ShowContent(null))
+    private var _state: MutableState<MainBodyState> =
+        mutableStateOf(MainBodyState.ShowContent(null))
     val state: State<MainBodyState> get() = _state
 
     val onAction = { action: MainActions ->
         when (action) {
             is MainActions.OpenDetails -> {
-                navController.navigate("${Destination.DETAILS}?id=${action.id}")
+                openDetails(action.id)
+            }
+            is MainActions.AddNewTask -> {
+                addNewTask()
             }
         }
+    }
+
+    private fun addNewTask() {
+        val d = null
+        navController.navigate("${Destination.DETAILS}?id=null")
+    }
+
+    private fun openDetails(id: String) {
+        navController.navigate("${Destination.DETAILS}?id=${id}")
     }
 
     init {

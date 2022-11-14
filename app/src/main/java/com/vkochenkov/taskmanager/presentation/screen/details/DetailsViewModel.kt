@@ -15,7 +15,7 @@ class DetailsViewModel(
     val repository: TasksRepository
 ) : ViewModel() {
 
-    private val taskId: String = checkNotNull(savedStateHandle["id"])
+    private val taskIdFromNav: String? = savedStateHandle["id"]
     private var currentTask: Task? = null
 
     private var _state: MutableState<DetailsBodyState> =
@@ -39,11 +39,32 @@ class DetailsViewModel(
     }
 
     init {
-        Log.d("vladd", "id = $taskId")
-        currentTask = repository.getTask(taskId)
-        _state.value = DetailsBodyState.ShowContent(
-            currentTask
-        )
+        Log.d("vladd", "id = $taskIdFromNav")
+        if (taskIdFromNav != null && taskIdFromNav != "null") {
+            Log.d("vladd", "if")
+
+            currentTask = repository.getTask(taskIdFromNav)
+            _state.value = DetailsBodyState.ShowContent(
+                currentTask
+            )
+        } else {
+            Log.d("vladd", "else")
+
+            currentTask = Task(
+                (Math.random()*1000).toInt().toString(),
+                "w",
+                "w",
+                Task.Priority.LOW,
+                Task.Status.TO_DO
+            )
+            Log.d("vladd", "currentTask = $currentTask")
+            currentTask?.let { task ->
+                repository.saveTask(task)
+                _state.value = DetailsBodyState.ShowContent(
+                    task
+                )
+            }
+        }
     }
 
     private fun onTaskChanged(task: Task) {
