@@ -19,27 +19,26 @@ class MainViewModel(
 
     val onAction = { action: MainActions ->
         when (action) {
-            is MainActions.OpenDetails -> {
-                openDetails(action.id)
-            }
-            is MainActions.AddNewTask -> {
-                addNewTask()
-            }
+            is MainActions.OnOpenDetails -> onOpenDetails(action.id)
+            is MainActions.OnAddNewTask -> onAddNewTask()
         }
     }
 
-    private fun addNewTask() {
-        val d = null
-        navController.navigate("${Destination.DETAILS}?id=null")
-    }
-
-    private fun openDetails(id: String) {
-        navController.navigate("${Destination.DETAILS}?id=${id}")
-    }
-
     init {
+        getAllTasks()
+    }
+
+    private fun getAllTasks() {
         _state.value = MainBodyState.ShowContent(
             repository.getAllTasks()
         )
+    }
+
+    private fun onAddNewTask() {
+        navController.navigate("${Destination.DETAILS}?id=null")
+    }
+
+    private fun onOpenDetails(id: String) {
+        navController.navigate("${Destination.DETAILS}?id=${id}")
     }
 }

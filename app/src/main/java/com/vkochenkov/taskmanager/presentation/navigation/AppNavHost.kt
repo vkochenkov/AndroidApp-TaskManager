@@ -1,4 +1,4 @@
-package com.vkochenkov.taskmanager.presentation
+package com.vkochenkov.taskmanager.presentation.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
@@ -7,7 +7,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.vkochenkov.taskmanager.presentation.navigation.Destination
 import com.vkochenkov.taskmanager.presentation.screen.details.DetailsScreen
 import com.vkochenkov.taskmanager.presentation.screen.main.MainScreen
 

@@ -1,7 +1,6 @@
 package com.vkochenkov.taskmanager.presentation.screen.details
 
 import android.content.res.Configuration
-import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -33,18 +32,8 @@ fun DetailsBody(
     onAction: (DetailsActions) -> Unit
 ) {
 
-    val onTaskChanged = { task: Task ->
-        onAction.invoke(DetailsActions.OnTaskChanged(task))
-    }
-
-    var onHandleBack by remember {
-        mutableStateOf(true)
-    }
-
-    BackHandler(enabled = onHandleBack, onBack = {
-        Log.d("vladd", "back")
-        onHandleBack = false
-        onAction.invoke(DetailsActions.OnNavigateBack)
+    BackHandler(enabled = true, onBack = {
+        onAction.invoke(DetailsActions.OnBackPressed())
     })
 
     Surface(
@@ -58,7 +47,7 @@ fun DetailsBody(
                     navigationIcon = {
                         IconButton(
                             onClick = {
-                                onAction.invoke(DetailsActions.OnNavigateBack)
+                                onAction.invoke(DetailsActions.OnBackPressed())
                             },
                             content = {
                                 Icon(
@@ -86,7 +75,13 @@ fun DetailsBody(
         ) { padding ->
             when (state) {
                 is DetailsBodyState.ShowContent -> {
-                    ShowContent(padding, state.task, state.isShowSaveDialog, onTaskChanged, onAction)
+                    ShowContent(padding, state.task, state.showDialogOnBack, onAction)
+                }
+                DetailsBodyState.EmptyContent -> {
+                    // todo
+                }
+                is DetailsBodyState.ShowError -> {
+                    // todo
                 }
             }
         }
@@ -98,17 +93,33 @@ fun DetailsBody(
 private fun ShowContent(
     padding: PaddingValues,
     task: Task,
-    isShowSaveDialod: Boolean,
-    onTaskChanged: (Task) -> Unit,
+    showDialogOnBack: Boolean,
     onAction: (DetailsActions) -> Unit
 ) {
-    // todo improve UI
-
-    // todo
-    if (isShowSaveDialod) {
+    if (showDialogOnBack) {
         AlertDialog(
-            onDismissRequest = { /*TODO*/ },
-            confirmButton = { }
+            onDismissRequest = {
+                onAction.invoke(DetailsActions.OnCancelDialog)
+            },
+            title = {
+                Text(text = stringResource(R.string.details_save_dialog_title))
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        onAction.invoke(DetailsActions.OnSaveTask)
+                    }) {
+                    Text(stringResource(R.string.details_save_dialog_confirm_btn))
+                }
+            },
+            dismissButton = {
+                Button(
+                    onClick = {
+                        onAction.invoke(DetailsActions.OnBackPressed(false))
+                    }) {
+                    Text(stringResource(R.string.details_save_dialog_dismiss_btn))
+                }
+            }
         )
     }
 
@@ -149,7 +160,7 @@ private fun ShowContent(
             value = title,
             onValueChange = {
                 title = it
-                onTaskChanged.invoke(task.copy(title = title))
+                onAction.invoke(DetailsActions.OnTaskChanged(task.copy(title = it)))
             })
         Spacer(modifier = Modifier.size(8.dp))
         OutlinedTextField(
@@ -163,7 +174,7 @@ private fun ShowContent(
             value = description,
             onValueChange = {
                 description = it
-                onTaskChanged.invoke(task.copy(description = it))
+                onAction.invoke(DetailsActions.OnTaskChanged(task.copy(description = it)))
             })
     }
 }

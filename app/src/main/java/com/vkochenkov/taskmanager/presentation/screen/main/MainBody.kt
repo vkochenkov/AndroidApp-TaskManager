@@ -40,7 +40,7 @@ fun MainBody(
             floatingActionButton = {
                 FloatingActionButton(
                     onClick = {
-                        onAction.invoke(MainActions.AddNewTask)
+                        onAction.invoke(MainActions.OnAddNewTask)
                     }) {
                     Icon(
                         imageVector = Icons.Default.Add,
@@ -105,7 +105,7 @@ private fun TaskCard(
             .fillMaxWidth()
             .defaultMinSize(minHeight = minClickableCardSize),
         onClick = {
-            onAction.invoke(MainActions.OpenDetails(task.id))
+            onAction.invoke(MainActions.OnOpenDetails(task.id))
         }
     ) {
         Box {
