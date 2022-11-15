@@ -5,6 +5,8 @@ import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
@@ -40,7 +42,10 @@ fun MainBody(
                     onClick = {
                         onAction.invoke(MainActions.AddNewTask)
                     }) {
-                    Text(text = stringResource(R.string.main_btn_add_task))
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = stringResource(R.string.main_btn_add_task)
+                    )
                 }
             }
         ) { padding ->
@@ -127,7 +132,8 @@ private fun TaskCard(
                     .fillMaxWidth()
                     .onGloballyPositioned {
                         val newSize = with(localDensity) { it.size.height.toDp() }
-                        cardHeight.value = if (newSize>minClickableCardSize) newSize else minClickableCardSize
+                        cardHeight.value =
+                            if (newSize > minClickableCardSize) newSize else minClickableCardSize
                     },
             ) {
                 Spacer(modifier = Modifier.size(8.dp))

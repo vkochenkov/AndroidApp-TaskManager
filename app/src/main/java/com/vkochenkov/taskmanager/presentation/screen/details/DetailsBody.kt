@@ -58,7 +58,7 @@ fun DetailsBody(
                     navigationIcon = {
                         IconButton(
                             onClick = {
-                                // todo add click action
+                                onAction.invoke(DetailsActions.OnNavigateBack)
                             },
                             content = {
                                 Icon(
@@ -86,7 +86,7 @@ fun DetailsBody(
         ) { padding ->
             when (state) {
                 is DetailsBodyState.ShowContent -> {
-                    ShowContent(padding, state.task, onTaskChanged, onAction)
+                    ShowContent(padding, state.task, state.isShowSaveDialog, onTaskChanged, onAction)
                 }
             }
         }
@@ -97,11 +97,20 @@ fun DetailsBody(
 @Composable
 private fun ShowContent(
     padding: PaddingValues,
-    task: Task?,
+    task: Task,
+    isShowSaveDialod: Boolean,
     onTaskChanged: (Task) -> Unit,
     onAction: (DetailsActions) -> Unit
 ) {
     // todo improve UI
+
+    // todo
+    if (isShowSaveDialod) {
+        AlertDialog(
+            onDismissRequest = { /*TODO*/ },
+            confirmButton = { }
+        )
+    }
 
     Column(
         modifier = Modifier
@@ -109,64 +118,54 @@ private fun ShowContent(
             .padding(horizontal = 16.dp)
             .fillMaxWidth()
     ) {
-        if (task != null) {
-            var title by remember { mutableStateOf(task.title) }
-            var description by remember { mutableStateOf(task.description ?: "") }
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.End
-            ) {
-                Text(
-                    text = stringResource(R.string.details_priority) + task.priority.toString(),
-                    fontSize = 14.sp
-                )
-                Spacer(modifier = Modifier.size(4.dp))
-                Box(
-                    modifier = Modifier
-                        .size(14.dp)
-                        .border(border = BorderStroke(1.dp, Color.Black), shape = CircleShape)
-                        .background(color = getPriorityColor(task.priority), shape = CircleShape)
-                )
-            }
-            Spacer(modifier = Modifier.size(8.dp))
-            OutlinedTextField(
-                label = {
-                    //todo to res
-                    Text(
-                        modifier = Modifier.background(color = MaterialTheme.colorScheme.background),
-                        text = stringResource(R.string.details_title_hint)
-                    )
-                },
-                modifier = Modifier.fillMaxWidth(),
-                value = title,
-                onValueChange = {
-                    title = it
-                    onTaskChanged.invoke(task.copy(title = title))
-                })
-            Spacer(modifier = Modifier.size(8.dp))
-            OutlinedTextField(
-                label = {
-                    //todo to res
-                    Text(
-                        modifier = Modifier.background(color = MaterialTheme.colorScheme.background),
-                        text = stringResource(R.string.details_description_hint)
-                    )
-                },
-                modifier = Modifier.fillMaxWidth(),
-                value = description,
-                onValueChange = {
-                    description = it
-                    onTaskChanged.invoke(task.copy(description = it))
-                })
-
-        } else {
-            // todo empty task
+        var title by remember { mutableStateOf(task.title) }
+        var description by remember { mutableStateOf(task.description ?: "") }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.End
+        ) {
+            Text(
+                text = stringResource(R.string.details_priority) + task.priority.toString(),
+                fontSize = 14.sp
+            )
+            Spacer(modifier = Modifier.size(4.dp))
+            Box(
+                modifier = Modifier
+                    .size(14.dp)
+                    .border(border = BorderStroke(1.dp, Color.Black), shape = CircleShape)
+                    .background(color = getPriorityColor(task.priority), shape = CircleShape)
+            )
         }
-
-
+        Spacer(modifier = Modifier.size(8.dp))
+        OutlinedTextField(
+            label = {
+                Text(
+                    modifier = Modifier.background(color = MaterialTheme.colorScheme.background),
+                    text = stringResource(R.string.details_title_hint)
+                )
+            },
+            modifier = Modifier.fillMaxWidth(),
+            value = title,
+            onValueChange = {
+                title = it
+                onTaskChanged.invoke(task.copy(title = title))
+            })
+        Spacer(modifier = Modifier.size(8.dp))
+        OutlinedTextField(
+            label = {
+                Text(
+                    modifier = Modifier.background(color = MaterialTheme.colorScheme.background),
+                    text = stringResource(R.string.details_description_hint)
+                )
+            },
+            modifier = Modifier.fillMaxWidth(),
+            value = description,
+            onValueChange = {
+                description = it
+                onTaskChanged.invoke(task.copy(description = it))
+            })
     }
-
 }
 
 

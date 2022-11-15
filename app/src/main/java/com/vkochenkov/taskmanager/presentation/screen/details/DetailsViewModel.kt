@@ -15,9 +15,10 @@ class DetailsViewModel(
 
     private val taskIdFromNav: String? = savedStateHandle["id"]
     private var currentTask: Task? = null
+    private var shouldSave: Boolean = false
 
     private var _state: MutableState<DetailsBodyState> =
-        mutableStateOf(DetailsBodyState.ShowContent(null))
+        mutableStateOf(DetailsBodyState.EmptyContent)
     val state get() = _state
 
     val onAction = { action: DetailsActions ->
@@ -26,36 +27,44 @@ class DetailsViewModel(
                 onNavigateBack()
             }
             is DetailsActions.OnTaskChanged -> {
-                onTaskChanged(action.task)
+                shouldSave = true
             }
             else -> {}
         }
     }
 
     private fun onNavigateBack() {
-        navController.popBackStack()
+        if (shouldSave && currentTask != null) {
+            _state.value = DetailsBodyState.ShowContent(
+                task = currentTask!!,
+                isShowSaveDialog = true
+            )
+            shouldSave = false
+        } else {
+            navController.popBackStack()
+        }
     }
 
     init {
-        Log.d("vladd", "id = $taskIdFromNav")
         if (taskIdFromNav != null && taskIdFromNav != "null") {
-            Log.d("vladd", "if")
 
             currentTask = repository.getTask(taskIdFromNav)
-            _state.value = DetailsBodyState.ShowContent(
-                currentTask
-            )
+            currentTask?.let {
+                _state.value = DetailsBodyState.ShowContent(
+                    it
+                )
+            }
+
         } else {
-            Log.d("vladd", "else")
+            shouldSave = true
 
             currentTask = Task(
-                (Math.random()*1000).toInt().toString(),
+                (Math.random() * 1000).toInt().toString(),
                 "w",
                 "w",
                 Task.Priority.LOW,
                 Task.Status.TO_DO
             )
-            Log.d("vladd", "currentTask = $currentTask")
             currentTask?.let { task ->
                 repository.saveTask(task)
                 _state.value = DetailsBodyState.ShowContent(
@@ -69,7 +78,7 @@ class DetailsViewModel(
         currentTask = task
         repository.saveTask(task)
         _state.value = DetailsBodyState.ShowContent(
-            currentTask
+            task
         )
     }
 }

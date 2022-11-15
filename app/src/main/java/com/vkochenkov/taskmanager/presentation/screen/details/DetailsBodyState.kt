@@ -5,6 +5,13 @@ import com.vkochenkov.taskmanager.data.model.Task
 sealed class DetailsBodyState {
 
     data class ShowContent(
-        var task: Task?
+        val task: Task,
+        val isShowSaveDialog: Boolean = false
+    ): DetailsBodyState()
+
+    object EmptyContent: DetailsBodyState()
+
+    data class ShowError(
+        var ex: Exception
     ): DetailsBodyState()
 }
