@@ -16,7 +16,7 @@ class MainViewModel(
 ) : BaseViewModel() {
 
     private var _state: MutableState<MainBodyState> =
-        mutableStateOf(MainBodyState.ShowContent(null))
+        mutableStateOf(MainBodyState.ShowLoading)
     val state: State<MainBodyState> get() = _state
 
     val onAction = { action: MainActions ->
@@ -30,6 +30,7 @@ class MainViewModel(
     private fun getAllTasks() {
         viewModelScope.launch {
             runCatching {
+                _state.value = MainBodyState.ShowLoading
                 repository.getAllTasks()
             }.onFailure {
                 _state.value = MainBodyState.ShowError

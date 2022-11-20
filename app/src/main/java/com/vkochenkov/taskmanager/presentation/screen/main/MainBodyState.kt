@@ -9,4 +9,6 @@ sealed class MainBodyState {
     ) : MainBodyState()
 
     object ShowError: MainBodyState()
+
+    object ShowLoading: MainBodyState()
 }

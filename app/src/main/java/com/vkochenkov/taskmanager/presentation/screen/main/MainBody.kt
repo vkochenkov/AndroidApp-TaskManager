@@ -52,7 +52,8 @@ fun MainBody(
         ) { padding ->
             when (state) {
                 is MainBodyState.ShowContent -> ShowContent(padding, state.tasksList, onAction)
-                is MainBodyState.ShowError -> ErrorState(padding = padding)
+                is MainBodyState.ShowError -> ErrorState(padding)
+                is MainBodyState.ShowLoading -> LoadingState(padding)
             }
         }
     }
@@ -99,6 +100,23 @@ private fun ErrorState(
             fontSize = 18.sp,
             text = text,
             textAlign = TextAlign.Center
+        )
+    }
+}
+
+@Composable
+private fun LoadingState(
+    padding: PaddingValues,
+) {
+    Column(
+        modifier = Modifier
+            .padding(padding)
+            .fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        CircularProgressIndicator(
+            modifier = Modifier.size(60.dp)
         )
     }
 }

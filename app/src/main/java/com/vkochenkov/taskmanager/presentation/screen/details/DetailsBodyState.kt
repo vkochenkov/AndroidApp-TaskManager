@@ -12,4 +12,6 @@ sealed class DetailsBodyState {
     object ShowEmpty : DetailsBodyState()
 
     object ShowError : DetailsBodyState()
+
+    object ShowLoading: DetailsBodyState()
 }

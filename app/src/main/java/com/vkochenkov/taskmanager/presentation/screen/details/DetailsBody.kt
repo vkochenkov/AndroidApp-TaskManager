@@ -82,6 +82,7 @@ fun DetailsBody(
                 is DetailsBodyState.ShowError -> {
                     // todo
                 }
+                is DetailsBodyState.ShowLoading -> LoadingState(padding)
             }
         }
     }
@@ -179,6 +180,22 @@ private fun ShowContent(
     }
 }
 
+@Composable
+private fun LoadingState(
+    padding: PaddingValues,
+) {
+    Column(
+        modifier = Modifier
+            .padding(padding)
+            .fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        CircularProgressIndicator(
+            modifier = Modifier.size(60.dp)
+        )
+    }
+}
 
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_NO, device = Devices.PIXEL_4)
 @Composable

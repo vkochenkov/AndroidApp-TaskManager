@@ -40,6 +40,7 @@ class DetailsViewModel(
         if (taskIdFromNav.isNotNull()) {
             viewModelScope.launch {
                 runCatching {
+                    _state.value = DetailsBodyState.ShowLoading
                     repository.getTask(taskIdFromNav!!.toInt())
                 }.onFailure {
                     _state.value = DetailsBodyState.ShowError
