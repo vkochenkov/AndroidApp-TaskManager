@@ -187,7 +187,7 @@ fun Preview() {
         DetailsBody(
             DetailsBodyState.ShowContent(
                 Task(
-                    "1",
+                    0,
                     "1 number number number number number number number number number number number number number",
                     "dddd ddd dd",
                     Task.Priority.NORMAL,

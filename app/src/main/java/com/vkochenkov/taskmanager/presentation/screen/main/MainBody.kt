@@ -157,14 +157,14 @@ fun Preview() {
             MainBodyState.ShowContent(
                 listOf(
                     Task(
-                        "1",
+                        0,
                         "1 number number number number number number number number number number number number number",
                         "dddd ddd dd",
                         Task.Priority.NORMAL,
                         Task.Status.IN_PROGRESS
                     ),
                     Task(
-                        "2",
+                        1,
                         "2 number number",
                         "dddde rere dd",
                         Task.Priority.LOW,

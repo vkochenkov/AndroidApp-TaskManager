@@ -1,7 +1,11 @@
 package com.vkochenkov.taskmanager.data.model
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+
+@Entity(tableName = "task")
 data class Task(
-    val id: String,
+    @PrimaryKey(autoGenerate = true) val id: Int,
     val title: String,
     val description: String?,
     val priority: Priority,

@@ -4,9 +4,11 @@ import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.viewModelScope
 import com.vkochenkov.taskmanager.data.TasksRepository
 import com.vkochenkov.taskmanager.data.model.Task
 import com.vkochenkov.taskmanager.presentation.base.BaseViewModel
+import kotlinx.coroutines.launch
 
 class DetailsViewModel(
     savedStateHandle: SavedStateHandle,
@@ -36,21 +38,28 @@ class DetailsViewModel(
 
     private fun getTaskOrCreateNew() {
         if (taskIdFromNav != null && taskIdFromNav != "null") {
-            currentTask = repository.getTask(taskIdFromNav)
+            viewModelScope.launch {
+                currentTask = repository.getTask(taskIdFromNav.toInt())
+                currentTask?.let {
+                    _state.value = DetailsBodyState.ShowContent(
+                        it
+                    )
+                }
+            }
         } else {
             showDialogOnBack = true
             currentTask = Task(
-                (Math.random() * 1000).toInt().toString(),
-                "new",
-                "new",
-                Task.Priority.LOW,
-                Task.Status.TO_DO
+                id = 0,
+                title = "title",
+                description = "",
+                priority = Task.Priority.LOW,
+                status = Task.Status.TO_DO
             )
-        }
-        currentTask?.let {
-            _state.value = DetailsBodyState.ShowContent(
-                it
-            )
+            currentTask?.let {
+                _state.value = DetailsBodyState.ShowContent(
+                    it
+                )
+            }
         }
     }
 
@@ -66,7 +75,9 @@ class DetailsViewModel(
 
     private fun onSaveAndLeave() {
         currentTask?.let { task ->
-            repository.saveTask(task)
+            viewModelScope.launch {
+                repository.saveTask(task)
+            }
             _state.value = DetailsBodyState.ShowContent(
                 task
             )
