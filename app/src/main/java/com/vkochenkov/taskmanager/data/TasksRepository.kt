@@ -18,6 +18,10 @@ class TasksRepository(
         dao.insert(task)
     }
 
+    suspend fun deleteTask(task: Task) {
+        dao.delete(task)
+    }
+
     fun getNewTaskSample(): Task {
         return Task(
             id = 0,

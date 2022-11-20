@@ -17,7 +17,9 @@ class DetailsViewModel(
 
     private val taskIdFromNav: String? = savedStateHandle["id"]
     private var currentTask: Task? = null
+
     private var showDialogOnBack: Boolean = false
+    private var showDialogOnDelete: Boolean = false
 
     private var _state: MutableState<DetailsBodyState> =
         mutableStateOf(DetailsBodyState.ShowEmpty)
@@ -28,7 +30,9 @@ class DetailsViewModel(
             is DetailsActions.OnBackPressed -> onBackPressed(action.showDialog)
             is DetailsActions.OnTaskChanged -> onTaskChanged(action.task)
             is DetailsActions.SaveTask -> saveTaskAndLeaveScreen()
-            is DetailsActions.CancelDialog -> cancelDialog()
+            is DetailsActions.CancelOnBackDialog -> cancelOnBackDialog()
+            is DetailsActions.CancelOnDeleteDialog -> cancelOnDeleteDialog()
+            is DetailsActions.DeleteTask -> deleteTask(action.showDialog)
         }
     }
 
@@ -60,11 +64,20 @@ class DetailsViewModel(
         }
     }
 
-    private fun cancelDialog() {
+    private fun cancelOnBackDialog() {
         currentTask?.let { task ->
             _state.value = DetailsBodyState.ShowContent(
                 task = task,
                 showDialogOnBack = false
+            )
+        }
+    }
+
+    private fun cancelOnDeleteDialog() {
+        currentTask?.let { task ->
+            _state.value = DetailsBodyState.ShowContent(
+                task = task,
+                showDialogOnDelete= false
             )
         }
     }
@@ -100,5 +113,27 @@ class DetailsViewModel(
         currentTask = task
         _state.value = DetailsBodyState.ShowContent(task)
         showDialogOnBack = true
+    }
+
+    private fun deleteTask(showDialog: Boolean?) {
+        showDialog?.let { showDialogOnDelete = it }
+        if (showDialogOnDelete && currentTask != null) {
+            _state.value = DetailsBodyState.ShowContent(
+                task = currentTask!!,
+                showDialogOnDelete = true
+            )
+        } else {
+            viewModelScope.launch {
+                runCatching {
+                    currentTask?.let {
+                        repository.deleteTask(it)
+                    }
+                }.onFailure {
+                    _state.value = DetailsBodyState.ShowError
+                }.onSuccess {
+                    navController.popBackStack()
+                }
+            }
+        }
     }
 }

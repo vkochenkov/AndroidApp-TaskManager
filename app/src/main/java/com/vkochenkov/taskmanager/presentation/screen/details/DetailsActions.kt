@@ -10,5 +10,10 @@ sealed class DetailsActions {
 
     object SaveTask : DetailsActions()
 
-    object CancelDialog : DetailsActions()
+    data class DeleteTask(val showDialog: Boolean? = null) : DetailsActions()
+
+    object CancelOnBackDialog : DetailsActions()
+
+    object CancelOnDeleteDialog : DetailsActions()
+
 }

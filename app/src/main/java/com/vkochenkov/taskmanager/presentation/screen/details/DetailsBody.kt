@@ -8,13 +8,13 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
@@ -59,11 +59,22 @@ fun DetailsBody(
                     actions = {
                         IconButton(
                             onClick = {
-                                // todo add click action delete and save
+                                onAction.invoke(DetailsActions.SaveTask)
                             },
                             content = {
                                 Icon(
-                                    imageVector = Icons.Default.Menu,
+                                    painter = painterResource(id = R.drawable.ic_baseline_save_24),
+                                    contentDescription = null
+                                )
+                            }
+                        )
+                        IconButton(
+                            onClick = {
+                                onAction.invoke(DetailsActions.DeleteTask(true))
+                            },
+                            content = {
+                                Icon(
+                                    imageVector = Icons.Default.Delete,
                                     contentDescription = null
                                 )
                             }
@@ -74,7 +85,7 @@ fun DetailsBody(
         ) { padding ->
             when (state) {
                 is DetailsBodyState.ShowContent -> {
-                    ShowContent(padding, state.task, state.showDialogOnBack, onAction)
+                    ShowContent(padding, state.task, state.showDialogOnBack, state.showDialogOnDelete, onAction)
                 }
                 DetailsBodyState.ShowEmpty -> {
                     // todo
@@ -94,12 +105,13 @@ private fun ShowContent(
     padding: PaddingValues,
     task: Task,
     showDialogOnBack: Boolean,
+    showDialogOnDelete: Boolean,
     onAction: (DetailsActions) -> Unit
 ) {
     if (showDialogOnBack) {
         AlertDialog(
             onDismissRequest = {
-                onAction.invoke(DetailsActions.CancelDialog)
+                onAction.invoke(DetailsActions.CancelOnBackDialog)
             },
             title = {
                 Text(text = stringResource(R.string.details_save_dialog_title))
@@ -118,6 +130,33 @@ private fun ShowContent(
                         onAction.invoke(DetailsActions.OnBackPressed(false))
                     }) {
                     Text(stringResource(R.string.details_save_dialog_dismiss_btn))
+                }
+            }
+        )
+    }
+
+    if (showDialogOnDelete) {
+        AlertDialog(
+            onDismissRequest = {
+                onAction.invoke(DetailsActions.CancelOnDeleteDialog)
+            },
+            title = {
+                Text(text = stringResource(R.string.details_delete_dialog_title))
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        onAction.invoke(DetailsActions.DeleteTask(false))
+                    }) {
+                    Text(stringResource(R.string.details_delete_dialog_confirm_btn))
+                }
+            },
+            dismissButton = {
+                Button(
+                    onClick = {
+                        onAction.invoke(DetailsActions.CancelOnDeleteDialog)
+                    }) {
+                    Text(stringResource(R.string.details_delete_dialog_dismiss_btn))
                 }
             }
         )

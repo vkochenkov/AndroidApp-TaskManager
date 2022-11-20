@@ -6,7 +6,8 @@ sealed class DetailsBodyState {
 
     data class ShowContent(
         val task: Task,
-        val showDialogOnBack: Boolean = false
+        val showDialogOnBack: Boolean = false,
+        val showDialogOnDelete: Boolean = false
     ) : DetailsBodyState()
 
     object ShowEmpty : DetailsBodyState()
