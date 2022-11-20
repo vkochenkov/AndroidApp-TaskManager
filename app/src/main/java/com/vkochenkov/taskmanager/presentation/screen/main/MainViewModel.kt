@@ -1,6 +1,5 @@
 package com.vkochenkov.taskmanager.presentation.screen.main
 
-import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
@@ -22,29 +21,30 @@ class MainViewModel(
 
     val onAction = { action: MainActions ->
         when (action) {
-            is MainActions.OnOpenDetails -> onOpenDetails(action.id)
-            is MainActions.OnAddNewTask -> onAddNewTask()
+            is MainActions.OpenDetails -> openDetails(action.id)
+            is MainActions.AddNewTask -> addNewTask()
+            is MainActions.UpdateData -> getAllTasks()
         }
-    }
-
-    init {
-        getAllTasks()
     }
 
     private fun getAllTasks() {
         viewModelScope.launch {
-            _state.value = MainBodyState.ShowContent(
+            runCatching {
                 repository.getAllTasks()
-            )
+            }.onFailure {
+                _state.value = MainBodyState.ShowError
+            }.onSuccess {
+                _state.value = MainBodyState.ShowContent(it)
+            }
         }
     }
 
-    private fun onAddNewTask() {
+    private fun addNewTask() {
+        // todo to think how to write better
         navController.navigate("${Destination.DETAILS}?id=null")
     }
 
-    private fun onOpenDetails(id: Int) {
-        Log.d("vladd", "nav to = ${Destination.DETAILS}?id=${id}")
+    private fun openDetails(id: Int) {
         navController.navigate("${Destination.DETAILS}?id=${id}")
     }
 }

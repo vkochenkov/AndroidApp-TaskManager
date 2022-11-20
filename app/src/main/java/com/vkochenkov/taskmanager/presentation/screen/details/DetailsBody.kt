@@ -60,7 +60,7 @@ fun DetailsBody(
                     actions = {
                         IconButton(
                             onClick = {
-                                // todo add click action
+                                // todo add click action delete and save
                             },
                             content = {
                                 Icon(
@@ -77,7 +77,7 @@ fun DetailsBody(
                 is DetailsBodyState.ShowContent -> {
                     ShowContent(padding, state.task, state.showDialogOnBack, onAction)
                 }
-                DetailsBodyState.EmptyContent -> {
+                DetailsBodyState.ShowEmpty -> {
                     // todo
                 }
                 is DetailsBodyState.ShowError -> {
@@ -99,7 +99,7 @@ private fun ShowContent(
     if (showDialogOnBack) {
         AlertDialog(
             onDismissRequest = {
-                onAction.invoke(DetailsActions.OnCancelDialog)
+                onAction.invoke(DetailsActions.CancelDialog)
             },
             title = {
                 Text(text = stringResource(R.string.details_save_dialog_title))
@@ -107,7 +107,7 @@ private fun ShowContent(
             confirmButton = {
                 Button(
                     onClick = {
-                        onAction.invoke(DetailsActions.OnSaveTask)
+                        onAction.invoke(DetailsActions.SaveTask)
                     }) {
                     Text(stringResource(R.string.details_save_dialog_confirm_btn))
                 }

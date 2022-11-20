@@ -11,10 +11,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
@@ -40,7 +42,7 @@ fun MainBody(
             floatingActionButton = {
                 FloatingActionButton(
                     onClick = {
-                        onAction.invoke(MainActions.OnAddNewTask)
+                        onAction.invoke(MainActions.AddNewTask)
                     }) {
                     Icon(
                         imageVector = Icons.Default.Add,
@@ -51,7 +53,7 @@ fun MainBody(
         ) { padding ->
             when (state) {
                 is MainBodyState.ShowContent -> ShowContent(padding, state.tasksList, onAction)
-                else -> ErrorState(padding)
+                is MainBodyState.ShowError -> ErrorState(padding = padding)
             }
         }
     }
@@ -77,16 +79,28 @@ private fun ShowContent(
             }
         }
     } else {
-        Text(text = "no content")
+        ErrorState(padding = padding, text = stringResource(id = R.string.main_empty_text))
     }
 }
 
 @Composable
 private fun ErrorState(
-    padding: PaddingValues
+    padding: PaddingValues,
+    text: String = stringResource(R.string.main_error_text)
 ) {
-    Column() {
-        Text(text = "error")
+    Column(
+        modifier = Modifier
+            .padding(padding)
+            .fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            modifier = Modifier.padding(horizontal = 16.dp),
+            fontSize = 18.sp,
+            text = text,
+            textAlign = TextAlign.Center
+        )
     }
 }
 
@@ -105,7 +119,7 @@ private fun TaskCard(
             .fillMaxWidth()
             .defaultMinSize(minHeight = minClickableCardSize),
         onClick = {
-            onAction.invoke(MainActions.OnOpenDetails(task.id))
+            onAction.invoke(MainActions.OpenDetails(task.id))
         }
     ) {
         Box {
@@ -125,7 +139,6 @@ private fun TaskCard(
                         )
                 )
             }
-            // todo remove column
             Column(
                 modifier = Modifier
                     .padding(start = 10.dp, end = 16.dp)
@@ -151,7 +164,7 @@ private fun TaskCard(
 
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_NO, device = Devices.PIXEL_4)
 @Composable
-fun Preview() {
+fun PreviewFull() {
     TaskManagerTheme {
         MainBody(
             MainBodyState.ShowContent(
@@ -171,6 +184,18 @@ fun Preview() {
                         Task.Status.IN_PROGRESS
                     )
                 )
+            )
+        ) {}
+    }
+}
+
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_NO, device = Devices.PIXEL_4)
+@Composable
+fun PreviewEmpty() {
+    TaskManagerTheme {
+        MainBody(
+            MainBodyState.ShowContent(
+                listOf()
             )
         ) {}
     }

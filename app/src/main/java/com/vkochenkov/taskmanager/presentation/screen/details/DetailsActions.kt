@@ -8,8 +8,7 @@ sealed class DetailsActions {
 
     data class OnBackPressed(val showDialog: Boolean? = null) : DetailsActions()
 
-    object OnSaveTask : DetailsActions()
+    object SaveTask : DetailsActions()
 
-    object OnCancelDialog : DetailsActions()
-
+    object CancelDialog : DetailsActions()
 }

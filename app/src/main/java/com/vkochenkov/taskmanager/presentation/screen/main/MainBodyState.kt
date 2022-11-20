@@ -7,4 +7,6 @@ sealed class MainBodyState {
     data class ShowContent(
         var tasksList: List<Task>?
     ) : MainBodyState()
+
+    object ShowError: MainBodyState()
 }

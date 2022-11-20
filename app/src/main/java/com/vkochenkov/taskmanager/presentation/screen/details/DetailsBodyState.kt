@@ -7,11 +7,9 @@ sealed class DetailsBodyState {
     data class ShowContent(
         val task: Task,
         val showDialogOnBack: Boolean = false
-    ): DetailsBodyState()
+    ) : DetailsBodyState()
 
-    object EmptyContent: DetailsBodyState()
+    object ShowEmpty : DetailsBodyState()
 
-    data class ShowError(
-        var ex: Exception
-    ): DetailsBodyState()
+    object ShowError : DetailsBodyState()
 }

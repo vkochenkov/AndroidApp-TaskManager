@@ -1,6 +1,5 @@
 package com.vkochenkov.taskmanager.presentation.screen.details
 
-import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle
@@ -20,15 +19,15 @@ class DetailsViewModel(
     private var showDialogOnBack: Boolean = false
 
     private var _state: MutableState<DetailsBodyState> =
-        mutableStateOf(DetailsBodyState.EmptyContent)
+        mutableStateOf(DetailsBodyState.ShowEmpty)
     val state get() = _state
 
     val onAction = { action: DetailsActions ->
         when (action) {
             is DetailsActions.OnBackPressed -> onBackPressed(action.showDialog)
             is DetailsActions.OnTaskChanged -> onTaskChanged(action.task)
-            is DetailsActions.OnSaveTask -> onSaveAndLeave()
-            is DetailsActions.OnCancelDialog -> onCancelDialog()
+            is DetailsActions.SaveTask -> saveTaskAndLeaveScreen()
+            is DetailsActions.CancelDialog -> cancelDialog()
         }
     }
 
@@ -39,11 +38,13 @@ class DetailsViewModel(
     private fun getTaskOrCreateNew() {
         if (taskIdFromNav != null && taskIdFromNav != "null") {
             viewModelScope.launch {
-                currentTask = repository.getTask(taskIdFromNav.toInt())
-                currentTask?.let {
-                    _state.value = DetailsBodyState.ShowContent(
-                        it
-                    )
+                runCatching {
+                    repository.getTask(taskIdFromNav.toInt())
+                }.onFailure {
+                    _state.value = DetailsBodyState.ShowError
+                }.onSuccess {
+                    currentTask = it
+                    _state.value = DetailsBodyState.ShowContent(it)
                 }
             }
         } else {
@@ -63,8 +64,7 @@ class DetailsViewModel(
         }
     }
 
-    private fun onCancelDialog() {
-        Log.d("vladd", "showDialogOnBack = $showDialogOnBack")
+    private fun cancelDialog() {
         currentTask?.let { task ->
             _state.value = DetailsBodyState.ShowContent(
                 task = task,
@@ -73,20 +73,22 @@ class DetailsViewModel(
         }
     }
 
-    private fun onSaveAndLeave() {
+    private fun saveTaskAndLeaveScreen() {
         currentTask?.let { task ->
             viewModelScope.launch {
-                repository.saveTask(task)
+                runCatching {
+                    repository.saveTask(task)
+                }.onFailure {
+                    _state.value = DetailsBodyState.ShowError
+                }.onSuccess {
+                    _state.value = DetailsBodyState.ShowContent(task)
+                    navController.popBackStack()
+                }
             }
-            _state.value = DetailsBodyState.ShowContent(
-                task
-            )
         }
-        navController.popBackStack()
     }
 
     private fun onBackPressed(showDialog: Boolean?) {
-        Log.d("vladd", "showDialogOnBack = $showDialogOnBack")
         showDialog?.let { showDialogOnBack = it }
         if (showDialogOnBack && currentTask != null) {
             _state.value = DetailsBodyState.ShowContent(
@@ -100,9 +102,7 @@ class DetailsViewModel(
 
     private fun onTaskChanged(task: Task) {
         currentTask = task
-        _state.value = DetailsBodyState.ShowContent(
-            task
-        )
+        _state.value = DetailsBodyState.ShowContent(task)
         showDialogOnBack = true
     }
 }

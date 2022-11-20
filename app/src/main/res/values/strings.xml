@@ -9,4 +9,6 @@
     <string name="details_save_dialog_title">Do you want to save this task?</string>
     <string name="details_save_dialog_confirm_btn">Save</string>
     <string name="details_save_dialog_dismiss_btn">No</string>
+    <string name="main_error_text">Something went wrong. Please, reopen application</string>
+    <string name="main_empty_text">You have no tasks</string>
 </resources>
