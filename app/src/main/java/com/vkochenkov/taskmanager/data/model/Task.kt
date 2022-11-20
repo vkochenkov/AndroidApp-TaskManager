@@ -1,7 +1,11 @@
 package com.vkochenkov.taskmanager.data.model
 
+import androidx.compose.ui.graphics.Color
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.vkochenkov.taskmanager.presentation.theme.ColorPriorityHigh
+import com.vkochenkov.taskmanager.presentation.theme.ColorPriorityLow
+import com.vkochenkov.taskmanager.presentation.theme.ColorPriorityNormal
 
 @Entity(tableName = "task")
 data class Task(
@@ -13,7 +17,21 @@ data class Task(
 ) {
 
     enum class Priority {
-        LOW, NORMAL, HIGH
+        LOW, NORMAL, HIGH;
+
+        fun getColor(): Color {
+            return when (this) {
+                LOW -> {
+                    ColorPriorityLow
+                }
+                NORMAL -> {
+                    ColorPriorityNormal
+                }
+                HIGH -> {
+                    ColorPriorityHigh
+                }
+            }
+        }
     }
 
     enum class Status {

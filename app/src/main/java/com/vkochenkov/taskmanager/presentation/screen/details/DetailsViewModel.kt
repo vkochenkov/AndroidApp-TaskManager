@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.vkochenkov.taskmanager.data.TasksRepository
 import com.vkochenkov.taskmanager.data.model.Task
 import com.vkochenkov.taskmanager.presentation.base.BaseViewModel
+import com.vkochenkov.taskmanager.presentation.utils.isNotNull
 import kotlinx.coroutines.launch
 
 class DetailsViewModel(
@@ -36,10 +37,10 @@ class DetailsViewModel(
     }
 
     private fun getTaskOrCreateNew() {
-        if (taskIdFromNav != null && taskIdFromNav != "null") {
+        if (taskIdFromNav.isNotNull()) {
             viewModelScope.launch {
                 runCatching {
-                    repository.getTask(taskIdFromNav.toInt())
+                    repository.getTask(taskIdFromNav!!.toInt())
                 }.onFailure {
                     _state.value = DetailsBodyState.ShowError
                 }.onSuccess {
@@ -49,13 +50,7 @@ class DetailsViewModel(
             }
         } else {
             showDialogOnBack = true
-            currentTask = Task(
-                id = 0,
-                title = "title",
-                description = "",
-                priority = Task.Priority.LOW,
-                status = Task.Status.TO_DO
-            )
+            currentTask = repository.getNewTaskSample()
             currentTask?.let {
                 _state.value = DetailsBodyState.ShowContent(
                     it

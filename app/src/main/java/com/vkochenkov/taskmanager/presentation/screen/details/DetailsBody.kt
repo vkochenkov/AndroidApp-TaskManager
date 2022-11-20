@@ -23,7 +23,6 @@ import androidx.compose.ui.unit.sp
 import com.vkochenkov.taskmanager.R
 import com.vkochenkov.taskmanager.data.model.Task
 import com.vkochenkov.taskmanager.presentation.theme.TaskManagerTheme
-import com.vkochenkov.taskmanager.presentation.utils.getPriorityColor
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -145,10 +144,11 @@ private fun ShowContent(
                 modifier = Modifier
                     .size(14.dp)
                     .border(border = BorderStroke(1.dp, Color.Black), shape = CircleShape)
-                    .background(color = getPriorityColor(task.priority), shape = CircleShape)
+                    .background(color = task.priority.getColor(), shape = CircleShape)
             )
         }
         Spacer(modifier = Modifier.size(8.dp))
+        // todo add validation does not empty
         OutlinedTextField(
             label = {
                 Text(

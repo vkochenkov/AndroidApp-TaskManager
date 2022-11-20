@@ -25,7 +25,6 @@ import androidx.compose.ui.unit.sp
 import com.vkochenkov.taskmanager.R
 import com.vkochenkov.taskmanager.data.model.Task
 import com.vkochenkov.taskmanager.presentation.theme.TaskManagerTheme
-import com.vkochenkov.taskmanager.presentation.utils.getPriorityColor
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -132,7 +131,7 @@ private fun TaskCard(
                         .width(16.dp)
                         .height(cardHeight.value)
                         .background(
-                            color = getPriorityColor(task.priority), shape = RoundedCornerShape(
+                            color = task.priority.getColor(), shape = RoundedCornerShape(
                                 topStart = 0.dp,
                                 bottomStart = 0.dp
                             )

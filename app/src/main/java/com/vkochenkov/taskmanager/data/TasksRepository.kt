@@ -17,4 +17,14 @@ class TasksRepository(
     suspend fun saveTask(task: Task) {
         dao.insert(task)
     }
+
+    fun getNewTaskSample(): Task {
+        return Task(
+            id = 0,
+            title = "",
+            description = "",
+            priority = Task.Priority.LOW,
+            status = Task.Status.TO_DO
+        )
+    }
 }
