@@ -25,9 +25,9 @@ class TasksRepository(
     fun getNewTaskSample(): Task {
         return Task(
             id = 0,
-            title = "",
+            title = "New task",
             description = "",
-            priority = Task.Priority.LOW,
+            priority = Task.Priority.NORMAL,
             status = Task.Status.TO_DO
         )
     }
