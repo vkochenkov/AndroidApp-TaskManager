@@ -117,6 +117,7 @@ private fun ShowContent(
     onAction: (DetailsActions) -> Unit
 ) {
     var priorityDropDownIsExpanded by remember { mutableStateOf(false) }
+    var statusDropDownIsExpanded by remember { mutableStateOf(false) }
 
     if (showDialogOnBack) {
         AlertDialog(
@@ -217,7 +218,8 @@ private fun ShowContent(
             .clickable {
                 priorityDropDownIsExpanded = !priorityDropDownIsExpanded
             }
-            .padding(vertical = 8.dp)) {
+            .padding(vertical = 8.dp)
+        ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.End
@@ -245,6 +247,39 @@ private fun ShowContent(
                     onClick = {
                         onAction.invoke(DetailsActions.OnTaskChanged(task.copy(priority = item)))
                         priorityDropDownIsExpanded = false
+                    },
+                    interactionSource = MutableInteractionSource(),
+                    text = {
+                        Text(text = item.toString())
+                    }
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.size(8.dp))
+
+        Box(modifier = Modifier
+            .fillMaxWidth()
+            .clickable {
+                statusDropDownIsExpanded = !statusDropDownIsExpanded
+            }
+            .padding(vertical = 8.dp)
+        ) {
+            Text(
+                text = stringResource(R.string.details_status) + task.status.toString(),
+                fontSize = 14.sp
+            )
+        }
+
+        DropdownMenu(
+            expanded = statusDropDownIsExpanded,
+            onDismissRequest = { statusDropDownIsExpanded = false }
+        ) {
+            Task.Status.values().forEach { item ->
+                DropdownMenuItem(
+                    onClick = {
+                        onAction.invoke(DetailsActions.OnTaskChanged(task.copy(status = item)))
+                        statusDropDownIsExpanded = false
                     },
                     interactionSource = MutableInteractionSource(),
                     text = {

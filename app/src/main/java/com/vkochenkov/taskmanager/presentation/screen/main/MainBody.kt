@@ -8,9 +8,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -22,9 +21,17 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.google.accompanist.pager.ExperimentalPagerApi
+import com.google.accompanist.pager.HorizontalPager
+import com.google.accompanist.pager.PagerState
+import com.google.accompanist.pager.rememberPagerState
 import com.vkochenkov.taskmanager.R
 import com.vkochenkov.taskmanager.data.model.Task
 import com.vkochenkov.taskmanager.presentation.theme.TaskManagerTheme
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
+import kotlin.coroutines.coroutineContext
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -32,7 +39,6 @@ fun MainBody(
     state: MainBodyState,
     onAction: (MainActions) -> Unit
 ) {
-    // todo use pager?
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
@@ -52,6 +58,10 @@ fun MainBody(
         ) { padding ->
             when (state) {
                 is MainBodyState.ShowContent -> ShowContent(padding, state.tasksList, onAction)
+                is MainBodyState.ShowEmpty -> ErrorState(
+                    padding = padding,
+                    text = stringResource(id = R.string.main_empty_text)
+                )
                 is MainBodyState.ShowError -> ErrorState(padding)
                 is MainBodyState.ShowLoading -> LoadingState(padding)
             }
@@ -59,27 +69,62 @@ fun MainBody(
     }
 }
 
+@OptIn(ExperimentalPagerApi::class)
 @Composable
 private fun ShowContent(
     padding: PaddingValues,
-    tasksList: List<Task>?,
+    tasksList: List<Task>,
     onAction: (MainActions) -> Unit
 ) {
-    if (!tasksList.isNullOrEmpty()) {
-        LazyColumn(
-            modifier = Modifier
-                .padding(padding),
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            for (task in tasksList) {
-                item {
-                    TaskCard(task, onAction)
+    // todo fix incorrect page after back
+    val pagerState: PagerState = rememberPagerState()
+    var selectedTabIndex by rememberSaveable { mutableStateOf(pagerState.currentPage) }
+    val coroutineScope = rememberCoroutineScope()
+
+    Column {
+        //todo to think about separate ui for horizontal orientation
+        TabRow(selectedTabIndex = selectedTabIndex) {
+            Task.Status.values().forEachIndexed { index, status ->
+                Tab(selected = false, onClick = {
+                    selectedTabIndex = index
+                    coroutineScope.launch {
+                        pagerState.animateScrollToPage(selectedTabIndex)
+                    }
+                }) {
+                    Text(text = status.toString())
                 }
             }
         }
-    } else {
-        ErrorState(padding = padding, text = stringResource(id = R.string.main_empty_text))
+        HorizontalPager(
+            state = pagerState,
+            count = Task.Status.values().size,
+            contentPadding = PaddingValues(start = 48.dp, end = 48.dp)
+        ) { pageIndex ->
+            selectedTabIndex = pagerState.currentPage
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .padding(padding),
+                contentPadding = PaddingValues(vertical = 12.dp, horizontal = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                val filtered = tasksList.filter { it.status == Task.Status.values()[pageIndex] }
+                if (filtered.isNotEmpty()) {
+                    for (task in filtered) {
+                        item {
+                            TaskCard(task, onAction)
+                        }
+                    }
+                } else {
+                    item {
+                        ErrorState(
+                            padding = padding,
+                            text = stringResource(id = R.string.main_empty_text_status)
+                        )
+                    }
+                }
+            }
+        }
     }
 }
 

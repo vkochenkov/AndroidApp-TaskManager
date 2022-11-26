@@ -35,7 +35,11 @@ class MainViewModel(
             }.onFailure {
                 _state.value = MainBodyState.ShowError
             }.onSuccess {
-                _state.value = MainBodyState.ShowContent(it)
+                if (it.isNotEmpty()) {
+                    _state.value = MainBodyState.ShowContent(it)
+                } else {
+                    _state.value = MainBodyState.ShowEmpty
+                }
             }
         }
     }
