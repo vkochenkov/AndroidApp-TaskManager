@@ -21,7 +21,6 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.PagerState
@@ -29,9 +28,7 @@ import com.google.accompanist.pager.rememberPagerState
 import com.vkochenkov.taskmanager.R
 import com.vkochenkov.taskmanager.data.model.Task
 import com.vkochenkov.taskmanager.presentation.theme.TaskManagerTheme
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
-import kotlin.coroutines.coroutineContext
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -83,29 +80,34 @@ private fun ShowContent(
 
     Column {
         //todo to think about separate ui for horizontal orientation
-        TabRow(selectedTabIndex = selectedTabIndex) {
+        TabRow(
+            selectedTabIndex = selectedTabIndex
+        ) {
             Task.Status.values().forEachIndexed { index, status ->
-                Tab(selected = false, onClick = {
-                    selectedTabIndex = index
-                    coroutineScope.launch {
-                        pagerState.animateScrollToPage(selectedTabIndex)
+                Tab(
+                    selected = false,
+                    onClick = {
+                        selectedTabIndex = index
+                        coroutineScope.launch {
+                            pagerState.animateScrollToPage(selectedTabIndex)
+                        }
                     }
-                }) {
+                ) {
+                    Spacer(modifier = Modifier.size(16.dp))
                     Text(text = status.toString())
                 }
             }
         }
         HorizontalPager(
             state = pagerState,
-            count = Task.Status.values().size,
-            contentPadding = PaddingValues(start = 48.dp, end = 48.dp)
+            count = Task.Status.values().size
         ) { pageIndex ->
             selectedTabIndex = pagerState.currentPage
             LazyColumn(
                 modifier = Modifier
                     .fillMaxHeight()
                     .padding(padding),
-                contentPadding = PaddingValues(vertical = 12.dp, horizontal = 8.dp),
+                contentPadding = PaddingValues(vertical = 16.dp, horizontal = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 val filtered = tasksList.filter { it.status == Task.Status.values()[pageIndex] }
