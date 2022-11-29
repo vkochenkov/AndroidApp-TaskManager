@@ -4,12 +4,12 @@ import android.content.res.Configuration
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -21,14 +21,9 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.google.accompanist.pager.ExperimentalPagerApi
-import com.google.accompanist.pager.HorizontalPager
-import com.google.accompanist.pager.PagerState
-import com.google.accompanist.pager.rememberPagerState
 import com.vkochenkov.taskmanager.R
 import com.vkochenkov.taskmanager.data.model.Task
 import com.vkochenkov.taskmanager.presentation.theme.TaskManagerTheme
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -66,63 +61,45 @@ fun MainBody(
     }
 }
 
-@OptIn(ExperimentalPagerApi::class)
 @Composable
 private fun ShowContent(
     padding: PaddingValues,
     tasksList: List<Task>,
     onAction: (MainActions) -> Unit
 ) {
-    // todo fix incorrect page after back
-    val pagerState: PagerState = rememberPagerState()
-    var selectedTabIndex by rememberSaveable { mutableStateOf(pagerState.currentPage) }
-    val coroutineScope = rememberCoroutineScope()
+    // todo fix incorrect position after go back on this screen
 
     Column {
-        //todo to think about separate ui for horizontal orientation
-        TabRow(
-            selectedTabIndex = selectedTabIndex
-        ) {
-            Task.Status.values().forEachIndexed { index, status ->
-                Tab(
-                    selected = false,
-                    onClick = {
-                        selectedTabIndex = index
-                        coroutineScope.launch {
-                            pagerState.animateScrollToPage(selectedTabIndex)
+        LazyRow {
+            for (status in Task.Status.values()) {
+                item {
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .width(250.dp)
+                            .padding(padding),
+                        contentPadding = PaddingValues(vertical = 16.dp, horizontal = 16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        val filtered = tasksList.filter { it.status == status }
+                        if (filtered.isNotEmpty()) {
+                            item {
+                                // todo fix name - without _
+                                Text(text = status.toString())
+                            }
+                            for (task in filtered) {
+                                item {
+                                    TaskCard(task, onAction)
+                                }
+                            }
+                        } else {
+                            item {
+                                ErrorState(
+                                    padding = padding,
+                                    text = stringResource(id = R.string.main_empty_text_status)
+                                )
+                            }
                         }
-                    }
-                ) {
-                    Spacer(modifier = Modifier.size(16.dp))
-                    Text(text = status.toString())
-                }
-            }
-        }
-        HorizontalPager(
-            state = pagerState,
-            count = Task.Status.values().size
-        ) { pageIndex ->
-            selectedTabIndex = pagerState.currentPage
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .padding(padding),
-                contentPadding = PaddingValues(vertical = 16.dp, horizontal = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                val filtered = tasksList.filter { it.status == Task.Status.values()[pageIndex] }
-                if (filtered.isNotEmpty()) {
-                    for (task in filtered) {
-                        item {
-                            TaskCard(task, onAction)
-                        }
-                    }
-                } else {
-                    item {
-                        ErrorState(
-                            padding = padding,
-                            text = stringResource(id = R.string.main_empty_text_status)
-                        )
                     }
                 }
             }
