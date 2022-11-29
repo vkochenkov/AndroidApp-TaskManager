@@ -14,6 +14,7 @@ data class Task(
     val description: String?,
     val priority: Priority,
     val status: Status
+    // todo add update date, and should filter in column by date and priority
 ) {
 
     enum class Priority {
