@@ -16,6 +16,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Devices
@@ -266,7 +267,7 @@ private fun ShowContent(
             .padding(vertical = 8.dp)
         ) {
             Text(
-                text = stringResource(R.string.details_status) + task.status.toString(),
+                text = stringResource(R.string.details_status) + task.status.getNameForUi(LocalContext.current),
                 fontSize = 14.sp
             )
         }
@@ -275,15 +276,15 @@ private fun ShowContent(
             expanded = statusDropDownIsExpanded,
             onDismissRequest = { statusDropDownIsExpanded = false }
         ) {
-            Task.Status.values().forEach { item ->
+            Task.Status.values().forEach { status ->
                 DropdownMenuItem(
                     onClick = {
-                        onAction.invoke(DetailsActions.OnTaskChanged(task.copy(status = item)))
+                        onAction.invoke(DetailsActions.OnTaskChanged(task.copy(status = status)))
                         statusDropDownIsExpanded = false
                     },
                     interactionSource = MutableInteractionSource(),
                     text = {
-                        Text(text = item.toString())
+                        Text(text = status.getNameForUi(LocalContext.current))
                     }
                 )
             }

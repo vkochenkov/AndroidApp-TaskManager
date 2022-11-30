@@ -13,8 +13,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Devices
@@ -71,7 +73,7 @@ private fun ShowContent(
 
     Column {
         LazyRow {
-            for (status in Task.Status.values()) {
+            for (status in Task.Status.values().filter { it != Task.Status.DONE }) {
                 item {
                     LazyColumn(
                         modifier = Modifier
@@ -82,11 +84,16 @@ private fun ShowContent(
                         verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         val filtered = tasksList.filter { it.status == status }
+                        item {
+                            Text(
+                                modifier = Modifier.fillMaxWidth(),
+                                text = status.getNameForUi(LocalContext.current),
+                                textAlign = TextAlign.Center,
+                                fontSize = 18.sp,
+                                fontFamily = FontFamily.Cursive
+                            )
+                        }
                         if (filtered.isNotEmpty()) {
-                            item {
-                                // todo fix name - without _
-                                Text(text = status.toString())
-                            }
                             for (task in filtered) {
                                 item {
                                     TaskCard(task, onAction)

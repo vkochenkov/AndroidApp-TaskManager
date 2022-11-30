@@ -23,15 +23,15 @@ class MainViewModel(
         when (action) {
             is MainActions.OpenDetails -> openDetails(action.id)
             is MainActions.AddNewTask -> addNewTask()
-            is MainActions.UpdateData -> getAllTasks()
+            is MainActions.UpdateData -> getActiveTasks()
         }
     }
 
-    private fun getAllTasks() {
+    private fun getActiveTasks() {
         viewModelScope.launch {
             runCatching {
                 _state.value = MainBodyState.ShowLoading
-                repository.getAllTasks()
+                repository.getActiveTasks()
             }.onFailure {
                 _state.value = MainBodyState.ShowError
             }.onSuccess {

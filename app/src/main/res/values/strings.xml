@@ -3,6 +3,11 @@
 
     <string name="main_btn_add_task">Add task</string>
 
+    <string name="status_to_do">To do</string>
+    <string name="status_in_progress">In progress</string>
+    <string name="status_review">Review</string>
+    <string name="status_done">Done</string>
+
     <string name="details_title_hint">Title</string>
     <string name="details_description_hint">Description</string>
     <string name="details_priority">"Priority: "</string>

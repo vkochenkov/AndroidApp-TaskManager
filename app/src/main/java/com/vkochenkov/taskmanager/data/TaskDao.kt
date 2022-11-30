@@ -13,6 +13,9 @@ interface TaskDao {
     @Query("SELECT * FROM task")
     suspend fun getAll(): List<Task>
 
+    @Query("SELECT * FROM task where status NOT LIKE 'DONE'")
+    suspend fun getAllWithoutDone(): List<Task>
+
     @Insert(onConflict = REPLACE)
     suspend fun insert(task: Task)
 

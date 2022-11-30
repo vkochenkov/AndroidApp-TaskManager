@@ -1,8 +1,10 @@
 package com.vkochenkov.taskmanager.data.model
 
+import android.content.Context
 import androidx.compose.ui.graphics.Color
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.vkochenkov.taskmanager.R
 import com.vkochenkov.taskmanager.presentation.theme.ColorPriorityHigh
 import com.vkochenkov.taskmanager.presentation.theme.ColorPriorityLow
 import com.vkochenkov.taskmanager.presentation.theme.ColorPriorityNormal
@@ -36,6 +38,27 @@ data class Task(
     }
 
     enum class Status {
-        TO_DO, IN_PROGRESS, DONE
+
+        TO_DO,
+        IN_PROGRESS,
+        REVIEW,
+        DONE;
+
+        fun getNameForUi(context: Context): String {
+            return when (this) {
+                TO_DO -> {
+                    context.getString(R.string.status_to_do)
+                }
+                IN_PROGRESS -> {
+                    context.getString(R.string.status_in_progress)
+                }
+                REVIEW -> {
+                    context.getString(R.string.status_review)
+                }
+                DONE -> {
+                    context.getString(R.string.status_done)
+                }
+            }
+        }
     }
 }

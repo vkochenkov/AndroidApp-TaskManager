@@ -10,6 +10,10 @@ class TasksRepository(
         return dao.getAll()
     }
 
+    suspend fun getActiveTasks(): List<Task> {
+        return dao.getAllWithoutDone()
+    }
+
     suspend fun getTask(id: Int): Task {
         return dao.get(id)
     }
