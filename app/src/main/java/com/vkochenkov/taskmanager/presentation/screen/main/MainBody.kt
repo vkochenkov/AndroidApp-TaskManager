@@ -4,35 +4,41 @@ import android.content.res.Configuration
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.google.accompanist.pager.ExperimentalPagerApi
+import com.google.accompanist.pager.HorizontalPager
+import com.google.accompanist.pager.PagerState
+import com.google.accompanist.pager.rememberPagerState
 import com.vkochenkov.taskmanager.R
 import com.vkochenkov.taskmanager.data.model.Task
 import com.vkochenkov.taskmanager.presentation.theme.TaskManagerTheme
+import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalPagerApi::class)
 @Composable
 fun MainBody(
     state: MainBodyState,
     onAction: (MainActions) -> Unit
 ) {
+    val pagerState: PagerState = rememberPagerState()
+
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
@@ -51,7 +57,7 @@ fun MainBody(
             }
         ) { padding ->
             when (state) {
-                is MainBodyState.ShowContent -> ShowContent(padding, state.tasksList, onAction)
+                is MainBodyState.ShowContent -> ShowContent(padding, state.tasksList, pagerState, onAction)
                 is MainBodyState.ShowEmpty -> ErrorState(
                     padding = padding,
                     text = stringResource(id = R.string.main_empty_text)
@@ -63,50 +69,61 @@ fun MainBody(
     }
 }
 
+@OptIn(ExperimentalPagerApi::class)
 @Composable
 private fun ShowContent(
     padding: PaddingValues,
     tasksList: List<Task>,
+    pagerState: PagerState,
     onAction: (MainActions) -> Unit
 ) {
-    // todo fix incorrect position after go back on this screen
+    var selectedTabIndex by rememberSaveable { mutableStateOf(pagerState.currentPage) }
+    val coroutineScope = rememberCoroutineScope()
 
     Column {
-        LazyRow {
-            for (status in Task.Status.values().filter { it != Task.Status.DONE }) {
-                item {
-                    LazyColumn(
-                        modifier = Modifier
-                            .fillMaxHeight()
-                            .width(250.dp)
-                            .padding(padding),
-                        contentPadding = PaddingValues(vertical = 16.dp, horizontal = 16.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        val filtered = tasksList.filter { it.status == status }
+        TabRow(
+            selectedTabIndex = selectedTabIndex
+        ) {
+            Task.Status.values().forEachIndexed { index, status ->
+                Tab(
+                    selected = false,
+                    onClick = {
+                        selectedTabIndex = index
+                        coroutineScope.launch {
+                            pagerState.animateScrollToPage(selectedTabIndex)
+                        }
+                    }
+                ) {
+                    Spacer(modifier = Modifier.size(16.dp))
+                    Text(text = status.getNameForUi(LocalContext.current))
+                }
+            }
+        }
+        HorizontalPager(
+            state = pagerState,
+            count = Task.Status.values().size
+        ) { pageIndex ->
+            selectedTabIndex = pagerState.currentPage
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .padding(padding),
+                contentPadding = PaddingValues(vertical = 16.dp, horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                val filtered = tasksList.filter { it.status == Task.Status.values()[pageIndex] }
+                if (filtered.isNotEmpty()) {
+                    for (task in filtered) {
                         item {
-                            Text(
-                                modifier = Modifier.fillMaxWidth(),
-                                text = status.getNameForUi(LocalContext.current),
-                                textAlign = TextAlign.Center,
-                                fontSize = 18.sp,
-                                fontFamily = FontFamily.Cursive
-                            )
+                            TaskCard(task, onAction)
                         }
-                        if (filtered.isNotEmpty()) {
-                            for (task in filtered) {
-                                item {
-                                    TaskCard(task, onAction)
-                                }
-                            }
-                        } else {
-                            item {
-                                ErrorState(
-                                    padding = padding,
-                                    text = stringResource(id = R.string.main_empty_text_status)
-                                )
-                            }
-                        }
+                    }
+                } else {
+                    item {
+                        ErrorState(
+                            padding = padding,
+                            text = stringResource(id = R.string.main_empty_text_status)
+                        )
                     }
                 }
             }
