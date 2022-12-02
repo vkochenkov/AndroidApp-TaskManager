@@ -10,11 +10,8 @@ import com.vkochenkov.taskmanager.data.model.Task
 @Dao
 interface TaskDao {
 
-    @Query("SELECT * FROM task")
+    @Query("SELECT * FROM task ORDER BY updateDate DESC")
     suspend fun getAll(): List<Task>
-
-    @Query("SELECT * FROM task where status NOT LIKE 'DONE'")
-    suspend fun getAllWithoutDone(): List<Task>
 
     @Insert(onConflict = REPLACE)
     suspend fun insert(task: Task)

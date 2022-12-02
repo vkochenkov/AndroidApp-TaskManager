@@ -12,11 +12,12 @@ import com.vkochenkov.taskmanager.presentation.theme.ColorPriorityNormal
 @Entity(tableName = "task")
 data class Task(
     @PrimaryKey(autoGenerate = true) val id: Int,
+    val creationDate: String,
+    val updateDate: String,
     val title: String,
     val description: String?,
     val priority: Priority,
     val status: Status
-    // todo add update date, and should filter in column by date and priority
 ) {
 
     enum class Priority {

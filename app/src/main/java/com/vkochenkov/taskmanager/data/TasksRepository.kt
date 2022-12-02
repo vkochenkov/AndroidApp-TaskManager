@@ -5,13 +5,8 @@ import com.vkochenkov.taskmanager.data.model.Task
 class TasksRepository(
     val dao: TaskDao
 ) {
-
     suspend fun getAllTasks(): List<Task> {
         return dao.getAll()
-    }
-
-    suspend fun getActiveTasks(): List<Task> {
-        return dao.getAllWithoutDone()
     }
 
     suspend fun getTask(id: Int): Task {
@@ -19,7 +14,8 @@ class TasksRepository(
     }
 
     suspend fun saveTask(task: Task) {
-        dao.insert(task)
+        val updated = task.copy(updateDate = System.currentTimeMillis().toString())
+        dao.insert(updated)
     }
 
     suspend fun deleteTask(task: Task) {
@@ -27,12 +23,15 @@ class TasksRepository(
     }
 
     fun getNewTaskSample(): Task {
+        val currentDate = System.currentTimeMillis().toString()
         return Task(
             id = 0,
             title = "New task",
             description = "",
             priority = Task.Priority.NORMAL,
-            status = Task.Status.TO_DO
+            status = Task.Status.TO_DO,
+            creationDate = currentDate,
+            updateDate = currentDate
         )
     }
 }

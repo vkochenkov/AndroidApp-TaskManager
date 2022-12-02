@@ -23,6 +23,6 @@
 
     <string name="main_error_text">Something went wrong. Please, reopen application</string>
     <string name="main_empty_text">You have no tasks</string>
-    <string name="main_empty_text_status">You don\'t have any tasks in this status yet</string>
+    <string name="main_empty_text_status">You don\'t have any task\nin this status yet</string>
 
 </resources>

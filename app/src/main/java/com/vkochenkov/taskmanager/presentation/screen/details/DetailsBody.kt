@@ -317,6 +317,8 @@ fun Preview() {
             DetailsBodyState.ShowContent(
                 Task(
                     0,
+                    System.currentTimeMillis().toString(),
+                    System.currentTimeMillis().toString(),
                     "1 number number number number number number number number number number number number number",
                     "dddd ddd dd",
                     Task.Priority.NORMAL,

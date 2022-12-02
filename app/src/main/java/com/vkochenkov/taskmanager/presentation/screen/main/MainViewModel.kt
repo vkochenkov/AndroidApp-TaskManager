@@ -1,5 +1,6 @@
 package com.vkochenkov.taskmanager.presentation.screen.main
 
+import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
@@ -31,7 +32,7 @@ class MainViewModel(
         viewModelScope.launch {
             runCatching {
                 _state.value = MainBodyState.ShowLoading
-                repository.getActiveTasks()
+                repository.getAllTasks()
             }.onFailure {
                 _state.value = MainBodyState.ShowError
             }.onSuccess {

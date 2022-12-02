@@ -96,6 +96,7 @@ private fun ShowContent(
                 ) {
                     Spacer(modifier = Modifier.size(16.dp))
                     Text(text = status.getNameForUi(LocalContext.current))
+                    Spacer(modifier = Modifier.size(8.dp))
                 }
             }
         }
@@ -235,14 +236,18 @@ fun PreviewFull() {
             MainBodyState.ShowContent(
                 listOf(
                     Task(
-                        0,
-                        "1 number number number number number number number number number number number number number",
-                        "dddd ddd dd",
-                        Task.Priority.NORMAL,
-                        Task.Status.IN_PROGRESS
+                        id = 0,
+                        creationDate = System.currentTimeMillis().toString(),
+                        updateDate = System.currentTimeMillis().toString(),
+                        title = "1 number number number number number number number number number number number number number",
+                        description = "dddd ddd dd",
+                        priority = Task.Priority.NORMAL,
+                        status = Task.Status.IN_PROGRESS,
                     ),
                     Task(
                         1,
+                        System.currentTimeMillis().toString(),
+                        System.currentTimeMillis().toString(),
                         "2 number number",
                         "dddde rere dd",
                         Task.Priority.LOW,
