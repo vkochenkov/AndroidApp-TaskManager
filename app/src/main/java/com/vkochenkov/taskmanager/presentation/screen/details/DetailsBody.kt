@@ -8,6 +8,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -120,6 +121,9 @@ private fun ShowContent(
     var priorityDropDownIsExpanded by remember { mutableStateOf(false) }
     var statusDropDownIsExpanded by remember { mutableStateOf(false) }
 
+    var title by remember { mutableStateOf(task.title) }
+    var description by remember { mutableStateOf(task.description ?: "") }
+
     if (showDialogOnBack) {
         AlertDialog(
             onDismissRequest = {
@@ -174,120 +178,131 @@ private fun ShowContent(
         )
     }
 
-    Column(
+    LazyColumn(
         modifier = Modifier
             .padding(padding)
             .padding(horizontal = 16.dp)
             .fillMaxWidth()
     ) {
-        var title by remember { mutableStateOf(task.title) }
-        var description by remember { mutableStateOf(task.description ?: "") }
-        // todo add validation does not empty
-        OutlinedTextField(
-            label = {
-                Text(
-                    modifier = Modifier.background(color = MaterialTheme.colorScheme.background),
-                    text = stringResource(R.string.details_title_hint)
-                )
-            },
-            modifier = Modifier.fillMaxWidth(),
-            value = title,
-            onValueChange = {
-                title = it
-                onAction.invoke(DetailsActions.OnTaskChanged(task.copy(title = it)))
-            })
-        Spacer(modifier = Modifier.size(8.dp))
-        OutlinedTextField(
-            label = {
-                Text(
-                    modifier = Modifier.background(color = MaterialTheme.colorScheme.background),
-                    text = stringResource(R.string.details_description_hint)
-                )
-            },
-            modifier = Modifier.fillMaxWidth(),
-            value = description,
-            onValueChange = {
-                description = it
-                onAction.invoke(DetailsActions.OnTaskChanged(task.copy(description = it)))
-            }
-        )
+        item {
+            OutlinedTextField(
+                label = {
+                    Text(
+                        modifier = Modifier.background(color = MaterialTheme.colorScheme.background),
+                        text = stringResource(R.string.details_title_hint)
+                    )
+                },
+                modifier = Modifier.fillMaxWidth(),
+                value = title,
+                onValueChange = {
+                    title = it
+                    onAction.invoke(DetailsActions.OnTaskChanged(task.copy(title = it)))
+                })
 
-        Spacer(modifier = Modifier.size(8.dp))
+            Spacer(modifier = Modifier.size(8.dp))
+        }
 
-        Box(modifier = Modifier
-            .fillMaxWidth()
-            .clickable {
-                priorityDropDownIsExpanded = !priorityDropDownIsExpanded
+        item {
+            OutlinedTextField(
+                label = {
+                    Text(
+                        modifier = Modifier.background(color = MaterialTheme.colorScheme.background),
+                        text = stringResource(R.string.details_description_hint)
+                    )
+                },
+                modifier = Modifier.fillMaxWidth(),
+                value = description,
+                onValueChange = {
+                    description = it
+                    onAction.invoke(DetailsActions.OnTaskChanged(task.copy(description = it)))
+                }
+            )
+
+            Spacer(modifier = Modifier.size(8.dp))
+        }
+
+        item {
+            Box(modifier = Modifier
+                .fillMaxWidth()
+                .clickable {
+                    priorityDropDownIsExpanded = !priorityDropDownIsExpanded
+                }
+                .padding(vertical = 8.dp)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    Text(
+                        text = stringResource(R.string.details_priority) + task.priority.toString(),
+                        fontSize = 14.sp
+                    )
+                    Spacer(modifier = Modifier.size(4.dp))
+                    Box(
+                        modifier = Modifier
+                            .size(14.dp)
+                            .border(border = BorderStroke(1.dp, Color.Black), shape = CircleShape)
+                            .background(color = task.priority.getColor(), shape = CircleShape)
+                    )
+                }
             }
-            .padding(vertical = 8.dp)
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.End
+
+            DropdownMenu(
+                expanded = priorityDropDownIsExpanded,
+                onDismissRequest = { priorityDropDownIsExpanded = false }
+            ) {
+                Task.Priority.values().forEach { item ->
+                    DropdownMenuItem(
+                        onClick = {
+                            onAction.invoke(DetailsActions.OnTaskChanged(task.copy(priority = item)))
+                            priorityDropDownIsExpanded = false
+                        },
+                        interactionSource = MutableInteractionSource(),
+                        text = {
+                            Text(text = item.toString())
+                        }
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.size(8.dp))
+        }
+
+        item {
+            Box(modifier = Modifier
+                .fillMaxWidth()
+                .clickable {
+                    statusDropDownIsExpanded = !statusDropDownIsExpanded
+                }
+                .padding(vertical = 8.dp)
             ) {
                 Text(
-                    text = stringResource(R.string.details_priority) + task.priority.toString(),
+                    text = stringResource(R.string.details_status) + task.status.getNameForUi(
+                        LocalContext.current
+                    ),
                     fontSize = 14.sp
                 )
-                Spacer(modifier = Modifier.size(4.dp))
-                Box(
-                    modifier = Modifier
-                        .size(14.dp)
-                        .border(border = BorderStroke(1.dp, Color.Black), shape = CircleShape)
-                        .background(color = task.priority.getColor(), shape = CircleShape)
-                )
             }
-        }
 
-        DropdownMenu(
-            expanded = priorityDropDownIsExpanded,
-            onDismissRequest = { priorityDropDownIsExpanded = false }
-        ) {
-            Task.Priority.values().forEach { item ->
-                DropdownMenuItem(
-                    onClick = {
-                        onAction.invoke(DetailsActions.OnTaskChanged(task.copy(priority = item)))
-                        priorityDropDownIsExpanded = false
-                    },
-                    interactionSource = MutableInteractionSource(),
-                    text = {
-                        Text(text = item.toString())
-                    }
-                )
+            DropdownMenu(
+                expanded = statusDropDownIsExpanded,
+                onDismissRequest = { statusDropDownIsExpanded = false }
+            ) {
+                Task.Status.values().forEach { status ->
+                    DropdownMenuItem(
+                        onClick = {
+                            onAction.invoke(DetailsActions.OnTaskChanged(task.copy(status = status)))
+                            statusDropDownIsExpanded = false
+                        },
+                        interactionSource = MutableInteractionSource(),
+                        text = {
+                            Text(text = status.getNameForUi(LocalContext.current))
+                        }
+                    )
+                }
             }
-        }
 
-        Spacer(modifier = Modifier.size(8.dp))
-
-        Box(modifier = Modifier
-            .fillMaxWidth()
-            .clickable {
-                statusDropDownIsExpanded = !statusDropDownIsExpanded
-            }
-            .padding(vertical = 8.dp)
-        ) {
-            Text(
-                text = stringResource(R.string.details_status) + task.status.getNameForUi(LocalContext.current),
-                fontSize = 14.sp
-            )
-        }
-
-        DropdownMenu(
-            expanded = statusDropDownIsExpanded,
-            onDismissRequest = { statusDropDownIsExpanded = false }
-        ) {
-            Task.Status.values().forEach { status ->
-                DropdownMenuItem(
-                    onClick = {
-                        onAction.invoke(DetailsActions.OnTaskChanged(task.copy(status = status)))
-                        statusDropDownIsExpanded = false
-                    },
-                    interactionSource = MutableInteractionSource(),
-                    text = {
-                        Text(text = status.getNameForUi(LocalContext.current))
-                    }
-                )
-            }
+            Spacer(modifier = Modifier.size(8.dp))
         }
     }
 }
