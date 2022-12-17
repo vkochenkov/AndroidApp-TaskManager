@@ -1,6 +1,5 @@
 package com.vkochenkov.taskmanager.presentation.screen.main
 
-import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
@@ -46,11 +45,10 @@ class MainViewModel(
     }
 
     private fun addNewTask() {
-        // todo to think how to write better
-        navController.navigate("${Destination.DETAILS}?id=null")
+        navController.navigate(Destination.Details.passArguments(null))
     }
 
     private fun openDetails(id: Int) {
-        navController.navigate("${Destination.DETAILS}?id=${id}")
+        navController.navigate(Destination.Details.passArguments(id.toString()))
     }
 }

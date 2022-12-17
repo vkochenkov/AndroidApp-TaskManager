@@ -44,5 +44,4 @@ val appModule = module {
             repository = get()
         )
     }
-
 }

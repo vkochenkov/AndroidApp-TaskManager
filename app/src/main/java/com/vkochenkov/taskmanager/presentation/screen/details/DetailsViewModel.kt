@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.vkochenkov.taskmanager.data.TasksRepository
 import com.vkochenkov.taskmanager.data.model.Task
 import com.vkochenkov.taskmanager.presentation.base.BaseViewModel
+import com.vkochenkov.taskmanager.presentation.navigation.Destination
 import com.vkochenkov.taskmanager.presentation.utils.isNotNull
 import kotlinx.coroutines.launch
 
@@ -15,7 +16,7 @@ class DetailsViewModel(
     val repository: TasksRepository
 ) : BaseViewModel() {
 
-    private val taskIdFromNav: String? = savedStateHandle["id"]
+    private val taskIdFromNav: String? = savedStateHandle[Destination.Details.argument1]
     private var currentTask: Task? = null
 
     private var showDialogOnBack: Boolean = false

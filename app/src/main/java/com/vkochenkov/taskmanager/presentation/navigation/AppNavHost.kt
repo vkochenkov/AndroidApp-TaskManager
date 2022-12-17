@@ -13,16 +13,16 @@ import com.vkochenkov.taskmanager.presentation.screen.main.MainScreen
 @Composable
 fun AppNavHost(
     navController: NavHostController = rememberNavController(),
-    startDestination: String = Destination.MAIN.toString()
+    startDestination: String = Destination.Main.route
 ) {
     NavHost(
         navController = navController,
         startDestination = startDestination
     ) {
-        composable(Destination.MAIN.toString()) { MainScreen(navController) }
+        composable(Destination.Main.route) { MainScreen(navController) }
         composable(
-            route = "${Destination.DETAILS}?id={id}",
-            arguments = listOf(navArgument("id") {
+            route = Destination.Details.routeWithArgs,
+            arguments = listOf(navArgument(Destination.Details.argument1) {
                 type = NavType.StringType
                 nullable = true
             })
