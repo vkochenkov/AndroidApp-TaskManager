@@ -27,6 +27,8 @@ import androidx.compose.ui.unit.sp
 import com.vkochenkov.taskmanager.R
 import com.vkochenkov.taskmanager.data.model.Task
 import com.vkochenkov.taskmanager.presentation.theme.TaskManagerTheme
+import com.vkochenkov.taskmanager.presentation.utils.getColor
+import com.vkochenkov.taskmanager.presentation.utils.getNameForUi
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

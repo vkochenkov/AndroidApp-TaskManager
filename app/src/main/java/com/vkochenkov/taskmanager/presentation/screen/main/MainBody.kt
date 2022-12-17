@@ -29,6 +29,8 @@ import com.google.accompanist.pager.rememberPagerState
 import com.vkochenkov.taskmanager.R
 import com.vkochenkov.taskmanager.data.model.Task
 import com.vkochenkov.taskmanager.presentation.theme.TaskManagerTheme
+import com.vkochenkov.taskmanager.presentation.utils.getColor
+import com.vkochenkov.taskmanager.presentation.utils.getNameForUi
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalPagerApi::class)
