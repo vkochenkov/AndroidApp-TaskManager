@@ -23,17 +23,17 @@ class DetailsViewModel(
     private var showDialogOnDelete: Boolean = false
 
     private var _state: MutableState<DetailsBodyState> =
-        mutableStateOf(DetailsBodyState.ShowEmpty)
+        mutableStateOf(DetailsBodyState.Loading)
     val state get() = _state
 
     val onAction = { action: DetailsActions ->
         when (action) {
-            is DetailsActions.OnBackPressed -> onBackPressed(action.showDialog)
-            is DetailsActions.OnTaskChanged -> onTaskChanged(action.task)
-            is DetailsActions.SaveTask -> saveTaskAndLeaveScreen()
-            is DetailsActions.CancelOnBackDialog -> cancelOnBackDialog()
-            is DetailsActions.CancelOnDeleteDialog -> cancelOnDeleteDialog()
-            is DetailsActions.DeleteTask -> deleteTask(action.showDialog)
+            is DetailsActions.BackPressed -> onBackPressed(action.showDialog)
+            is DetailsActions.TaskChanged -> onTaskChanged(action.task)
+            is DetailsActions.SaveTask -> onSaveTask()
+            is DetailsActions.CancelBackDialog -> onCancelBackDialog()
+            is DetailsActions.CancelDeleteDialog -> onCancelDeleteDialog()
+            is DetailsActions.DeleteTask -> onDeleteTask(action.showDialog)
         }
     }
 
@@ -45,54 +45,60 @@ class DetailsViewModel(
         if (taskIdFromNav.isNotNull()) {
             viewModelScope.launch {
                 runCatching {
-                    _state.value = DetailsBodyState.ShowLoading
+                    _state.value = DetailsBodyState.Loading
                     repository.getTask(taskIdFromNav!!.toInt())
                 }.onFailure {
-                    _state.value = DetailsBodyState.ShowError
+                    _state.value = DetailsBodyState.Error
                 }.onSuccess {
                     currentTask = it
-                    _state.value = DetailsBodyState.ShowContent(it)
+                    _state.value = DetailsBodyState.Content(it)
                 }
             }
         } else {
             showDialogOnBack = true
             currentTask = repository.getNewTaskSample()
             currentTask?.let {
-                _state.value = DetailsBodyState.ShowContent(
+                _state.value = DetailsBodyState.Content(
                     it
                 )
             }
         }
     }
 
-    private fun cancelOnBackDialog() {
+    private fun onCancelBackDialog() {
         currentTask?.let { task ->
-            _state.value = DetailsBodyState.ShowContent(
+            _state.value = DetailsBodyState.Content(
                 task = task,
                 showDialogOnBack = false
             )
         }
     }
 
-    private fun cancelOnDeleteDialog() {
+    private fun onCancelDeleteDialog() {
         currentTask?.let { task ->
-            _state.value = DetailsBodyState.ShowContent(
+            _state.value = DetailsBodyState.Content(
                 task = task,
-                showDialogOnDelete= false
+                showDialogOnDelete = false
             )
         }
     }
 
-    private fun saveTaskAndLeaveScreen() {
+    private fun onSaveTask() {
         currentTask?.let { task ->
-            viewModelScope.launch {
-                runCatching {
-                    repository.saveTask(task)
-                }.onFailure {
-                    _state.value = DetailsBodyState.ShowError
-                }.onSuccess {
-                    _state.value = DetailsBodyState.ShowContent(task)
-                    navController.popBackStack()
+            if (task.title.isEmpty()) {
+                _state.value = DetailsBodyState.Content(task, showTitleValidation = true)
+            } else if (task.description != null && task.description.length > 30) {
+                _state.value = DetailsBodyState.Content(task, showDescriptionValidation = true)
+            } else {
+                viewModelScope.launch {
+                    runCatching {
+                        repository.saveTask(task)
+                    }.onFailure {
+                        _state.value = DetailsBodyState.Error
+                    }.onSuccess {
+                        _state.value = DetailsBodyState.Content(task)
+                        navController.popBackStack()
+                    }
                 }
             }
         }
@@ -101,7 +107,7 @@ class DetailsViewModel(
     private fun onBackPressed(showDialog: Boolean?) {
         showDialog?.let { showDialogOnBack = it }
         if (showDialogOnBack && currentTask != null) {
-            _state.value = DetailsBodyState.ShowContent(
+            _state.value = DetailsBodyState.Content(
                 task = currentTask!!,
                 showDialogOnBack = true
             )
@@ -112,14 +118,14 @@ class DetailsViewModel(
 
     private fun onTaskChanged(task: Task) {
         currentTask = task
-        _state.value = DetailsBodyState.ShowContent(task)
+        _state.value = DetailsBodyState.Content(task)
         showDialogOnBack = true
     }
 
-    private fun deleteTask(showDialog: Boolean?) {
+    private fun onDeleteTask(showDialog: Boolean?) {
         showDialog?.let { showDialogOnDelete = it }
         if (showDialogOnDelete && currentTask != null) {
-            _state.value = DetailsBodyState.ShowContent(
+            _state.value = DetailsBodyState.Content(
                 task = currentTask!!,
                 showDialogOnDelete = true
             )
@@ -130,7 +136,7 @@ class DetailsViewModel(
                         repository.deleteTask(it)
                     }
                 }.onFailure {
-                    _state.value = DetailsBodyState.ShowError
+                    _state.value = DetailsBodyState.Error
                 }.onSuccess {
                     navController.popBackStack()
                 }

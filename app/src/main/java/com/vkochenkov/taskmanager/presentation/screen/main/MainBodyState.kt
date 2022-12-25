@@ -4,13 +4,13 @@ import com.vkochenkov.taskmanager.data.model.Task
 
 sealed class MainBodyState {
 
-    data class ShowContent(
+    data class Content(
         var tasksList: List<Task>
     ) : MainBodyState()
 
-    object ShowEmpty: MainBodyState()
+    object Empty: MainBodyState()
 
-    object ShowError: MainBodyState()
+    object Error: MainBodyState()
 
-    object ShowLoading: MainBodyState()
+    object Loading: MainBodyState()
 }

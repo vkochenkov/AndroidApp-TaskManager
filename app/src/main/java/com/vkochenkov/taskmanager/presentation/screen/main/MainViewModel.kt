@@ -16,39 +16,39 @@ class MainViewModel(
 ) : BaseViewModel() {
 
     private var _state: MutableState<MainBodyState> =
-        mutableStateOf(MainBodyState.ShowLoading)
+        mutableStateOf(MainBodyState.Loading)
     val state: State<MainBodyState> get() = _state
 
     val onAction = { action: MainActions ->
         when (action) {
-            is MainActions.OpenDetails -> openDetails(action.id)
-            is MainActions.AddNewTask -> addNewTask()
-            is MainActions.UpdateData -> getActiveTasks()
+            is MainActions.OpenDetails -> onOpenDetails(action.id)
+            is MainActions.AddNewTask -> onAddNewTask()
+            is MainActions.UpdateData -> onGetActiveTasks()
         }
     }
 
-    private fun getActiveTasks() {
+    private fun onGetActiveTasks() {
         viewModelScope.launch {
             runCatching {
-                _state.value = MainBodyState.ShowLoading
+                _state.value = MainBodyState.Loading
                 repository.getAllTasks()
             }.onFailure {
-                _state.value = MainBodyState.ShowError
+                _state.value = MainBodyState.Error
             }.onSuccess {
                 if (it.isNotEmpty()) {
-                    _state.value = MainBodyState.ShowContent(it)
+                    _state.value = MainBodyState.Content(it)
                 } else {
-                    _state.value = MainBodyState.ShowEmpty
+                    _state.value = MainBodyState.Empty
                 }
             }
         }
     }
 
-    private fun addNewTask() {
+    private fun onAddNewTask() {
         navController.navigate(Destination.Details.passArguments(null))
     }
 
-    private fun openDetails(id: Int) {
+    private fun onOpenDetails(id: Int) {
         navController.navigate(Destination.Details.passArguments(id.toString()))
     }
 }

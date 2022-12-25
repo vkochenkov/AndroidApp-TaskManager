@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.vkochenkov.taskmanager.R
 import com.vkochenkov.taskmanager.data.model.Task
+import com.vkochenkov.taskmanager.presentation.components.ErrorState
 import com.vkochenkov.taskmanager.presentation.theme.TaskManagerTheme
 import com.vkochenkov.taskmanager.presentation.utils.getColor
 import com.vkochenkov.taskmanager.presentation.utils.getNameForUi
@@ -38,7 +39,7 @@ fun DetailsBody(
 ) {
 
     BackHandler(enabled = true, onBack = {
-        onAction.invoke(DetailsActions.OnBackPressed())
+        onAction.invoke(DetailsActions.BackPressed())
     })
 
     Surface(
@@ -52,7 +53,7 @@ fun DetailsBody(
                     navigationIcon = {
                         IconButton(
                             onClick = {
-                                onAction.invoke(DetailsActions.OnBackPressed())
+                                onAction.invoke(DetailsActions.BackPressed())
                             },
                             content = {
                                 Icon(
@@ -90,22 +91,19 @@ fun DetailsBody(
             }
         ) { padding ->
             when (state) {
-                is DetailsBodyState.ShowContent -> {
-                    ShowContent(
+                is DetailsBodyState.Content -> {
+                    ContentState(
                         padding,
                         state.task,
                         state.showDialogOnBack,
                         state.showDialogOnDelete,
+                        state.showTitleValidation,
+                        state.showDescriptionValidation,
                         onAction
                     )
                 }
-                DetailsBodyState.ShowEmpty -> {
-                    // todo
-                }
-                is DetailsBodyState.ShowError -> {
-                    // todo
-                }
-                is DetailsBodyState.ShowLoading -> LoadingState(padding)
+                is DetailsBodyState.Error -> ErrorState(padding)
+                is DetailsBodyState.Loading -> LoadingState(padding)
             }
         }
     }
@@ -113,11 +111,13 @@ fun DetailsBody(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ShowContent(
+private fun ContentState(
     padding: PaddingValues,
     task: Task,
     showDialogOnBack: Boolean,
     showDialogOnDelete: Boolean,
+    showTitleValidation: Boolean,
+    showDescriptionValidation: Boolean,
     onAction: (DetailsActions) -> Unit
 ) {
     var priorityDropDownIsExpanded by remember { mutableStateOf(false) }
@@ -129,7 +129,7 @@ private fun ShowContent(
     if (showDialogOnBack) {
         AlertDialog(
             onDismissRequest = {
-                onAction.invoke(DetailsActions.CancelOnBackDialog)
+                onAction.invoke(DetailsActions.CancelBackDialog)
             },
             title = {
                 Text(text = stringResource(R.string.details_save_dialog_title))
@@ -138,14 +138,15 @@ private fun ShowContent(
                 Button(
                     onClick = {
                         onAction.invoke(DetailsActions.SaveTask)
-                    }) {
+                    }
+                ) {
                     Text(stringResource(R.string.details_save_dialog_confirm_btn))
                 }
             },
             dismissButton = {
                 Button(
                     onClick = {
-                        onAction.invoke(DetailsActions.OnBackPressed(false))
+                        onAction.invoke(DetailsActions.BackPressed(false))
                     }) {
                     Text(stringResource(R.string.details_save_dialog_dismiss_btn))
                 }
@@ -156,7 +157,7 @@ private fun ShowContent(
     if (showDialogOnDelete) {
         AlertDialog(
             onDismissRequest = {
-                onAction.invoke(DetailsActions.CancelOnDeleteDialog)
+                onAction.invoke(DetailsActions.CancelDeleteDialog)
             },
             title = {
                 Text(text = stringResource(R.string.details_delete_dialog_title))
@@ -172,7 +173,7 @@ private fun ShowContent(
             dismissButton = {
                 Button(
                     onClick = {
-                        onAction.invoke(DetailsActions.CancelOnDeleteDialog)
+                        onAction.invoke(DetailsActions.CancelDeleteDialog)
                     }) {
                     Text(stringResource(R.string.details_delete_dialog_dismiss_btn))
                 }
@@ -188,6 +189,7 @@ private fun ShowContent(
     ) {
         item {
             OutlinedTextField(
+                isError = showTitleValidation,
                 label = {
                     Text(
                         modifier = Modifier.background(color = MaterialTheme.colorScheme.background),
@@ -198,7 +200,7 @@ private fun ShowContent(
                 value = title,
                 onValueChange = {
                     title = it
-                    onAction.invoke(DetailsActions.OnTaskChanged(task.copy(title = it)))
+                    onAction.invoke(DetailsActions.TaskChanged(task.copy(title = it)))
                 })
 
             Spacer(modifier = Modifier.size(8.dp))
@@ -206,6 +208,7 @@ private fun ShowContent(
 
         item {
             OutlinedTextField(
+                isError = showDescriptionValidation,
                 label = {
                     Text(
                         modifier = Modifier.background(color = MaterialTheme.colorScheme.background),
@@ -216,7 +219,7 @@ private fun ShowContent(
                 value = description,
                 onValueChange = {
                     description = it
-                    onAction.invoke(DetailsActions.OnTaskChanged(task.copy(description = it)))
+                    onAction.invoke(DetailsActions.TaskChanged(task.copy(description = it)))
                 }
             )
 
@@ -256,7 +259,7 @@ private fun ShowContent(
                 Task.Priority.values().forEach { item ->
                     DropdownMenuItem(
                         onClick = {
-                            onAction.invoke(DetailsActions.OnTaskChanged(task.copy(priority = item)))
+                            onAction.invoke(DetailsActions.TaskChanged(task.copy(priority = item)))
                             priorityDropDownIsExpanded = false
                         },
                         interactionSource = MutableInteractionSource(),
@@ -293,7 +296,7 @@ private fun ShowContent(
                 Task.Status.values().forEach { status ->
                     DropdownMenuItem(
                         onClick = {
-                            onAction.invoke(DetailsActions.OnTaskChanged(task.copy(status = status)))
+                            onAction.invoke(DetailsActions.TaskChanged(task.copy(status = status)))
                             statusDropDownIsExpanded = false
                         },
                         interactionSource = MutableInteractionSource(),
@@ -331,7 +334,7 @@ private fun LoadingState(
 fun Preview() {
     TaskManagerTheme {
         DetailsBody(
-            DetailsBodyState.ShowContent(
+            DetailsBodyState.Content(
                 Task(
                     0,
                     System.currentTimeMillis().toString(),
