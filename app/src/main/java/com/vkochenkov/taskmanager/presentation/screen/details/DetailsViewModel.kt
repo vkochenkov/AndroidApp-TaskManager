@@ -85,9 +85,9 @@ class DetailsViewModel(
 
     private fun onSaveTask() {
         currentTask?.let { task ->
-            if (task.title.isEmpty()) {
+            if (task.title.isEmpty() || task.title.length > TITLE_MAX_LENGTH) {
                 _state.value = DetailsBodyState.Content(task, showTitleValidation = true)
-            } else if (task.description != null && task.description.length > 30) {
+            } else if (task.description != null && task.description.length > DESCRIPTION_MAX_LENGTH) {
                 _state.value = DetailsBodyState.Content(task, showDescriptionValidation = true)
             } else {
                 viewModelScope.launch {
@@ -142,5 +142,10 @@ class DetailsViewModel(
                 }
             }
         }
+    }
+
+    companion object {
+        const val TITLE_MAX_LENGTH = 50
+        const val DESCRIPTION_MAX_LENGTH = 300
     }
 }
