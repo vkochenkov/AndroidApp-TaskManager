@@ -16,7 +16,6 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
@@ -28,6 +27,7 @@ import com.google.accompanist.pager.PagerState
 import com.google.accompanist.pager.rememberPagerState
 import com.vkochenkov.taskmanager.R
 import com.vkochenkov.taskmanager.data.model.Task
+import com.vkochenkov.taskmanager.presentation.components.ErrorState
 import com.vkochenkov.taskmanager.presentation.theme.TaskManagerTheme
 import com.vkochenkov.taskmanager.presentation.utils.getColor
 import com.vkochenkov.taskmanager.presentation.utils.getNameForUi
@@ -59,13 +59,13 @@ fun MainBody(
             }
         ) { padding ->
             when (state) {
-                is MainBodyState.ShowContent -> ShowContent(padding, state.tasksList, pagerState, onAction)
-                is MainBodyState.ShowEmpty -> ErrorState(
+                is MainBodyState.Content -> ContentState(padding, state.tasksList, pagerState, onAction)
+                is MainBodyState.Empty -> ErrorState(
                     padding = padding,
                     text = stringResource(id = R.string.main_empty_text)
                 )
-                is MainBodyState.ShowError -> ErrorState(padding)
-                is MainBodyState.ShowLoading -> LoadingState(padding)
+                is MainBodyState.Error -> ErrorState(padding)
+                is MainBodyState.Loading -> LoadingState(padding)
             }
         }
     }
@@ -73,7 +73,7 @@ fun MainBody(
 
 @OptIn(ExperimentalPagerApi::class)
 @Composable
-private fun ShowContent(
+private fun ContentState(
     padding: PaddingValues,
     tasksList: List<Task>,
     pagerState: PagerState,
@@ -131,27 +131,6 @@ private fun ShowContent(
                 }
             }
         }
-    }
-}
-
-@Composable
-private fun ErrorState(
-    padding: PaddingValues,
-    text: String = stringResource(R.string.main_error_text)
-) {
-    Column(
-        modifier = Modifier
-            .padding(padding)
-            .fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Text(
-            modifier = Modifier.padding(horizontal = 16.dp),
-            fontSize = 18.sp,
-            text = text,
-            textAlign = TextAlign.Center
-        )
     }
 }
 
@@ -235,7 +214,7 @@ private fun TaskCard(
 fun PreviewFull() {
     TaskManagerTheme {
         MainBody(
-            MainBodyState.ShowContent(
+            MainBodyState.Content(
                 listOf(
                     Task(
                         id = 0,
@@ -266,7 +245,7 @@ fun PreviewFull() {
 fun PreviewEmpty() {
     TaskManagerTheme {
         MainBody(
-            MainBodyState.ShowContent(
+            MainBodyState.Content(
                 listOf()
             )
         ) {}

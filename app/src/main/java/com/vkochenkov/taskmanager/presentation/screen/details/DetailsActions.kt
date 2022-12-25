@@ -4,16 +4,16 @@ import com.vkochenkov.taskmanager.data.model.Task
 
 sealed class DetailsActions {
 
-    data class OnTaskChanged(val task: Task) : DetailsActions()
+    data class TaskChanged(val task: Task) : DetailsActions()
 
-    data class OnBackPressed(val showDialog: Boolean? = null) : DetailsActions()
+    data class BackPressed(val showDialog: Boolean? = null) : DetailsActions()
 
     object SaveTask : DetailsActions()
 
     data class DeleteTask(val showDialog: Boolean? = null) : DetailsActions()
 
-    object CancelOnBackDialog : DetailsActions()
+    object CancelBackDialog : DetailsActions()
 
-    object CancelOnDeleteDialog : DetailsActions()
+    object CancelDeleteDialog : DetailsActions()
 
 }

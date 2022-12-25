@@ -4,15 +4,16 @@ import com.vkochenkov.taskmanager.data.model.Task
 
 sealed class DetailsBodyState {
 
-    data class ShowContent(
+    data class Content(
         val task: Task,
+        val validationText: String? = null,
         val showDialogOnBack: Boolean = false,
-        val showDialogOnDelete: Boolean = false
+        val showDialogOnDelete: Boolean = false,
+        val showTitleValidation: Boolean = false,
+        val showDescriptionValidation: Boolean = false
     ) : DetailsBodyState()
 
-    object ShowEmpty : DetailsBodyState()
+    object Error : DetailsBodyState()
 
-    object ShowError : DetailsBodyState()
-
-    object ShowLoading: DetailsBodyState()
+    object Loading : DetailsBodyState()
 }
