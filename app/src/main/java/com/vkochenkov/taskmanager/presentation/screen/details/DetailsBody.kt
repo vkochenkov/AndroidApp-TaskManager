@@ -1,11 +1,6 @@
 package com.vkochenkov.taskmanager.presentation.screen.details
 
-import android.app.DatePickerDialog
-import android.app.TimePickerDialog
-import android.content.Context
 import android.content.res.Configuration
-import android.widget.DatePicker
-import android.widget.TimePicker
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -35,7 +30,6 @@ import com.vkochenkov.taskmanager.presentation.components.ErrorState
 import com.vkochenkov.taskmanager.presentation.theme.TaskManagerTheme
 import com.vkochenkov.taskmanager.presentation.utils.getColor
 import com.vkochenkov.taskmanager.presentation.utils.getNameForUi
-import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -43,7 +37,6 @@ fun DetailsBody(
     state: DetailsBodyState,
     onAction: (DetailsActions) -> Unit
 ) {
-    val context = LocalContext.current
 
     BackHandler(enabled = true, onBack = {
         onAction.invoke(DetailsActions.BackPressed())
@@ -73,11 +66,7 @@ fun DetailsBody(
                     actions = {
                         IconButton(
                             onClick = {
-                                if (state is DetailsBodyState.Content && state.task.notificationTime != null) {
-                                    onAction.invoke(DetailsActions.RemoveNotification(showDialog = true))
-                                } else {
-                                    showPickers(context, onAction)
-                                }
+                                onAction.invoke(DetailsActions.ShowNotificationDialog)
                             },
                             content = {
                                 Icon(
@@ -123,9 +112,9 @@ fun DetailsBody(
                     ContentState(
                         padding,
                         state.task,
-                        state.showDialogOnBack,
-                        state.showDialogOnDelete,
-                        state.showDialogOnRemoveNotification,
+                        state.showOnBackDialog,
+                        state.showOnDeleteDialog,
+                        state.showNotificationDialog,
                         state.showTitleValidation,
                         state.showDescriptionValidation,
                         onAction
@@ -143,9 +132,9 @@ fun DetailsBody(
 private fun ContentState(
     padding: PaddingValues,
     task: Task,
-    showDialogOnBack: Boolean,
-    showDialogOnDelete: Boolean,
-    showDialogOnRemoveNotification: Boolean,
+    showOnBackDialog: Boolean,
+    showOnDeleteDialog: Boolean,
+    showNotificationDialog: Boolean,
     showTitleValidation: Boolean,
     showDescriptionValidation: Boolean,
     onAction: (DetailsActions) -> Unit
@@ -156,7 +145,7 @@ private fun ContentState(
     var title by remember { mutableStateOf(task.title) }
     var description by remember { mutableStateOf(task.description ?: "") }
 
-    if (showDialogOnBack) {
+    if (showOnBackDialog) {
         AlertDialog(
             onDismissRequest = {
                 onAction.invoke(DetailsActions.CancelBackDialog)
@@ -167,24 +156,23 @@ private fun ContentState(
             confirmButton = {
                 Button(
                     onClick = {
+                        onAction.invoke(DetailsActions.BackPressed(false))
+                    }) {
+                    Text(stringResource(R.string.details_save_dialog_dismiss_btn))
+                }
+
+                Button(
+                    onClick = {
                         onAction.invoke(DetailsActions.SaveTask)
                     }
                 ) {
                     Text(stringResource(R.string.details_save_dialog_confirm_btn))
                 }
-            },
-            dismissButton = {
-                Button(
-                    onClick = {
-                        onAction.invoke(DetailsActions.BackPressed(false))
-                    }) {
-                    Text(stringResource(R.string.details_save_dialog_dismiss_btn))
-                }
             }
         )
     }
 
-    if (showDialogOnDelete) {
+    if (showOnDeleteDialog) {
         AlertDialog(
             onDismissRequest = {
                 onAction.invoke(DetailsActions.CancelDeleteDialog)
@@ -195,44 +183,56 @@ private fun ContentState(
             confirmButton = {
                 Button(
                     onClick = {
-                        onAction.invoke(DetailsActions.DeleteTask(false))
-                    }) {
-                    Text(stringResource(R.string.details_delete_dialog_confirm_btn))
-                }
-            },
-            dismissButton = {
-                Button(
-                    onClick = {
                         onAction.invoke(DetailsActions.CancelDeleteDialog)
                     }) {
                     Text(stringResource(R.string.details_delete_dialog_dismiss_btn))
+                }
+
+                Button(
+                    onClick = {
+                        onAction.invoke(DetailsActions.DeleteTask(false))
+                    }) {
+                    Text(stringResource(R.string.details_delete_dialog_confirm_btn))
                 }
             }
         )
     }
 
-    if (showDialogOnRemoveNotification) {
+    if (showNotificationDialog) {
+
+        // todo add UI for draw dialog
+
+
         AlertDialog(
             onDismissRequest = {
-                onAction.invoke(DetailsActions.CancelRemoveNotificationDialog)
+                onAction.invoke(DetailsActions.CancelNotificationDialog)
             },
             title = {
-                Text(text = stringResource(R.string.details_remove_notification_dialog_title))
+                Text(text = "text")
             },
             confirmButton = {
                 Button(
                     onClick = {
-                        onAction.invoke(DetailsActions.RemoveNotification(false))
+                        onAction.invoke(DetailsActions.CancelNotificationDialog)
                     }) {
-                    Text(stringResource(R.string.details_remove_notification_dialog_confirm_btn))
+                    Text("cancel")
                 }
-            },
-            dismissButton = {
+
+                if (task.notificationTime != null) {
+                    Button(
+                        onClick = {
+                            onAction.invoke(DetailsActions.RemoveNotification)
+                        }) {
+                        Text("remove")
+                    }
+                }
+
                 Button(
                     onClick = {
-                        onAction.invoke(DetailsActions.CancelRemoveNotificationDialog)
+                        // todo get from fields
+                        onAction.invoke(DetailsActions.SetNotification(100500))
                     }) {
-                    Text(stringResource(R.string.details_remove_notification_dialog_dismiss_btn))
+                    Text("set")
                 }
             }
         )
@@ -384,52 +384,6 @@ private fun LoadingState(
             modifier = Modifier.size(60.dp)
         )
     }
-}
-
-private fun showPickers(
-    context: Context,
-    onAction: (DetailsActions) -> Unit
-) {
-    val mCalendar = Calendar.getInstance()
-    var year: Int = mCalendar.get(Calendar.YEAR)
-    var month: Int = mCalendar.get(Calendar.MONTH)
-    var day: Int = mCalendar.get(Calendar.DAY_OF_MONTH)
-    var hour: Int = mCalendar.get(Calendar.HOUR_OF_DAY)
-    var minute: Int = mCalendar.get(Calendar.MINUTE)
-
-    val timePickerDialog = TimePickerDialog(
-        context,
-        { _: TimePicker, mHour: Int, mMinute: Int ->
-            hour = mHour
-            minute = mMinute
-            onAction.invoke(
-                DetailsActions.SetNotificationTime(
-                    year,
-                    month,
-                    day,
-                    hour,
-                    minute
-                )
-            )
-        },
-        hour,
-        minute,
-        true
-    )
-
-    val datePickerDialog = DatePickerDialog(
-        context,
-        { _: DatePicker, mYear: Int, mMonth: Int, mDayOfMonth: Int ->
-            year = mYear
-            month = mMonth
-            day = mDayOfMonth
-            timePickerDialog.show()
-        },
-        year,
-        month,
-        day
-    )
-    datePickerDialog.show()
 }
 
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_NO, device = Devices.PIXEL_4)

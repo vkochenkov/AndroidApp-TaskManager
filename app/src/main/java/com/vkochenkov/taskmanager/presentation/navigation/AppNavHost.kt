@@ -19,7 +19,11 @@ fun AppNavHost(
         navController = navController,
         startDestination = startDestination
     ) {
-        composable(Destination.Main.route) { MainScreen(navController) }
+        composable(
+            Destination.Main.route
+        ) {
+            MainScreen(navController)
+        }
         composable(
             route = Destination.Details.routeWithArgs,
             arguments = listOf(navArgument(Destination.Details.argument1) {

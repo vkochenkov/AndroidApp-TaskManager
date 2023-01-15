@@ -13,7 +13,7 @@ data class Task(
     val priority: Priority,
     val status: Status,
     val notificationTime: Long?
-) {
+): java.io.Serializable {
 
     enum class Priority {
         LOW,

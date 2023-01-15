@@ -2,7 +2,7 @@ package com.vkochenkov.taskmanager.presentation.screen.details
 
 import android.app.AlarmManager
 import android.app.PendingIntent
-import android.app.PendingIntent.FLAG_IMMUTABLE
+import android.app.PendingIntent.FLAG_UPDATE_CURRENT
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -12,10 +12,14 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import com.vkochenkov.taskmanager.R
 import com.vkochenkov.taskmanager.data.TasksRepository
 import com.vkochenkov.taskmanager.data.model.Task
 import com.vkochenkov.taskmanager.presentation.base.BaseViewModel
 import com.vkochenkov.taskmanager.presentation.base.ShowNotificationReceiver
+import com.vkochenkov.taskmanager.presentation.base.ShowNotificationReceiver.Companion.BUNDLE_FOR_NOTIFICATION
+import com.vkochenkov.taskmanager.presentation.base.ShowNotificationReceiver.Companion.NOTIFICATION_ID
+import com.vkochenkov.taskmanager.presentation.base.ShowNotificationReceiver.Companion.TASK_FOR_NOTIFICATION
 import com.vkochenkov.taskmanager.presentation.navigation.Destination
 import com.vkochenkov.taskmanager.presentation.utils.isNotNull
 import kotlinx.coroutines.launch
@@ -28,11 +32,11 @@ class DetailsViewModel(
 ) : BaseViewModel() {
 
     private val taskIdFromNav: String? = savedStateHandle[Destination.Details.argument1]
+    // todo to think about subscription on DB
     private var currentTask: Task? = null
 
     private var showDialogOnBack: Boolean = false
     private var showDialogOnDelete: Boolean = false
-    private var showDialogOnRemoveNotification: Boolean = false
 
     private var _state: MutableState<DetailsBodyState> =
         mutableStateOf(DetailsBodyState.Loading)
@@ -44,17 +48,13 @@ class DetailsViewModel(
             is DetailsActions.TaskChanged -> onTaskChanged(action.task)
             is DetailsActions.SaveTask -> onSaveTask()
             is DetailsActions.CancelBackDialog -> onCancelBackDialog()
-            is DetailsActions.CancelRemoveNotificationDialog -> onCancelRemoveNotificationDialog()
             is DetailsActions.CancelDeleteDialog -> onCancelDeleteDialog()
             is DetailsActions.DeleteTask -> onDeleteTask(action.showDialog)
-            is DetailsActions.RemoveNotification -> onCanselNotification(action.showDialog)
-            is DetailsActions.SetNotificationTime -> onSetNotificationTime(
-                year = action.year,
-                month = action.month,
-                day = action.day,
-                hour = action.hour,
-                minute = action.minute
-            )
+
+            is DetailsActions.CancelNotificationDialog -> onCancelNotificationDialog()
+            is DetailsActions.ShowNotificationDialog -> onShowNotificationDialog()
+            is DetailsActions.RemoveNotification -> onRemoveNotification()
+            is DetailsActions.SetNotification -> onSetNotification(action.date)
         }
     }
 
@@ -90,7 +90,7 @@ class DetailsViewModel(
         currentTask?.let { task ->
             _state.value = DetailsBodyState.Content(
                 task = task,
-                showDialogOnBack = false
+                showOnBackDialog = false
             )
         }
     }
@@ -99,16 +99,7 @@ class DetailsViewModel(
         currentTask?.let { task ->
             _state.value = DetailsBodyState.Content(
                 task = task,
-                showDialogOnDelete = false
-            )
-        }
-    }
-
-    private fun onCancelRemoveNotificationDialog() {
-        currentTask?.let { task ->
-            _state.value = DetailsBodyState.Content(
-                task = task,
-                showDialogOnRemoveNotification = false
+                showOnDeleteDialog = false
             )
         }
     }
@@ -139,7 +130,7 @@ class DetailsViewModel(
         if (showDialogOnBack && currentTask != null) {
             _state.value = DetailsBodyState.Content(
                 task = currentTask!!,
-                showDialogOnBack = true
+                showOnBackDialog = true
             )
         } else {
             navController.popBackStack()
@@ -157,7 +148,7 @@ class DetailsViewModel(
         if (showDialogOnDelete && currentTask != null) {
             _state.value = DetailsBodyState.Content(
                 task = currentTask!!,
-                showDialogOnDelete = true
+                showOnDeleteDialog = true
             )
         } else {
             viewModelScope.launch {
@@ -174,68 +165,73 @@ class DetailsViewModel(
         }
     }
 
-    private fun onCanselNotification(showDialog: Boolean?) {
-        showDialog?.let { showDialogOnRemoveNotification = it }
-        if (showDialogOnRemoveNotification && currentTask != null) {
+    private fun onCancelNotificationDialog() {
+        currentTask?.let { task ->
             _state.value = DetailsBodyState.Content(
-                task = currentTask!!,
-                showDialogOnRemoveNotification = true
+                task = task,
+                showNotificationDialog = false
             )
-        } else {
-            //todo to think about exeptions?
-            viewModelScope.launch {
-                runCatching {
-                    currentTask = currentTask?.copy(
-                        notificationTime = null
-                    )
-                    //todo add way to remove created alarm
-                    currentTask?.let {
-                        repository.saveTask(it)
-                    }
-                }.onFailure {
-                    _state.value = DetailsBodyState.Error
-                }.onSuccess {
-                    _state.value = DetailsBodyState.Content(
-                        task = currentTask!!,
-                        showDialogOnRemoveNotification = false
-                    )
-                }
-            }
         }
     }
 
-    private fun onSetNotificationTime(
-        year: Int,
-        month: Int,
-        day: Int,
-        hour: Int,
-        minute: Int
-    ) {
+    private fun onShowNotificationDialog() {
+        currentTask?.let { task ->
+            _state.value = DetailsBodyState.Content(
+                task = task,
+                showNotificationDialog = true
+            )
+        }
+    }
+
+    private fun onRemoveNotification() {
+        viewModelScope.launch {
+            runCatching {
+                currentTask = currentTask?.copy(
+                    notificationTime = null
+                )
+                currentTask?.let {
+                    repository.saveTask(it)
+                }
+            }.onFailure {
+                _state.value = DetailsBodyState.Error
+            }.onSuccess {
+                _state.value = DetailsBodyState.Content(
+                    task = currentTask!!,
+                    showNotificationDialog = false
+                )
+            }
+        }
+
+        //------------------
+
+
+        //------------------
 
         val alarmManager =
             applicationContext.getSystemService(AppCompatActivity.ALARM_SERVICE) as AlarmManager
 
-        //create intent for broadcast receiver
-        val broadcastIntent = Intent(applicationContext, ShowNotificationReceiver::class.java)
-        broadcastIntent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND)
+        alarmManager.cancel(getAlarmPendingIntent())
 
-        //create bundle and set data to it
-        val bundle = Bundle()
-        //bundle.putParcelable(FILM, film)
-        val id = 12
-        //createNotificationId(film!!.serverName)
-        bundle.putInt(ShowNotificationReceiver.NOTIFICATION_ID, id)
-        //broadcastIntent.putExtra(BUNDLE, bundle)
+        applicationContext.let {
+            Toast.makeText(it, it.getString(R.string.toast_remove_notification), Toast.LENGTH_LONG)
+                .show()
+        }
+    }
 
-        //create different action for receive all notifications
-        broadcastIntent.action = id.toString()
-
-        //create pending intent for alarm manager
-        val alarmPendingIntent =
-            PendingIntent.getBroadcast(applicationContext, id, broadcastIntent, FLAG_IMMUTABLE)
+    private fun onSetNotification(
+        date: Long
+    ) {
 
         //create instance of calendar and set date to it
         val startTime = Calendar.getInstance()
+
+        //todo use
+        var year: Int = startTime.get(Calendar.YEAR)
+        var month: Int = startTime.get(Calendar.MONTH)
+        var day: Int = startTime.get(Calendar.DAY_OF_MONTH)
+        var hour: Int = startTime.get(Calendar.HOUR_OF_DAY)
+        var minute: Int = startTime.get(Calendar.MINUTE)
+
         startTime.set(Calendar.YEAR, year)
         startTime.set(Calendar.MONTH, month)
         startTime.set(Calendar.DAY_OF_MONTH, day)
@@ -245,11 +241,13 @@ class DetailsViewModel(
 
         val alarmStartTime = startTime.timeInMillis
 
-        //set alarm manager for open broadcast receiver after a time
+        val alarmManager =
+            applicationContext.getSystemService(AppCompatActivity.ALARM_SERVICE) as AlarmManager
+
         alarmManager.set(
             AlarmManager.RTC_WAKEUP,
             alarmStartTime,
-            alarmPendingIntent
+            getAlarmPendingIntent()
         )
 
         currentTask = currentTask?.copy(
@@ -261,21 +259,45 @@ class DetailsViewModel(
                 repository.saveTask(it)
                 _state.value = DetailsBodyState.Content(
                     task = it,
-                    showDialogOnDelete = false
+                    showOnDeleteDialog = false
                 )
             }
         }
 
-        //todo to text
-        Toast.makeText(
+        applicationContext.let {
+            Toast.makeText(it, it.getString(R.string.toast_set_notification), Toast.LENGTH_LONG)
+                .show()
+        }
+    }
+
+    private fun getAlarmPendingIntent(): PendingIntent {
+
+        val id = currentTask.hashCode()
+
+        val broadcastIntent = Intent(applicationContext, ShowNotificationReceiver::class.java)
+        broadcastIntent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND)
+        //create different action for receive all notifications
+        broadcastIntent.action = id.toString()
+
+        broadcastIntent.putExtra(
+            BUNDLE_FOR_NOTIFICATION,
+            Bundle().apply {
+                putSerializable(TASK_FOR_NOTIFICATION, currentTask)
+                putInt(NOTIFICATION_ID, id)
+            }
+        )
+
+        //create pending intent for alarm manager
+        return PendingIntent.getBroadcast(
             applicationContext,
-            "Notification was created",
-            Toast.LENGTH_LONG
-        ).show()
+            id,
+            broadcastIntent,
+            FLAG_UPDATE_CURRENT
+        )
     }
 
     companion object {
-        const val TITLE_MAX_LENGTH = 50
-        const val DESCRIPTION_MAX_LENGTH = 300
+        private const val TITLE_MAX_LENGTH = 50
+        private const val DESCRIPTION_MAX_LENGTH = 300
     }
 }

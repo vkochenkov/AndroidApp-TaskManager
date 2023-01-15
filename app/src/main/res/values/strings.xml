@@ -29,4 +29,6 @@
     <string name="main_empty_text">You have no tasks</string>
     <string name="main_empty_text_status">You don\'t have any task\nin this status yet</string>
 
+    <string name="toast_set_notification">Notification was created</string>
+    <string name="toast_remove_notification">Notification was removed</string>
 </resources>

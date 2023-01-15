@@ -10,27 +10,50 @@ import android.content.Intent
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationCompat.PRIORITY_DEFAULT
-
+import com.vkochenkov.taskmanager.data.TasksRepository
+import com.vkochenkov.taskmanager.data.model.Task
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
+import org.koin.java.KoinJavaComponent.inject
 
 class ShowNotificationReceiver : BroadcastReceiver() {
 
+    val repository: TasksRepository by inject(TasksRepository::class.java)
+
     companion object {
-        val CHANNEL_ID = "SAMPLE_CHANNEL"
-        val CHANNEL_NAME = "MY_NOTIFICATION"
-        val NOTIFICATION_ID = "NOTIFICATION_ID"
+        const val NOTIFICATION_ID = "NOTIFICATION_ID"
+        const val TASK_FOR_NOTIFICATION = "TASK_FOR_NOTIFICATION"
+        const val BUNDLE_FOR_NOTIFICATION = "BUNDLE_FOR_NOTIFICATION"
+        const val BUNDLE_FROM_NOTIFICATION = "BUNDLE_FROM_NOTIFICATION"
+
+        private const val CHANNEL_ID = "SAMPLE_CHANNEL"
+        private const val CHANNEL_NAME = "MY_NOTIFICATION"
     }
 
     override fun onReceive(context: Context, intent: Intent) {
 
-    //    val bundle = intent.getBundleExtra(BUNDLE)
-        val notificationId = 123
-      //  val film = bundle?.getParcelable<Film>(FILM)
+        val bundle = intent.getBundleExtra(BUNDLE_FOR_NOTIFICATION) ?: return
+        val notificationId = bundle.getInt(NOTIFICATION_ID)
+
+        val task = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            bundle.getSerializable(TASK_FOR_NOTIFICATION, Task::class.java)
+        } else {
+            @Suppress("DEPRECATION")
+            bundle.getSerializable(TASK_FOR_NOTIFICATION) as Task
+        } ?: return
 
         val intentActivity = Intent(context, MainActivity::class.java)
-      //  intentActivity.putExtra(BUNDLE, bundle)
+        intentActivity.putExtra(BUNDLE_FROM_NOTIFICATION, bundle)
+
         //set unique request code for exact film
         val contentIntent =
-            PendingIntent.getActivity(context, notificationId, intentActivity, PendingIntent.FLAG_UPDATE_CURRENT)
+            PendingIntent.getActivity(
+                context,
+                notificationId,
+                intentActivity,
+                PendingIntent.FLAG_UPDATE_CURRENT
+            )
 
         val notificationManager =
             context.getSystemService(NOTIFICATION_SERVICE) as NotificationManager
@@ -47,8 +70,8 @@ class ShowNotificationReceiver : BroadcastReceiver() {
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
             .setChannelId(CHANNEL_ID)
             .setSmallIcon(androidx.loader.R.drawable.notification_bg)
-            .setContentTitle("context.getString(R.string.notification_title_str)")
-            .setContentText("film.title")
+            .setContentTitle(task.title)
+            .setContentText(task.description ?: "без описания") //todo fix "" and move to str
             .setContentIntent(contentIntent)
             .setPriority(PRIORITY_DEFAULT)
             .setAutoCancel(true)
@@ -56,6 +79,12 @@ class ShowNotificationReceiver : BroadcastReceiver() {
 
         notificationManager.notify(notificationId, notification)
 
-        //todo remove notification from DB
+        CoroutineScope(SupervisorJob()).launch {
+            repository.saveTask(
+                task.copy(
+                    notificationTime = null
+                )
+            )
+        }
     }
 }
