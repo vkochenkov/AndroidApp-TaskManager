@@ -9,6 +9,7 @@ sealed class DetailsBodyState {
         val validationText: String? = null,
         val showDialogOnBack: Boolean = false,
         val showDialogOnDelete: Boolean = false,
+        val showDialogOnRemoveNotification: Boolean = false,
         val showTitleValidation: Boolean = false,
         val showDescriptionValidation: Boolean = false
     ) : DetailsBodyState()

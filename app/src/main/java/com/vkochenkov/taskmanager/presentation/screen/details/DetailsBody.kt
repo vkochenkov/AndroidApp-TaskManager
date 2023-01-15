@@ -1,6 +1,11 @@
 package com.vkochenkov.taskmanager.presentation.screen.details
 
+import android.app.DatePickerDialog
+import android.app.TimePickerDialog
+import android.content.Context
 import android.content.res.Configuration
+import android.widget.DatePicker
+import android.widget.TimePicker
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -30,6 +35,7 @@ import com.vkochenkov.taskmanager.presentation.components.ErrorState
 import com.vkochenkov.taskmanager.presentation.theme.TaskManagerTheme
 import com.vkochenkov.taskmanager.presentation.utils.getColor
 import com.vkochenkov.taskmanager.presentation.utils.getNameForUi
+import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -37,6 +43,7 @@ fun DetailsBody(
     state: DetailsBodyState,
     onAction: (DetailsActions) -> Unit
 ) {
+    val context = LocalContext.current
 
     BackHandler(enabled = true, onBack = {
         onAction.invoke(DetailsActions.BackPressed())
@@ -64,6 +71,27 @@ fun DetailsBody(
                         )
                     },
                     actions = {
+                        IconButton(
+                            onClick = {
+                                if (state is DetailsBodyState.Content && state.task.notificationTime != null) {
+                                    onAction.invoke(DetailsActions.RemoveNotification(showDialog = true))
+                                } else {
+                                    showPickers(context, onAction)
+                                }
+                            },
+                            content = {
+                                Icon(
+                                    painter = painterResource(
+                                        if (state is DetailsBodyState.Content && state.task.notificationTime != null) {
+                                            R.drawable.ic_baseline_notifications_active_24
+                                        } else {
+                                            R.drawable.ic_baseline_notifications_24
+                                        }
+                                    ),
+                                    contentDescription = null
+                                )
+                            }
+                        )
                         IconButton(
                             onClick = {
                                 onAction.invoke(DetailsActions.SaveTask)
@@ -97,6 +125,7 @@ fun DetailsBody(
                         state.task,
                         state.showDialogOnBack,
                         state.showDialogOnDelete,
+                        state.showDialogOnRemoveNotification,
                         state.showTitleValidation,
                         state.showDescriptionValidation,
                         onAction
@@ -116,6 +145,7 @@ private fun ContentState(
     task: Task,
     showDialogOnBack: Boolean,
     showDialogOnDelete: Boolean,
+    showDialogOnRemoveNotification: Boolean,
     showTitleValidation: Boolean,
     showDescriptionValidation: Boolean,
     onAction: (DetailsActions) -> Unit
@@ -176,6 +206,33 @@ private fun ContentState(
                         onAction.invoke(DetailsActions.CancelDeleteDialog)
                     }) {
                     Text(stringResource(R.string.details_delete_dialog_dismiss_btn))
+                }
+            }
+        )
+    }
+
+    if (showDialogOnRemoveNotification) {
+        AlertDialog(
+            onDismissRequest = {
+                onAction.invoke(DetailsActions.CancelRemoveNotificationDialog)
+            },
+            title = {
+                Text(text = stringResource(R.string.details_remove_notification_dialog_title))
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        onAction.invoke(DetailsActions.RemoveNotification(false))
+                    }) {
+                    Text(stringResource(R.string.details_remove_notification_dialog_confirm_btn))
+                }
+            },
+            dismissButton = {
+                Button(
+                    onClick = {
+                        onAction.invoke(DetailsActions.CancelRemoveNotificationDialog)
+                    }) {
+                    Text(stringResource(R.string.details_remove_notification_dialog_dismiss_btn))
                 }
             }
         )
@@ -329,6 +386,52 @@ private fun LoadingState(
     }
 }
 
+private fun showPickers(
+    context: Context,
+    onAction: (DetailsActions) -> Unit
+) {
+    val mCalendar = Calendar.getInstance()
+    var year: Int = mCalendar.get(Calendar.YEAR)
+    var month: Int = mCalendar.get(Calendar.MONTH)
+    var day: Int = mCalendar.get(Calendar.DAY_OF_MONTH)
+    var hour: Int = mCalendar.get(Calendar.HOUR_OF_DAY)
+    var minute: Int = mCalendar.get(Calendar.MINUTE)
+
+    val timePickerDialog = TimePickerDialog(
+        context,
+        { _: TimePicker, mHour: Int, mMinute: Int ->
+            hour = mHour
+            minute = mMinute
+            onAction.invoke(
+                DetailsActions.SetNotificationTime(
+                    year,
+                    month,
+                    day,
+                    hour,
+                    minute
+                )
+            )
+        },
+        hour,
+        minute,
+        true
+    )
+
+    val datePickerDialog = DatePickerDialog(
+        context,
+        { _: DatePicker, mYear: Int, mMonth: Int, mDayOfMonth: Int ->
+            year = mYear
+            month = mMonth
+            day = mDayOfMonth
+            timePickerDialog.show()
+        },
+        year,
+        month,
+        day
+    )
+    datePickerDialog.show()
+}
+
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_NO, device = Devices.PIXEL_4)
 @Composable
 fun Preview() {
@@ -342,7 +445,8 @@ fun Preview() {
                     "1 number number number number number number number number number number number number number",
                     "dddd ddd dd",
                     Task.Priority.NORMAL,
-                    Task.Status.IN_PROGRESS
+                    Task.Status.IN_PROGRESS,
+                    100500
                 )
             )
         ) {}

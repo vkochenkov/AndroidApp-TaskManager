@@ -31,7 +31,8 @@ class TasksRepository(
             priority = Task.Priority.NORMAL,
             status = Task.Status.TO_DO,
             creationDate = currentDate,
-            updateDate = currentDate
+            updateDate = currentDate,
+            notificationTime = null
         )
     }
 }

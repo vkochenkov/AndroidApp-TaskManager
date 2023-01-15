@@ -11,7 +11,8 @@ data class Task(
     val title: String,
     val description: String?,
     val priority: Priority,
-    val status: Status
+    val status: Status,
+    val notificationTime: Long?
 ) {
 
     enum class Priority {

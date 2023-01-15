@@ -224,6 +224,7 @@ fun PreviewFull() {
                         description = "dddd ddd dd",
                         priority = Task.Priority.NORMAL,
                         status = Task.Status.IN_PROGRESS,
+                        notificationTime = null
                     ),
                     Task(
                         1,
@@ -232,7 +233,8 @@ fun PreviewFull() {
                         "2 number number",
                         "dddde rere dd",
                         Task.Priority.LOW,
-                        Task.Status.IN_PROGRESS
+                        Task.Status.IN_PROGRESS,
+                        notificationTime = 100500
                     )
                 )
             )
