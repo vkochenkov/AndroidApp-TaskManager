@@ -2,7 +2,7 @@ package com.vkochenkov.taskmanager.presentation.screen.details
 
 import android.app.AlarmManager
 import android.app.PendingIntent
-import android.app.PendingIntent.FLAG_UPDATE_CURRENT
+import android.app.PendingIntent.*
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -18,12 +18,12 @@ import com.vkochenkov.taskmanager.data.model.Task
 import com.vkochenkov.taskmanager.presentation.base.BaseViewModel
 import com.vkochenkov.taskmanager.presentation.base.ShowNotificationReceiver
 import com.vkochenkov.taskmanager.presentation.base.ShowNotificationReceiver.Companion.BUNDLE_FOR_NOTIFICATION
-import com.vkochenkov.taskmanager.presentation.base.ShowNotificationReceiver.Companion.NOTIFICATION_ID
-import com.vkochenkov.taskmanager.presentation.base.ShowNotificationReceiver.Companion.TASK_FOR_NOTIFICATION
+import com.vkochenkov.taskmanager.presentation.base.ShowNotificationReceiver.Companion.TASK_ID
 import com.vkochenkov.taskmanager.presentation.navigation.Destination
 import com.vkochenkov.taskmanager.presentation.utils.isNotNull
 import kotlinx.coroutines.launch
 import java.util.*
+import kotlin.NoSuchElementException
 
 class DetailsViewModel(
     savedStateHandle: SavedStateHandle,
@@ -32,11 +32,11 @@ class DetailsViewModel(
 ) : BaseViewModel() {
 
     private val taskIdFromNav: String? = savedStateHandle[Destination.Details.argument1]
+
     // todo to think about subscription on DB
     private var currentTask: Task? = null
 
     private var showDialogOnBack: Boolean = false
-    private var showDialogOnDelete: Boolean = false
 
     private var _state: MutableState<DetailsBodyState> =
         mutableStateOf(DetailsBodyState.Loading)
@@ -67,7 +67,7 @@ class DetailsViewModel(
             viewModelScope.launch {
                 runCatching {
                     _state.value = DetailsBodyState.Loading
-                    repository.getTask(taskIdFromNav!!.toInt())
+                    repository.getTask(taskIdFromNav!!.toInt()) ?: throw NoSuchElementException()
                 }.onFailure {
                     _state.value = DetailsBodyState.Error
                 }.onSuccess {
@@ -144,8 +144,7 @@ class DetailsViewModel(
     }
 
     private fun onDeleteTask(showDialog: Boolean?) {
-        showDialog?.let { showDialogOnDelete = it }
-        if (showDialogOnDelete && currentTask != null) {
+        if (showDialog == true && currentTask != null) {
             _state.value = DetailsBodyState.Content(
                 task = currentTask!!,
                 showOnDeleteDialog = true
@@ -199,13 +198,9 @@ class DetailsViewModel(
                     task = currentTask!!,
                     showNotificationDialog = false
                 )
+                showDialogOnBack = false
             }
         }
-
-        //------------------
-
-
-        //------------------
 
         val alarmManager =
             applicationContext.getSystemService(AppCompatActivity.ALARM_SERVICE) as AlarmManager
@@ -225,7 +220,7 @@ class DetailsViewModel(
         //create instance of calendar and set date to it
         val startTime = Calendar.getInstance()
 
-        //todo use
+        //todo
         var year: Int = startTime.get(Calendar.YEAR)
         var month: Int = startTime.get(Calendar.MONTH)
         var day: Int = startTime.get(Calendar.DAY_OF_MONTH)
@@ -239,15 +234,18 @@ class DetailsViewModel(
         startTime.set(Calendar.MINUTE, minute)
         startTime.set(Calendar.SECOND, 0)
 
-        val alarmStartTime = startTime.timeInMillis
+        val alarmStartTime = startTime.timeInMillis + 10_000
 
         val alarmManager =
             applicationContext.getSystemService(AppCompatActivity.ALARM_SERVICE) as AlarmManager
 
+        //cancel previous if exists and set new
+        val pendingIntent = getAlarmPendingIntent()
+        alarmManager.cancel(pendingIntent)
         alarmManager.set(
             AlarmManager.RTC_WAKEUP,
             alarmStartTime,
-            getAlarmPendingIntent()
+            pendingIntent
         )
 
         currentTask = currentTask?.copy(
@@ -255,12 +253,18 @@ class DetailsViewModel(
         )
 
         viewModelScope.launch {
-            currentTask?.let {
-                repository.saveTask(it)
-                _state.value = DetailsBodyState.Content(
-                    task = it,
-                    showOnDeleteDialog = false
-                )
+            currentTask?.let { task ->
+                runCatching {
+                    repository.saveTask(task)
+                }.onSuccess {
+                    showDialogOnBack = false
+                    _state.value = DetailsBodyState.Content(
+                        task = task,
+                        showNotificationDialog = false
+                    )
+                }.onFailure {
+                    _state.value = DetailsBodyState.Error
+                }
             }
         }
 
@@ -272,27 +276,25 @@ class DetailsViewModel(
 
     private fun getAlarmPendingIntent(): PendingIntent {
 
-        val id = currentTask.hashCode()
+        val id = currentTask?.id ?: 0
 
         val broadcastIntent = Intent(applicationContext, ShowNotificationReceiver::class.java)
         broadcastIntent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND)
-        //create different action for receive all notifications
+        //create different action for receive notifications from all tasks
         broadcastIntent.action = id.toString()
 
         broadcastIntent.putExtra(
             BUNDLE_FOR_NOTIFICATION,
             Bundle().apply {
-                putSerializable(TASK_FOR_NOTIFICATION, currentTask)
-                putInt(NOTIFICATION_ID, id)
+                putInt(TASK_ID, id)
             }
         )
 
-        //create pending intent for alarm manager
-        return PendingIntent.getBroadcast(
+        return getBroadcast(
             applicationContext,
-            id,
+            id, // requestCode
             broadcastIntent,
-            FLAG_UPDATE_CURRENT
+            FLAG_IMMUTABLE
         )
     }
 

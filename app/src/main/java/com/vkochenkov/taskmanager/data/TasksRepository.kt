@@ -9,7 +9,7 @@ class TasksRepository(
         return dao.getAll()
     }
 
-    suspend fun getTask(id: Int): Task {
+    suspend fun getTask(id: Int): Task? {
         return dao.get(id)
     }
 

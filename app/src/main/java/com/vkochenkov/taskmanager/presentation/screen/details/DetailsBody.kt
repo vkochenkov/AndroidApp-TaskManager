@@ -202,13 +202,14 @@ private fun ContentState(
 
         // todo add UI for draw dialog
 
-
         AlertDialog(
             onDismissRequest = {
                 onAction.invoke(DetailsActions.CancelNotificationDialog)
             },
             title = {
-                Text(text = "text")
+                Text(text = "Do you want to set notification?")
+                Text(text = "pressing set and remove buttons save your current task automatically")
+
             },
             confirmButton = {
                 Button(
@@ -229,7 +230,7 @@ private fun ContentState(
 
                 Button(
                     onClick = {
-                        // todo get from fields
+                        // todo get date from fields
                         onAction.invoke(DetailsActions.SetNotification(100500))
                     }) {
                     Text("set")
