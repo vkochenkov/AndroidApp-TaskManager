@@ -220,7 +220,7 @@ class DetailsViewModel(
         //create instance of calendar and set date to it
         val startTime = Calendar.getInstance()
 
-        //todo
+        //todo after create data picker
         var year: Int = startTime.get(Calendar.YEAR)
         var month: Int = startTime.get(Calendar.MONTH)
         var day: Int = startTime.get(Calendar.DAY_OF_MONTH)
@@ -275,24 +275,23 @@ class DetailsViewModel(
     }
 
     private fun getAlarmPendingIntent(): PendingIntent {
-
-        val id = currentTask?.id ?: 0
+        val taskId = currentTask?.id ?: 0
 
         val broadcastIntent = Intent(applicationContext, ShowNotificationReceiver::class.java)
         broadcastIntent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND)
         //create different action for receive notifications from all tasks
-        broadcastIntent.action = id.toString()
+        broadcastIntent.action = taskId.toString()
 
         broadcastIntent.putExtra(
             BUNDLE_FOR_NOTIFICATION,
             Bundle().apply {
-                putInt(TASK_ID, id)
+                putInt(TASK_ID, taskId)
             }
         )
 
         return getBroadcast(
             applicationContext,
-            id, // requestCode
+            taskId, // requestCode
             broadcastIntent,
             FLAG_IMMUTABLE
         )
