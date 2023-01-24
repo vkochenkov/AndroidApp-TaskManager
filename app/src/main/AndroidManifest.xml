@@ -34,7 +34,7 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data
-                    android:host="vkochenkov.task_manager"
+                    android:host="${hostName}"
                     android:scheme="https" />
             </intent-filter>
 

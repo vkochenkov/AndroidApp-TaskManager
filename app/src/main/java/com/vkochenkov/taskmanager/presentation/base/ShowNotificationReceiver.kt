@@ -16,6 +16,7 @@ import androidx.core.net.toUri
 import com.vkochenkov.taskmanager.data.TasksRepository
 import com.vkochenkov.taskmanager.data.model.Task
 import com.vkochenkov.taskmanager.presentation.navigation.Destination
+import com.vkochenkov.taskmanager.presentation.navigation.buildDeeplink
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
@@ -54,12 +55,10 @@ class ShowNotificationReceiver : BroadcastReceiver() {
             )
         }
 
-        //todo to save into constants gradle
         val intentActivity = Intent(
             Intent.ACTION_VIEW,
-            "https://vkochenkov.task_manager/${Destination.Details.passArguments(taskId.toString())}".toUri()
+            buildDeeplink(Destination.Details.passArguments(taskId.toString())).toUri()
         )
-
 
         val contentIntent: PendingIntent = TaskStackBuilder.create(context).run {
             addNextIntentWithParentStack(intentActivity)

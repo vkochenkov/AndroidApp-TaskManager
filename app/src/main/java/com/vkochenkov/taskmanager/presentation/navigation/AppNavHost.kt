@@ -31,8 +31,9 @@ fun AppNavHost(
                 type = NavType.StringType
                 nullable = true
             }),
-            //todo to save into constants gradle
-            deepLinks = listOf(navDeepLink { uriPattern = "https://vkochenkov.task_manager/${Destination.Details.routeWithArgs}" })
+            deepLinks = listOf(navDeepLink {
+                uriPattern = buildDeeplink(Destination.Details.routeWithArgs)
+            })
         ) {
             DetailsScreen(navController)
         }

@@ -220,7 +220,7 @@ class DetailsViewModel(
         //create instance of calendar and set date to it
         val startTime = Calendar.getInstance()
 
-        //todo after create data picker
+        // todo after create data picker
         var year: Int = startTime.get(Calendar.YEAR)
         var month: Int = startTime.get(Calendar.MONTH)
         var day: Int = startTime.get(Calendar.DAY_OF_MONTH)
