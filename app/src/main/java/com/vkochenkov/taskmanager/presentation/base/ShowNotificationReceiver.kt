@@ -12,6 +12,7 @@ import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationCompat.PRIORITY_DEFAULT
 import androidx.core.net.toUri
+import com.vkochenkov.taskmanager.R
 import com.vkochenkov.taskmanager.data.TasksRepository
 import com.vkochenkov.taskmanager.data.model.Task
 import com.vkochenkov.taskmanager.presentation.navigation.Destination
@@ -52,9 +53,8 @@ class ShowNotificationReceiver : BroadcastReceiver() {
             )
         }
 
-        // todo research why open browser
         val intentActivity = Intent(
-            Intent.ACTION_VIEW,
+            "com.vkochenkov.taskmanager.OPEN_TASK",
             buildDeeplink(Destination.Details.passArguments(taskId.toString())).toUri()
         )
 
@@ -77,7 +77,7 @@ class ShowNotificationReceiver : BroadcastReceiver() {
 
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
             .setChannelId(CHANNEL_ID)
-            .setSmallIcon(androidx.loader.R.drawable.notification_bg) // todo change icon
+            .setSmallIcon(R.drawable.ic_baseline_notifications_active_24)
             .setContentTitle(task.title)
             .setContentText(task.description)
             .setContentIntent(contentIntent)
@@ -85,7 +85,7 @@ class ShowNotificationReceiver : BroadcastReceiver() {
             .setAutoCancel(true)
             .build()
 
-        val notificationId = (Calendar.getInstance().timeInMillis / 1000).toInt()
+        val notificationId = (Calendar.getInstance().timeInMillis / 1000).toInt() // create unic id
         notificationManager.notify(notificationId, notification)
 
         CoroutineScope(SupervisorJob()).launch {
