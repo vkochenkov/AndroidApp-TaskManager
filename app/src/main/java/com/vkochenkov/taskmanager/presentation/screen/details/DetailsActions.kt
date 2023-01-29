@@ -21,7 +21,8 @@ sealed class DetailsActions {
     object CancelNotificationDialog : DetailsActions()
 
     data class SetNotification(
-        val date: Long
+        val time: String,
+        val date: String
     ) : DetailsActions()
 
     object RemoveNotification : DetailsActions()

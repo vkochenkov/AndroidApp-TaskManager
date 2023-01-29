@@ -9,7 +9,6 @@ import android.content.Context
 import android.content.Context.NOTIFICATION_SERVICE
 import android.content.Intent
 import android.os.Build
-import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationCompat.PRIORITY_DEFAULT
 import androidx.core.net.toUri
@@ -41,8 +40,6 @@ class ShowNotificationReceiver : BroadcastReceiver() {
         val bundle = intent.getBundleExtra(BUNDLE_FOR_NOTIFICATION) ?: return
         val taskId = bundle.getInt(TASK_ID)
 
-        Log.d("vladd", "ShowNotificationReceiver taskId = $taskId")
-
         val task: Task = runBlocking {
             repository.getTask(taskId)
         } ?: return
@@ -68,8 +65,8 @@ class ShowNotificationReceiver : BroadcastReceiver() {
         val notificationManager =
             context.getSystemService(NOTIFICATION_SERVICE) as NotificationManager
 
+        // for api 26 and above
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            //for api 26 and above
             val channelName = CHANNEL_NAME
             val importance = NotificationManager.IMPORTANCE_DEFAULT
             val channel = NotificationChannel(CHANNEL_ID, channelName, importance)

@@ -31,6 +31,9 @@ class DetailsViewModel(
     private val applicationContext: Context
 ) : BaseViewModel() {
 
+    private val alarmManager =
+        applicationContext.getSystemService(AppCompatActivity.ALARM_SERVICE) as AlarmManager
+
     private val taskIdFromNav: String? = savedStateHandle[Destination.Details.argument1]
 
     // todo to think about subscription on DB
@@ -54,7 +57,7 @@ class DetailsViewModel(
             is DetailsActions.CancelNotificationDialog -> onCancelNotificationDialog()
             is DetailsActions.ShowNotificationDialog -> onShowNotificationDialog()
             is DetailsActions.RemoveNotification -> onRemoveNotification()
-            is DetailsActions.SetNotification -> onSetNotification(action.date)
+            is DetailsActions.SetNotification -> onSetNotification(action.time, action.date)
         }
     }
 
@@ -150,6 +153,9 @@ class DetailsViewModel(
                 showOnDeleteDialog = true
             )
         } else {
+            // cancel notification if exists
+            alarmManager.cancel(getAlarmPendingIntent())
+
             viewModelScope.launch {
                 runCatching {
                     currentTask?.let {
@@ -202,44 +208,66 @@ class DetailsViewModel(
             }
         }
 
-        val alarmManager =
-            applicationContext.getSystemService(AppCompatActivity.ALARM_SERVICE) as AlarmManager
-
         alarmManager.cancel(getAlarmPendingIntent())
 
-        applicationContext.let {
-            Toast.makeText(it, it.getString(R.string.toast_remove_notification), Toast.LENGTH_LONG)
-                .show()
-        }
+        showToast(R.string.toast_remove_notification)
     }
 
     private fun onSetNotification(
-        date: Long
+        time: String,
+        date: String
     ) {
+        val calendarForNotification = Calendar.getInstance()
 
-        //create instance of calendar and set date to it
-        val startTime = Calendar.getInstance()
+        when {
+            time.isEmpty() -> {
+                showToast(R.string.toast_empty_time)
+                return
+            }
+            date.isEmpty() -> {
+                showToast(R.string.toast_empty_date)
+                return
+            }
+            !time.matches("[0-2][0-9]:[0-5][0-9]".toRegex()) -> {
+                showToast(R.string.toast_wrong_time)
+                return
+            }
+            !date.matches("[0-3][0-9].[0-1][0-9].[0-9][0-9][0-9][0-9]".toRegex()) -> {
+                showToast(R.string.toast_wrong_date)
+                return
+            }
+        }
 
-        // todo after create data picker
-        var year: Int = startTime.get(Calendar.YEAR)
-        var month: Int = startTime.get(Calendar.MONTH)
-        var day: Int = startTime.get(Calendar.DAY_OF_MONTH)
-        var hour: Int = startTime.get(Calendar.HOUR_OF_DAY)
-        var minute: Int = startTime.get(Calendar.MINUTE)
+        try {
+            val t = time.split(":")
+            val d = date.split(".")
 
-        startTime.set(Calendar.YEAR, year)
-        startTime.set(Calendar.MONTH, month)
-        startTime.set(Calendar.DAY_OF_MONTH, day)
-        startTime.set(Calendar.HOUR_OF_DAY, hour)
-        startTime.set(Calendar.MINUTE, minute)
-        startTime.set(Calendar.SECOND, 0)
+            val nYear = d[2].toInt()
+            val nMonth = d[1].toInt() - 1 // calendar's month starts from 0
+            val nDay = d[0].toInt()
+            val nHour = t[0].toInt()
+            val nMinute = t[1].toInt()
 
-        val alarmStartTime = startTime.timeInMillis + 10_000
+            calendarForNotification.set(Calendar.YEAR, nYear)
+            calendarForNotification.set(Calendar.MONTH, nMonth)
+            calendarForNotification.set(Calendar.DAY_OF_MONTH, nDay)
+            calendarForNotification.set(Calendar.HOUR_OF_DAY, nHour)
+            calendarForNotification.set(Calendar.MINUTE, nMinute)
+            calendarForNotification.set(Calendar.SECOND, 0)
 
-        val alarmManager =
-            applicationContext.getSystemService(AppCompatActivity.ALARM_SERVICE) as AlarmManager
+        } catch (ex: Exception) {
+            showToast(R.string.toast_ex)
+            return
+        }
 
-        //cancel previous if exists and set new
+        val alarmStartTime = calendarForNotification.timeInMillis
+
+        if (alarmStartTime < System.currentTimeMillis()) {
+            showToast(R.string.toast_past)
+            return
+        }
+
+        // cancel previous if exists and set new
         val pendingIntent = getAlarmPendingIntent()
         alarmManager.cancel(pendingIntent)
         alarmManager.set(
@@ -268,10 +296,7 @@ class DetailsViewModel(
             }
         }
 
-        applicationContext.let {
-            Toast.makeText(it, it.getString(R.string.toast_set_notification), Toast.LENGTH_LONG)
-                .show()
-        }
+        showToast(R.string.toast_set_notification)
     }
 
     private fun getAlarmPendingIntent(): PendingIntent {
@@ -295,6 +320,13 @@ class DetailsViewModel(
             broadcastIntent,
             FLAG_IMMUTABLE
         )
+    }
+
+    private fun showToast(stringRes: Int) {
+        applicationContext.let {
+            Toast.makeText(it, it.getString(stringRes), Toast.LENGTH_LONG)
+                .show()
+        }
     }
 
     companion object {

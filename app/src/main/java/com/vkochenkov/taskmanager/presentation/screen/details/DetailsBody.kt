@@ -29,6 +29,8 @@ import com.vkochenkov.taskmanager.data.model.Task
 import com.vkochenkov.taskmanager.presentation.components.ErrorState
 import com.vkochenkov.taskmanager.presentation.theme.TaskManagerTheme
 import com.vkochenkov.taskmanager.presentation.utils.getColor
+import com.vkochenkov.taskmanager.presentation.utils.getFormattedNotificationDate
+import com.vkochenkov.taskmanager.presentation.utils.getFormattedNotificationTime
 import com.vkochenkov.taskmanager.presentation.utils.getNameForUi
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -158,7 +160,7 @@ private fun ContentState(
                     onClick = {
                         onAction.invoke(DetailsActions.BackPressed(false))
                     }) {
-                    Text(stringResource(R.string.details_save_dialog_dismiss_btn))
+                    Text(stringResource(R.string.details_save_dialog_btn_dismiss))
                 }
 
                 Button(
@@ -166,7 +168,7 @@ private fun ContentState(
                         onAction.invoke(DetailsActions.SaveTask)
                     }
                 ) {
-                    Text(stringResource(R.string.details_save_dialog_confirm_btn))
+                    Text(stringResource(R.string.details_save_dialog_btn_confirm))
                 }
             }
         )
@@ -185,14 +187,14 @@ private fun ContentState(
                     onClick = {
                         onAction.invoke(DetailsActions.CancelDeleteDialog)
                     }) {
-                    Text(stringResource(R.string.details_delete_dialog_dismiss_btn))
+                    Text(stringResource(R.string.details_delete_dialog_btn_dismiss))
                 }
 
                 Button(
                     onClick = {
                         onAction.invoke(DetailsActions.DeleteTask(false))
                     }) {
-                    Text(stringResource(R.string.details_delete_dialog_confirm_btn))
+                    Text(stringResource(R.string.details_delete_dialog_btn_confirm))
                 }
             }
         )
@@ -200,23 +202,51 @@ private fun ContentState(
 
     if (showNotificationDialog) {
 
-        // todo add UI for draw dialog
+        var notificationTime by remember { mutableStateOf(task.getFormattedNotificationTime()) }
+        var notificationDate by remember { mutableStateOf(task.getFormattedNotificationDate()) }
 
         AlertDialog(
             onDismissRequest = {
                 onAction.invoke(DetailsActions.CancelNotificationDialog)
             },
             title = {
-                Text(text = "Do you want to set notification?")
-                Text(text = "pressing set and remove buttons save your current task automatically")
+                Text(text = stringResource(R.string.details_notification_dialog_title))
+            },
+            text = {
+                Column() {
+                    OutlinedTextField(
+                        label = {
+                            Text(
+                                text = stringResource(R.string.details_notification_dialog_time_field_label)
+                            )
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        value = notificationTime,
+                        onValueChange = {
+                            notificationTime = it
+                        }
+                    )
 
+                    OutlinedTextField(
+                        label = {
+                            Text(
+                                text = stringResource(R.string.details_notification_dialog_date_field_label)
+                            )
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        value = notificationDate,
+                        onValueChange = {
+                            notificationDate = it
+                        }
+                    )
+                }
             },
             confirmButton = {
                 Button(
                     onClick = {
                         onAction.invoke(DetailsActions.CancelNotificationDialog)
                     }) {
-                    Text("cancel")
+                    Text(stringResource(R.string.details_notification_dialog_btn_cancel))
                 }
 
                 if (task.notificationTime != null) {
@@ -224,16 +254,15 @@ private fun ContentState(
                         onClick = {
                             onAction.invoke(DetailsActions.RemoveNotification)
                         }) {
-                        Text("remove")
+                        Text(stringResource(R.string.details_notification_dialog_btn_remove))
                     }
                 }
 
                 Button(
                     onClick = {
-                        // todo get date from fields
-                        onAction.invoke(DetailsActions.SetNotification(100500))
+                        onAction.invoke(DetailsActions.SetNotification(notificationTime, notificationDate))
                     }) {
-                    Text("set")
+                    Text(stringResource(R.string.details_notification_dialog_btn_set))
                 }
             }
         )

@@ -14,16 +14,19 @@
     <string name="details_status">"Status: "</string>
 
     <string name="details_delete_dialog_title">Do you want to delete this task?</string>
-    <string name="details_delete_dialog_confirm_btn">Delete</string>
-    <string name="details_delete_dialog_dismiss_btn">No</string>
+    <string name="details_delete_dialog_btn_confirm">Delete</string>
+    <string name="details_delete_dialog_btn_dismiss">No</string>
 
     <string name="details_save_dialog_title">Do you want to save changes?</string>
-    <string name="details_save_dialog_confirm_btn">Save</string>
-    <string name="details_save_dialog_dismiss_btn">No</string>
+    <string name="details_save_dialog_btn_confirm">Save</string>
+    <string name="details_save_dialog_btn_dismiss">No</string>
 
-    <string name="details_remove_notification_dialog_title">Do you want to remove notification about this task?</string>
-    <string name="details_remove_notification_dialog_confirm_btn">Remove</string>
-    <string name="details_remove_notification_dialog_dismiss_btn">No</string>
+    <string name="details_notification_dialog_title">Do you want to set notification?</string>
+    <string name="details_notification_dialog_btn_set">Set</string>
+    <string name="details_notification_dialog_btn_remove">Remove</string>
+    <string name="details_notification_dialog_btn_cancel">Cancel</string>
+    <string name="details_notification_dialog_time_field_label">hh:mm</string>
+    <string name="details_notification_dialog_date_field_label">dd.mm.yyyy</string>
 
     <string name="main_error_text">Something went wrong. Please, reopen application</string>
     <string name="main_empty_text">You have no tasks</string>
@@ -31,4 +34,10 @@
 
     <string name="toast_set_notification">Notification was created</string>
     <string name="toast_remove_notification">Notification was removed</string>
+    <string name="toast_past">Time in the past!</string>
+    <string name="toast_ex">Something went wrong!</string>
+    <string name="toast_wrong_date">Wrong date format</string>
+    <string name="toast_wrong_time">Wrong time format</string>
+    <string name="toast_empty_date">Date is empty!</string>
+    <string name="toast_empty_time">Time is empty!</string>
 </resources>
