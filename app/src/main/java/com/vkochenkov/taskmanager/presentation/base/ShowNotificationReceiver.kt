@@ -52,6 +52,7 @@ class ShowNotificationReceiver : BroadcastReceiver() {
             )
         }
 
+        // todo research why open browser
         val intentActivity = Intent(
             Intent.ACTION_VIEW,
             buildDeeplink(Destination.Details.passArguments(taskId.toString())).toUri()
@@ -59,7 +60,7 @@ class ShowNotificationReceiver : BroadcastReceiver() {
 
         val contentIntent: PendingIntent = TaskStackBuilder.create(context).run {
             addNextIntentWithParentStack(intentActivity)
-            getPendingIntent(taskId, PendingIntent.FLAG_UPDATE_CURRENT)
+            getPendingIntent(taskId, PendingIntent.FLAG_IMMUTABLE)
         }
 
         val notificationManager =
@@ -76,7 +77,7 @@ class ShowNotificationReceiver : BroadcastReceiver() {
 
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
             .setChannelId(CHANNEL_ID)
-            .setSmallIcon(androidx.loader.R.drawable.notification_bg)
+            .setSmallIcon(androidx.loader.R.drawable.notification_bg) // todo change icon
             .setContentTitle(task.title)
             .setContentText(task.description)
             .setContentIntent(contentIntent)
