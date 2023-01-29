@@ -41,7 +41,8 @@ val appModule = module {
     viewModel {
         DetailsViewModel(
             savedStateHandle = get(),
-            repository = get()
+            repository = get(),
+            applicationContext = androidContext()
         )
     }
 }

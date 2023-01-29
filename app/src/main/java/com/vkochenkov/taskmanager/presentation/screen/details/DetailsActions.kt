@@ -16,4 +16,15 @@ sealed class DetailsActions {
 
     object CancelDeleteDialog : DetailsActions()
 
+    object ShowNotificationDialog : DetailsActions()
+
+    object CancelNotificationDialog : DetailsActions()
+
+    data class SetNotification(
+        val time: String,
+        val date: String
+    ) : DetailsActions()
+
+    object RemoveNotification : DetailsActions()
+
 }

@@ -1,6 +1,8 @@
 package com.vkochenkov.taskmanager.presentation.navigation
 
-sealed class Destination: Route {
+import com.vkochenkov.taskmanager.BuildConfig
+
+sealed class Destination : Route {
 
     object Main : Destination() {
 
@@ -15,6 +17,10 @@ sealed class Destination: Route {
     }
 }
 
+fun buildDeeplink(route: String): String {
+    return "https://${BuildConfig.APPLICATION_ID}/$route"
+}
+
 interface Route {
 
     val route: String
@@ -24,9 +30,15 @@ interface RouteWith1Arg : Route {
 
     val argument1: String?
 
+    /**
+     * Use for route in AppNavHost
+     */
     val routeWithArgs: String
         get() = "$route?$argument1={$argument1}"
 
+    /**
+     * Use inside navController.navigate()
+     */
     fun passArguments(arg1: String?): String {
         return "$route?$argument1=$arg1"
     }

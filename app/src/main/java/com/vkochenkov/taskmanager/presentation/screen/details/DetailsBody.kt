@@ -29,6 +29,8 @@ import com.vkochenkov.taskmanager.data.model.Task
 import com.vkochenkov.taskmanager.presentation.components.ErrorState
 import com.vkochenkov.taskmanager.presentation.theme.TaskManagerTheme
 import com.vkochenkov.taskmanager.presentation.utils.getColor
+import com.vkochenkov.taskmanager.presentation.utils.getFormattedNotificationDate
+import com.vkochenkov.taskmanager.presentation.utils.getFormattedNotificationTime
 import com.vkochenkov.taskmanager.presentation.utils.getNameForUi
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -66,6 +68,23 @@ fun DetailsBody(
                     actions = {
                         IconButton(
                             onClick = {
+                                onAction.invoke(DetailsActions.ShowNotificationDialog)
+                            },
+                            content = {
+                                Icon(
+                                    painter = painterResource(
+                                        if (state is DetailsBodyState.Content && state.task.notificationTime != null) {
+                                            R.drawable.ic_baseline_notifications_active_24
+                                        } else {
+                                            R.drawable.ic_baseline_notifications_24
+                                        }
+                                    ),
+                                    contentDescription = null
+                                )
+                            }
+                        )
+                        IconButton(
+                            onClick = {
                                 onAction.invoke(DetailsActions.SaveTask)
                             },
                             content = {
@@ -95,8 +114,9 @@ fun DetailsBody(
                     ContentState(
                         padding,
                         state.task,
-                        state.showDialogOnBack,
-                        state.showDialogOnDelete,
+                        state.showOnBackDialog,
+                        state.showOnDeleteDialog,
+                        state.showNotificationDialog,
                         state.showTitleValidation,
                         state.showDescriptionValidation,
                         onAction
@@ -114,8 +134,9 @@ fun DetailsBody(
 private fun ContentState(
     padding: PaddingValues,
     task: Task,
-    showDialogOnBack: Boolean,
-    showDialogOnDelete: Boolean,
+    showOnBackDialog: Boolean,
+    showOnDeleteDialog: Boolean,
+    showNotificationDialog: Boolean,
     showTitleValidation: Boolean,
     showDescriptionValidation: Boolean,
     onAction: (DetailsActions) -> Unit
@@ -126,7 +147,7 @@ private fun ContentState(
     var title by remember { mutableStateOf(task.title) }
     var description by remember { mutableStateOf(task.description ?: "") }
 
-    if (showDialogOnBack) {
+    if (showOnBackDialog) {
         AlertDialog(
             onDismissRequest = {
                 onAction.invoke(DetailsActions.CancelBackDialog)
@@ -137,24 +158,23 @@ private fun ContentState(
             confirmButton = {
                 Button(
                     onClick = {
+                        onAction.invoke(DetailsActions.BackPressed(false))
+                    }) {
+                    Text(stringResource(R.string.details_save_dialog_btn_dismiss))
+                }
+
+                Button(
+                    onClick = {
                         onAction.invoke(DetailsActions.SaveTask)
                     }
                 ) {
-                    Text(stringResource(R.string.details_save_dialog_confirm_btn))
-                }
-            },
-            dismissButton = {
-                Button(
-                    onClick = {
-                        onAction.invoke(DetailsActions.BackPressed(false))
-                    }) {
-                    Text(stringResource(R.string.details_save_dialog_dismiss_btn))
+                    Text(stringResource(R.string.details_save_dialog_btn_confirm))
                 }
             }
         )
     }
 
-    if (showDialogOnDelete) {
+    if (showOnDeleteDialog) {
         AlertDialog(
             onDismissRequest = {
                 onAction.invoke(DetailsActions.CancelDeleteDialog)
@@ -165,17 +185,84 @@ private fun ContentState(
             confirmButton = {
                 Button(
                     onClick = {
-                        onAction.invoke(DetailsActions.DeleteTask(false))
-                    }) {
-                    Text(stringResource(R.string.details_delete_dialog_confirm_btn))
-                }
-            },
-            dismissButton = {
-                Button(
-                    onClick = {
                         onAction.invoke(DetailsActions.CancelDeleteDialog)
                     }) {
-                    Text(stringResource(R.string.details_delete_dialog_dismiss_btn))
+                    Text(stringResource(R.string.details_delete_dialog_btn_dismiss))
+                }
+
+                Button(
+                    onClick = {
+                        onAction.invoke(DetailsActions.DeleteTask(false))
+                    }) {
+                    Text(stringResource(R.string.details_delete_dialog_btn_confirm))
+                }
+            }
+        )
+    }
+
+    if (showNotificationDialog) {
+
+        var notificationTime by remember { mutableStateOf(task.getFormattedNotificationTime()) }
+        var notificationDate by remember { mutableStateOf(task.getFormattedNotificationDate()) }
+
+        AlertDialog(
+            onDismissRequest = {
+                onAction.invoke(DetailsActions.CancelNotificationDialog)
+            },
+            title = {
+                Text(text = stringResource(R.string.details_notification_dialog_title))
+            },
+            text = {
+                Column() {
+                    OutlinedTextField(
+                        label = {
+                            Text(
+                                text = stringResource(R.string.details_notification_dialog_time_field_label)
+                            )
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        value = notificationTime,
+                        onValueChange = {
+                            notificationTime = it
+                        }
+                    )
+
+                    OutlinedTextField(
+                        label = {
+                            Text(
+                                text = stringResource(R.string.details_notification_dialog_date_field_label)
+                            )
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        value = notificationDate,
+                        onValueChange = {
+                            notificationDate = it
+                        }
+                    )
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        onAction.invoke(DetailsActions.CancelNotificationDialog)
+                    }) {
+                    Text(stringResource(R.string.details_notification_dialog_btn_cancel))
+                }
+
+                if (task.notificationTime != null) {
+                    Button(
+                        onClick = {
+                            onAction.invoke(DetailsActions.RemoveNotification)
+                        }) {
+                        Text(stringResource(R.string.details_notification_dialog_btn_remove))
+                    }
+                }
+
+                Button(
+                    onClick = {
+                        onAction.invoke(DetailsActions.SetNotification(notificationTime, notificationDate))
+                    }) {
+                    Text(stringResource(R.string.details_notification_dialog_btn_set))
                 }
             }
         )
@@ -342,7 +429,8 @@ fun Preview() {
                     "1 number number number number number number number number number number number number number",
                     "dddd ddd dd",
                     Task.Priority.NORMAL,
-                    Task.Status.IN_PROGRESS
+                    Task.Status.IN_PROGRESS,
+                    100500
                 )
             )
         ) {}

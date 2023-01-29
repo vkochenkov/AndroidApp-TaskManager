@@ -9,7 +9,7 @@ class TasksRepository(
         return dao.getAll()
     }
 
-    suspend fun getTask(id: Int): Task {
+    suspend fun getTask(id: Int): Task? {
         return dao.get(id)
     }
 
@@ -31,7 +31,8 @@ class TasksRepository(
             priority = Task.Priority.NORMAL,
             status = Task.Status.TO_DO,
             creationDate = currentDate,
-            updateDate = currentDate
+            updateDate = currentDate,
+            notificationTime = null
         )
     }
 }
