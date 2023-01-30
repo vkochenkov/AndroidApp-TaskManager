@@ -17,7 +17,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Devices
@@ -294,7 +293,9 @@ private fun ContentState(
                     title = it
                     onAction.invoke(DetailsActions.TaskChanged(task.copy(title = it)))
                 })
+        }
 
+        item {
             Spacer(modifier = Modifier.size(8.dp))
         }
 
@@ -314,8 +315,10 @@ private fun ContentState(
                     onAction.invoke(DetailsActions.TaskChanged(task.copy(description = it)))
                 }
             )
+        }
 
-            Spacer(modifier = Modifier.size(8.dp))
+        item {
+            Spacer(modifier = Modifier.size(16.dp))
         }
 
         item {
@@ -342,26 +345,28 @@ private fun ContentState(
                             .background(color = task.priority.getColor(), shape = CircleShape)
                     )
                 }
-            }
 
-            DropdownMenu(
-                expanded = priorityDropDownIsExpanded,
-                onDismissRequest = { priorityDropDownIsExpanded = false }
-            ) {
-                Task.Priority.values().forEach { item ->
-                    DropdownMenuItem(
-                        onClick = {
-                            onAction.invoke(DetailsActions.TaskChanged(task.copy(priority = item)))
-                            priorityDropDownIsExpanded = false
-                        },
-                        interactionSource = MutableInteractionSource(),
-                        text = {
-                            Text(text = item.getNameForUi())
-                        }
-                    )
+                DropdownMenu(
+                    expanded = priorityDropDownIsExpanded,
+                    onDismissRequest = { priorityDropDownIsExpanded = false }
+                ) {
+                    Task.Priority.values().forEach { item ->
+                        DropdownMenuItem(
+                            onClick = {
+                                onAction.invoke(DetailsActions.TaskChanged(task.copy(priority = item)))
+                                priorityDropDownIsExpanded = false
+                            },
+                            interactionSource = MutableInteractionSource(),
+                            text = {
+                                Text(text = item.getNameForUi())
+                            }
+                        )
+                    }
                 }
             }
+        }
 
+        item {
             Spacer(modifier = Modifier.size(8.dp))
         }
 
@@ -377,27 +382,25 @@ private fun ContentState(
                     text = stringResource(R.string.details_status) + task.status.getNameForUi(),
                     fontSize = 14.sp
                 )
-            }
 
-            DropdownMenu(
-                expanded = statusDropDownIsExpanded,
-                onDismissRequest = { statusDropDownIsExpanded = false }
-            ) {
-                Task.Status.values().forEach { status ->
-                    DropdownMenuItem(
-                        onClick = {
-                            onAction.invoke(DetailsActions.TaskChanged(task.copy(status = status)))
-                            statusDropDownIsExpanded = false
-                        },
-                        interactionSource = MutableInteractionSource(),
-                        text = {
-                            Text(text = status.getNameForUi())
-                        }
-                    )
+                DropdownMenu(
+                    expanded = statusDropDownIsExpanded,
+                    onDismissRequest = { statusDropDownIsExpanded = false }
+                ) {
+                    Task.Status.values().forEach { status ->
+                        DropdownMenuItem(
+                            onClick = {
+                                onAction.invoke(DetailsActions.TaskChanged(task.copy(status = status)))
+                                statusDropDownIsExpanded = false
+                            },
+                            interactionSource = MutableInteractionSource(),
+                            text = {
+                                Text(text = status.getNameForUi())
+                            }
+                        )
+                    }
                 }
             }
-
-            Spacer(modifier = Modifier.size(8.dp))
         }
     }
 }
