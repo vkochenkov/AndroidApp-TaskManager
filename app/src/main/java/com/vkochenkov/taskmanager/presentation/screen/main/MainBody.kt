@@ -1,10 +1,8 @@
 package com.vkochenkov.taskmanager.presentation.screen.main
 
 import android.content.res.Configuration
-import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
@@ -12,9 +10,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Devices
@@ -59,7 +55,12 @@ fun MainBody(
             }
         ) { padding ->
             when (state) {
-                is MainBodyState.Content -> ContentState(padding, state.tasksList, pagerState, onAction)
+                is MainBodyState.Content -> ContentState(
+                    padding,
+                    state.tasksList,
+                    pagerState,
+                    onAction
+                )
                 is MainBodyState.Empty -> ErrorState(
                     padding = padding,
                     text = stringResource(id = R.string.main_empty_text)
@@ -157,55 +158,22 @@ private fun TaskCard(
     task: Task,
     onAction: (MainActions) -> Unit
 ) {
-    val minClickableCardSize = 48.dp
-    val cardHeight = remember { mutableStateOf(minClickableCardSize) }
-    val localDensity = LocalDensity.current
-
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .defaultMinSize(minHeight = minClickableCardSize),
+            .defaultMinSize(minHeight = 48.dp),
         onClick = {
             onAction.invoke(MainActions.OpenDetails(task.id))
-        }
+        },
+        colors = CardDefaults.cardColors(task.priority.getColor())
     ) {
-        Box {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End
-            ) {
-                Box(
-                    modifier = Modifier
-                        .width(16.dp)
-                        .height(cardHeight.value)
-                        .background(
-                            color = task.priority.getColor(), shape = RoundedCornerShape(
-                                topStart = 0.dp,
-                                bottomStart = 0.dp
-                            )
-                        )
-                )
-            }
-            Column(
-                modifier = Modifier
-                    .padding(start = 10.dp, end = 16.dp)
-                    .fillMaxWidth()
-                    .onGloballyPositioned {
-                        val newSize = with(localDensity) { it.size.height.toDp() }
-                        cardHeight.value =
-                            if (newSize > minClickableCardSize) newSize else minClickableCardSize
-                    },
-            ) {
-                Spacer(modifier = Modifier.size(8.dp))
-                Text(
-                    text = task.title,
-                    fontSize = 18.sp,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Spacer(modifier = Modifier.size(8.dp))
-            }
-        }
+        Text(
+            modifier = Modifier.padding(16.dp),
+            text = task.title,
+            fontSize = 18.sp,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis
+        )
     }
 }
 
@@ -249,6 +217,25 @@ fun PreviewEmpty() {
         MainBody(
             MainBodyState.Content(
                 listOf()
+            )
+        ) {}
+    }
+}
+
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_NO, device = Devices.PIXEL_4)
+@Composable
+fun PreviewTaskCard() {
+    TaskManagerTheme {
+        TaskCard(
+            task = Task(
+                id = 0,
+                creationDate = System.currentTimeMillis().toString(),
+                updateDate = System.currentTimeMillis().toString(),
+                title = "1 number number number number number number number number number number number number number",
+                description = "dddd ddd dd",
+                priority = Task.Priority.NORMAL,
+                status = Task.Status.IN_PROGRESS,
+                notificationTime = null
             )
         ) {}
     }
