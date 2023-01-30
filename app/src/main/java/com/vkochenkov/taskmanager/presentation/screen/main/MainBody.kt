@@ -98,7 +98,7 @@ private fun ContentState(
                     }
                 ) {
                     Spacer(modifier = Modifier.size(16.dp))
-                    Text(text = status.getNameForUi(LocalContext.current))
+                    Text(text = status.getNameForUi())
                     Spacer(modifier = Modifier.size(8.dp))
                 }
             }

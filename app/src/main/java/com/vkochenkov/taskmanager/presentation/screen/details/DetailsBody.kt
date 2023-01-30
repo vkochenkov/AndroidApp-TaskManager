@@ -260,7 +260,12 @@ private fun ContentState(
 
                 Button(
                     onClick = {
-                        onAction.invoke(DetailsActions.SetNotification(notificationTime, notificationDate))
+                        onAction.invoke(
+                            DetailsActions.SetNotification(
+                                notificationTime,
+                                notificationDate
+                            )
+                        )
                     }) {
                     Text(stringResource(R.string.details_notification_dialog_btn_set))
                 }
@@ -326,7 +331,7 @@ private fun ContentState(
                     horizontalArrangement = Arrangement.End
                 ) {
                     Text(
-                        text = stringResource(R.string.details_priority) + task.priority.toString(),
+                        text = stringResource(R.string.details_priority) + task.priority.getNameForUi(),
                         fontSize = 14.sp
                     )
                     Spacer(modifier = Modifier.size(4.dp))
@@ -351,7 +356,7 @@ private fun ContentState(
                         },
                         interactionSource = MutableInteractionSource(),
                         text = {
-                            Text(text = item.toString())
+                            Text(text = item.getNameForUi())
                         }
                     )
                 }
@@ -369,9 +374,7 @@ private fun ContentState(
                 .padding(vertical = 8.dp)
             ) {
                 Text(
-                    text = stringResource(R.string.details_status) + task.status.getNameForUi(
-                        LocalContext.current
-                    ),
+                    text = stringResource(R.string.details_status) + task.status.getNameForUi(),
                     fontSize = 14.sp
                 )
             }
@@ -388,7 +391,7 @@ private fun ContentState(
                         },
                         interactionSource = MutableInteractionSource(),
                         text = {
-                            Text(text = status.getNameForUi(LocalContext.current))
+                            Text(text = status.getNameForUi())
                         }
                     )
                 }
