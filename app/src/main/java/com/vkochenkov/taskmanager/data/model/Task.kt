@@ -11,7 +11,7 @@ data class Task(
     val title: String,
     val description: String?,
     val priority: Priority,
-    val status: Status,
+    val status: String,
     val notificationTime: Long?
 ) {
 
@@ -21,10 +21,10 @@ data class Task(
         HIGH
     }
 
-    enum class Status {
-        TO_DO,
-        IN_PROGRESS,
-        REVIEW,
-        DONE
-    }
+//    enum class Status {
+//        TO_DO,
+//        IN_PROGRESS,
+//        REVIEW,
+//        DONE
+//    }
 }

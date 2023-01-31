@@ -1,4 +1,4 @@
-package com.vkochenkov.taskmanager.data
+package com.vkochenkov.taskmanager.data.db
 
 import androidx.room.Dao
 import androidx.room.Delete

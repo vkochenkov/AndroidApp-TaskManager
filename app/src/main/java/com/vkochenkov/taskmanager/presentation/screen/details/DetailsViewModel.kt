@@ -13,7 +13,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.vkochenkov.taskmanager.R
-import com.vkochenkov.taskmanager.data.TasksRepository
+import com.vkochenkov.taskmanager.data.repos.StatusRepository
+import com.vkochenkov.taskmanager.data.repos.TaskRepository
 import com.vkochenkov.taskmanager.data.model.Task
 import com.vkochenkov.taskmanager.presentation.base.BaseViewModel
 import com.vkochenkov.taskmanager.presentation.base.ShowNotificationReceiver
@@ -21,13 +22,15 @@ import com.vkochenkov.taskmanager.presentation.base.ShowNotificationReceiver.Com
 import com.vkochenkov.taskmanager.presentation.base.ShowNotificationReceiver.Companion.TASK_ID
 import com.vkochenkov.taskmanager.presentation.navigation.Destination
 import com.vkochenkov.taskmanager.presentation.utils.isNotNull
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.*
 import kotlin.NoSuchElementException
 
 class DetailsViewModel(
     savedStateHandle: SavedStateHandle,
-    private val repository: TasksRepository,
+    private val taskRepository: TaskRepository,
+    val statusRepository: StatusRepository,
     private val applicationContext: Context
 ) : BaseViewModel() {
 
@@ -44,6 +47,9 @@ class DetailsViewModel(
     private var _state: MutableState<DetailsBodyState> =
         mutableStateOf(DetailsBodyState.Loading)
     val state get() = _state
+
+    //todo refactor
+    private val statuses = statusRepository.getStatuses()
 
     val onAction = { action: DetailsActions ->
         when (action) {
@@ -70,20 +76,22 @@ class DetailsViewModel(
             viewModelScope.launch {
                 runCatching {
                     _state.value = DetailsBodyState.Loading
-                    repository.getTask(taskIdFromNav!!.toInt()) ?: throw NoSuchElementException()
+                    delay(10000)
+                    taskRepository.getTask(taskIdFromNav!!.toInt())
+                        ?: throw NoSuchElementException()
                 }.onFailure {
                     _state.value = DetailsBodyState.Error
                 }.onSuccess {
                     currentTask = it
-                    _state.value = DetailsBodyState.Content(it)
+                    _state.value = DetailsBodyState.Content(it, statuses)
                 }
             }
         } else {
             showDialogOnBack = true
-            currentTask = repository.getNewTaskSample()
+            currentTask = taskRepository.getNewTaskSample()
             currentTask?.let {
                 _state.value = DetailsBodyState.Content(
-                    it
+                    it, statuses
                 )
             }
         }
@@ -93,6 +101,7 @@ class DetailsViewModel(
         currentTask?.let { task ->
             _state.value = DetailsBodyState.Content(
                 task = task,
+                statuses = statuses,
                 showOnBackDialog = false
             )
         }
@@ -102,6 +111,7 @@ class DetailsViewModel(
         currentTask?.let { task ->
             _state.value = DetailsBodyState.Content(
                 task = task,
+                statuses = statuses,
                 showOnDeleteDialog = false
             )
         }
@@ -110,17 +120,25 @@ class DetailsViewModel(
     private fun onSaveTask() {
         currentTask?.let { task ->
             if (task.title.isEmpty() || task.title.length > TITLE_MAX_LENGTH) {
-                _state.value = DetailsBodyState.Content(task, showTitleValidation = true)
+                _state.value = DetailsBodyState.Content(
+                    task,
+                    statuses = statuses,
+                    showTitleValidation = true
+                )
             } else if (task.description != null && task.description.length > DESCRIPTION_MAX_LENGTH) {
-                _state.value = DetailsBodyState.Content(task, showDescriptionValidation = true)
+                _state.value = DetailsBodyState.Content(
+                    task,
+                    statuses = statuses,
+                    showDescriptionValidation = true
+                )
             } else {
                 viewModelScope.launch {
                     runCatching {
-                        repository.saveTask(task)
+                        taskRepository.saveTask(task)
                     }.onFailure {
                         _state.value = DetailsBodyState.Error
                     }.onSuccess {
-                        _state.value = DetailsBodyState.Content(task)
+                        _state.value = DetailsBodyState.Content(task, statuses)
                         navController.popBackStack()
                     }
                 }
@@ -133,6 +151,7 @@ class DetailsViewModel(
         if (showDialogOnBack && currentTask != null) {
             _state.value = DetailsBodyState.Content(
                 task = currentTask!!,
+                statuses = statuses,
                 showOnBackDialog = true
             )
         } else {
@@ -142,7 +161,7 @@ class DetailsViewModel(
 
     private fun onTaskChanged(task: Task) {
         currentTask = task
-        _state.value = DetailsBodyState.Content(task)
+        _state.value = DetailsBodyState.Content(task, statuses)
         showDialogOnBack = true
     }
 
@@ -150,6 +169,7 @@ class DetailsViewModel(
         if (showDialog == true && currentTask != null) {
             _state.value = DetailsBodyState.Content(
                 task = currentTask!!,
+                statuses = statuses,
                 showOnDeleteDialog = true
             )
         } else {
@@ -159,7 +179,7 @@ class DetailsViewModel(
             viewModelScope.launch {
                 runCatching {
                     currentTask?.let {
-                        repository.deleteTask(it)
+                        taskRepository.deleteTask(it)
                     }
                 }.onFailure {
                     _state.value = DetailsBodyState.Error
@@ -174,6 +194,7 @@ class DetailsViewModel(
         currentTask?.let { task ->
             _state.value = DetailsBodyState.Content(
                 task = task,
+                statuses = statuses,
                 showNotificationDialog = false
             )
         }
@@ -183,6 +204,7 @@ class DetailsViewModel(
         currentTask?.let { task ->
             _state.value = DetailsBodyState.Content(
                 task = task,
+                statuses = statuses,
                 showNotificationDialog = true
             )
         }
@@ -195,13 +217,14 @@ class DetailsViewModel(
                     notificationTime = null
                 )
                 currentTask?.let {
-                    repository.saveTask(it)
+                    taskRepository.saveTask(it)
                 }
             }.onFailure {
                 _state.value = DetailsBodyState.Error
             }.onSuccess {
                 _state.value = DetailsBodyState.Content(
                     task = currentTask!!,
+                    statuses = statuses,
                     showNotificationDialog = false
                 )
                 showDialogOnBack = false
@@ -283,11 +306,12 @@ class DetailsViewModel(
         viewModelScope.launch {
             currentTask?.let { task ->
                 runCatching {
-                    repository.saveTask(task)
+                    taskRepository.saveTask(task)
                 }.onSuccess {
                     showDialogOnBack = false
                     _state.value = DetailsBodyState.Content(
                         task = task,
+                        statuses = statuses,
                         showNotificationDialog = false
                     )
                 }.onFailure {

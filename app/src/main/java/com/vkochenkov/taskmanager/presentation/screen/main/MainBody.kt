@@ -1,7 +1,6 @@
 package com.vkochenkov.taskmanager.presentation.screen.main
 
 import android.content.res.Configuration
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
@@ -12,7 +11,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Devices
@@ -28,7 +26,6 @@ import com.vkochenkov.taskmanager.data.model.Task
 import com.vkochenkov.taskmanager.presentation.components.ErrorState
 import com.vkochenkov.taskmanager.presentation.theme.TaskManagerTheme
 import com.vkochenkov.taskmanager.presentation.utils.getColor
-import com.vkochenkov.taskmanager.presentation.utils.getNameForUi
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalPagerApi::class)
@@ -60,6 +57,7 @@ fun MainBody(
                 is MainBodyState.Content -> ContentState(
                     padding,
                     state.tasksList,
+                    state.statusesList,
                     pagerState,
                     onAction
                 )
@@ -79,6 +77,7 @@ fun MainBody(
 private fun ContentState(
     padding: PaddingValues,
     tasksList: List<Task>,
+    statusesList: List<String>,
     pagerState: PagerState,
     onAction: (MainActions) -> Unit
 ) {
@@ -89,7 +88,7 @@ private fun ContentState(
         TabRow(
             selectedTabIndex = selectedTabIndex
         ) {
-            Task.Status.values().forEachIndexed { index, status ->
+            statusesList.forEachIndexed { index, status ->
                 Tab(
                     selected = false,
                     onClick = {
@@ -100,14 +99,14 @@ private fun ContentState(
                     }
                 ) {
                     Spacer(modifier = Modifier.size(16.dp))
-                    Text(text = status.getNameForUi())
+                    Text(text = status)
                     Spacer(modifier = Modifier.size(8.dp))
                 }
             }
         }
         HorizontalPager(
             state = pagerState,
-            count = Task.Status.values().size
+            count = statusesList.size
         ) { pageIndex ->
             selectedTabIndex = pagerState.currentPage
             LazyColumn(
@@ -117,7 +116,7 @@ private fun ContentState(
                 contentPadding = PaddingValues(vertical = 16.dp, horizontal = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                val filtered = tasksList.filter { it.status == Task.Status.values()[pageIndex] }
+                val filtered = tasksList.filter { it.status == statusesList[pageIndex] }
                 if (filtered.isNotEmpty()) {
                     for (task in filtered) {
                         item {
@@ -194,7 +193,7 @@ fun PreviewFull() {
                         title = "1 number number number number number number number number number number number number number",
                         description = "dddd ddd dd",
                         priority = Task.Priority.NORMAL,
-                        status = Task.Status.IN_PROGRESS,
+                        status = "In progress",
                         notificationTime = null
                     ),
                     Task(
@@ -204,10 +203,11 @@ fun PreviewFull() {
                         "2 number number",
                         "dddde rere dd",
                         Task.Priority.LOW,
-                        Task.Status.IN_PROGRESS,
+                        "In progress",
                         notificationTime = 100500
                     )
-                )
+                ),
+                listOf("status1", "status2")
             )
         ) {}
     }
@@ -219,6 +219,7 @@ fun PreviewEmpty() {
     TaskManagerTheme {
         MainBody(
             MainBodyState.Content(
+                listOf(),
                 listOf()
             )
         ) {}
@@ -237,7 +238,7 @@ fun PreviewTaskCard() {
                 title = "1 number number number number number number number number number number number number number",
                 description = "dddd ddd dd",
                 priority = Task.Priority.NORMAL,
-                status = Task.Status.IN_PROGRESS,
+                status = "In progress",
                 notificationTime = null
             )
         ) {}

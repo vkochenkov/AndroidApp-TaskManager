@@ -1,8 +1,10 @@
-package com.vkochenkov.taskmanager.data
+package com.vkochenkov.taskmanager.data.repos
 
 import com.vkochenkov.taskmanager.data.model.Task
+import com.vkochenkov.taskmanager.data.DefaultData.defaultStatuses
+import com.vkochenkov.taskmanager.data.db.TaskDao
 
-class TasksRepository(
+class TaskRepository(
     val dao: TaskDao
 ) {
     suspend fun getAllTasks(): List<Task> {
@@ -29,7 +31,7 @@ class TasksRepository(
             title = "New task",
             description = "",
             priority = Task.Priority.NORMAL,
-            status = Task.Status.TO_DO,
+            status = defaultStatuses.get(0),
             creationDate = currentDate,
             updateDate = currentDate,
             notificationTime = null
