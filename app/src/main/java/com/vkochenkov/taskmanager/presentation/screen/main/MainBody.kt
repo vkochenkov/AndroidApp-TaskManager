@@ -11,6 +11,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Devices
@@ -41,15 +42,36 @@ fun MainBody(
         color = MaterialTheme.colorScheme.background
     ) {
         Scaffold(
+            floatingActionButtonPosition = FabPosition.Center,
             floatingActionButton = {
-                FloatingActionButton(
-                    onClick = {
-                        onAction.invoke(MainActions.AddNewTask)
-                    }) {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = stringResource(R.string.main_btn_add_task)
-                    )
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    // two floating buttons is not right way from google-guidelines, I know.
+                    FloatingActionButton(
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        onClick = {
+                            onAction.invoke(MainActions.OpenSettings)
+                        }
+                    ) {
+                        Icon(
+                            painterResource(id = R.drawable.ic_baseline_settings_24),
+                            contentDescription = stringResource(R.string.main_btn_settings)
+                        )
+                    }
+                    FloatingActionButton(
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        onClick = {
+                            onAction.invoke(MainActions.AddNewTask)
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = stringResource(R.string.main_btn_add_task)
+                        )
+                    }
                 }
             }
         ) { padding ->
@@ -84,7 +106,9 @@ private fun ContentState(
     var selectedTabIndex by rememberSaveable { mutableStateOf(pagerState.currentPage) }
     val coroutineScope = rememberCoroutineScope()
 
-    Column {
+    Column(
+        modifier = Modifier.padding(padding)
+    ) {
         TabRow(
             selectedTabIndex = selectedTabIndex
         ) {

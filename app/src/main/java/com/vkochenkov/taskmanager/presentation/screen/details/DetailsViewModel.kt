@@ -31,6 +31,7 @@ class DetailsViewModel(
     savedStateHandle: SavedStateHandle,
     private val taskRepository: TaskRepository,
     val statusRepository: StatusRepository,
+    // there is no leak
     private val applicationContext: Context
 ) : BaseViewModel() {
 
@@ -48,7 +49,7 @@ class DetailsViewModel(
         mutableStateOf(DetailsBodyState.Loading)
     val state get() = _state
 
-    //todo refactor
+    // todo refactor!!! and fix clickable tob bar buttons when loading etc...
     private val statuses = statusRepository.getStatuses()
 
     val onAction = { action: DetailsActions ->

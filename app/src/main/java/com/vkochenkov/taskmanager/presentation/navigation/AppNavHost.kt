@@ -10,6 +10,7 @@ import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
 import com.vkochenkov.taskmanager.presentation.screen.details.DetailsScreen
 import com.vkochenkov.taskmanager.presentation.screen.main.MainScreen
+import com.vkochenkov.taskmanager.presentation.screen.settings.SettingsScreen
 
 @Composable
 fun AppNavHost(
@@ -36,6 +37,11 @@ fun AppNavHost(
             })
         ) {
             DetailsScreen(navController)
+        }
+        composable(
+            Destination.Settings.route
+        ) {
+            SettingsScreen(navController)
         }
     }
 }

@@ -26,6 +26,7 @@ class MainViewModel(
             is MainActions.OpenDetails -> onOpenDetails(action.id)
             is MainActions.AddNewTask -> onAddNewTask()
             is MainActions.UpdateData -> onUpdateData()
+            is MainActions.OpenSettings -> onOpenSettings()
         }
     }
 
@@ -55,4 +56,10 @@ class MainViewModel(
     private fun onOpenDetails(id: Int) {
         navController.navigate(Destination.Details.passArguments(id.toString()))
     }
+
+
+    private fun onOpenSettings() {
+        navController.navigate(Destination.Settings.route)
+    }
+
 }

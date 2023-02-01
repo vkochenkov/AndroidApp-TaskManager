@@ -7,4 +7,6 @@ sealed class MainActions {
     object AddNewTask : MainActions()
 
     object UpdateData : MainActions()
+
+    object OpenSettings : MainActions()
 }

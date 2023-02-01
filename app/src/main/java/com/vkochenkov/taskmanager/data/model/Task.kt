@@ -20,11 +20,4 @@ data class Task(
         NORMAL,
         HIGH
     }
-
-//    enum class Status {
-//        TO_DO,
-//        IN_PROGRESS,
-//        REVIEW,
-//        DONE
-//    }
 }
