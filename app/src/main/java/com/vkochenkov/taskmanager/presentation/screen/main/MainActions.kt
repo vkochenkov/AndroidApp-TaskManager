@@ -9,4 +9,6 @@ sealed class MainActions {
     object UpdateData : MainActions()
 
     object OpenSettings : MainActions()
+
+    object Exit : MainActions()
 }

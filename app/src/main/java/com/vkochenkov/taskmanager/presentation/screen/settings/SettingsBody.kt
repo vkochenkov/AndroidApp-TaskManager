@@ -1,10 +1,11 @@
 package com.vkochenkov.taskmanager.presentation.screen.settings
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import com.google.accompanist.pager.ExperimentalPagerApi
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -17,7 +18,24 @@ fun SettingsBody(
         color = MaterialTheme.colorScheme.background
     ) {
         Scaffold(
-            topBar = {}
+            topBar = {
+                TopAppBar(
+                    title = { },
+                    navigationIcon = {
+                        IconButton(
+                            onClick = {
+                                onAction.invoke(SettingsActions.BackPressed())
+                            },
+                            content = {
+                                Icon(
+                                    imageVector = Icons.Default.ArrowBack,
+                                    contentDescription = null
+                                )
+                            }
+                        )
+                    }
+                )
+            }
         ) { padding ->
             when (state) {
                 is SettingsBodyState.Content -> ContentState(

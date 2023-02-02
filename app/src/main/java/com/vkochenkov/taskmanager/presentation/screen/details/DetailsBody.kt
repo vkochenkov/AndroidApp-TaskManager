@@ -122,7 +122,7 @@ fun DetailsBody(
                         onAction
                     )
                 }
-                is DetailsBodyState.Error -> ErrorState(padding)
+                is DetailsBodyState.Error -> ErrorState(Modifier.padding(padding))
                 is DetailsBodyState.Loading -> LoadingState(padding)
             }
         }

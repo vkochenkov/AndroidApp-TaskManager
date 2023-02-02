@@ -13,12 +13,11 @@ import com.vkochenkov.taskmanager.R
 
 @Composable
 fun ErrorState(
-    padding: PaddingValues,
+    modifier: Modifier = Modifier,
     text: String = stringResource(R.string.main_error_text)
 ) {
     Column(
-        modifier = Modifier
-            .padding(padding)
+        modifier = modifier
             .fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center

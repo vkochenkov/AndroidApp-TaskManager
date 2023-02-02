@@ -10,6 +10,7 @@ import com.vkochenkov.taskmanager.data.repos.TaskRepository
 import com.vkochenkov.taskmanager.presentation.base.BaseViewModel
 import com.vkochenkov.taskmanager.presentation.navigation.Destination
 import kotlinx.coroutines.launch
+import kotlin.system.exitProcess
 
 class MainViewModel(
     savedStateHandle: SavedStateHandle,
@@ -27,6 +28,7 @@ class MainViewModel(
             is MainActions.AddNewTask -> onAddNewTask()
             is MainActions.UpdateData -> onUpdateData()
             is MainActions.OpenSettings -> onOpenSettings()
+            is MainActions.Exit -> exitProcess(-1)
         }
     }
 

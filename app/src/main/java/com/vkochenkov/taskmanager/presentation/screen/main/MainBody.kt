@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -42,36 +43,61 @@ fun MainBody(
         color = MaterialTheme.colorScheme.background
     ) {
         Scaffold(
-            floatingActionButtonPosition = FabPosition.Center,
+            topBar = {
+                CenterAlignedTopAppBar(
+                    title = {
+                        Text(text = stringResource(id = R.string.app_name))
+                    },
+                    navigationIcon = {
+                        IconButton(
+                            onClick = {
+                                onAction.invoke(MainActions.Exit)
+                            },
+                            content = {
+                                Icon(
+                                    imageVector = Icons.Default.ExitToApp,
+                                    contentDescription = null
+                                )
+                            }
+                        )
+                    },
+                    actions = {
+                        IconButton(
+                            onClick = {
+                                onAction.invoke(MainActions.AddNewTask)
+                            },
+                            content = {
+                                Icon(
+                                    imageVector = Icons.Default.Add,
+                                    contentDescription = stringResource(R.string.main_btn_add_task)
+                                )
+                            }
+                        )
+                        IconButton(
+                            onClick = {
+                                onAction.invoke(MainActions.OpenSettings)
+                            },
+                            content = {
+                                Icon(
+                                    painterResource(id = R.drawable.ic_baseline_settings_24),
+                                    contentDescription = stringResource(R.string.main_btn_settings)
+                                )
+                            }
+                        )
+                    }
+                )
+            },
             floatingActionButton = {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
+                FloatingActionButton(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    onClick = {
+                        onAction.invoke(MainActions.AddNewTask)
+                    }
                 ) {
-                    // two floating buttons is not right way from google-guidelines, I know.
-                    FloatingActionButton(
-                        modifier = Modifier.padding(horizontal = 16.dp),
-                        onClick = {
-                            onAction.invoke(MainActions.OpenSettings)
-                        }
-                    ) {
-                        Icon(
-                            painterResource(id = R.drawable.ic_baseline_settings_24),
-                            contentDescription = stringResource(R.string.main_btn_settings)
-                        )
-                    }
-                    FloatingActionButton(
-                        modifier = Modifier.padding(horizontal = 16.dp),
-                        onClick = {
-                            onAction.invoke(MainActions.AddNewTask)
-                        }
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Add,
-                            contentDescription = stringResource(R.string.main_btn_add_task)
-                        )
-                    }
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = stringResource(R.string.main_btn_add_task)
+                    )
                 }
             }
         ) { padding ->
@@ -84,11 +110,11 @@ fun MainBody(
                     onAction
                 )
                 is MainBodyState.Empty -> ErrorState(
-                    padding = padding,
+                    Modifier.padding(padding),
                     text = stringResource(id = R.string.main_empty_text)
                 )
-                is MainBodyState.Error -> ErrorState(padding)
-                is MainBodyState.Loading -> LoadingState(padding)
+                is MainBodyState.Error -> ErrorState(Modifier.padding(padding))
+                is MainBodyState.Loading -> LoadingState(Modifier.padding(padding))
             }
         }
     }
@@ -109,6 +135,7 @@ private fun ContentState(
     Column(
         modifier = Modifier.padding(padding)
     ) {
+        Divider()
         TabRow(
             selectedTabIndex = selectedTabIndex
         ) {
@@ -122,9 +149,9 @@ private fun ContentState(
                         }
                     }
                 ) {
-                    Spacer(modifier = Modifier.size(16.dp))
+                    Spacer(modifier = Modifier.size(12.dp))
                     Text(text = status)
-                    Spacer(modifier = Modifier.size(8.dp))
+                    Spacer(modifier = Modifier.size(12.dp))
                 }
             }
         }
@@ -135,8 +162,7 @@ private fun ContentState(
             selectedTabIndex = pagerState.currentPage
             LazyColumn(
                 modifier = Modifier
-                    .fillMaxHeight()
-                    .padding(padding),
+                    .fillMaxHeight(),
                 contentPadding = PaddingValues(vertical = 16.dp, horizontal = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
@@ -150,7 +176,6 @@ private fun ContentState(
                 } else {
                     item {
                         ErrorState(
-                            padding = padding,
                             text = stringResource(id = R.string.main_empty_text_status)
                         )
                     }
@@ -162,11 +187,10 @@ private fun ContentState(
 
 @Composable
 private fun LoadingState(
-    padding: PaddingValues,
+    modifier: Modifier = Modifier
 ) {
     Column(
-        modifier = Modifier
-            .padding(padding)
+        modifier = modifier
             .fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
