@@ -32,8 +32,10 @@ fun SettingsBody(
     ) {
         Scaffold(
             topBar = {
-                TopAppBar(
-                    title = { },
+                CenterAlignedTopAppBar(
+                    title = {
+                        Text(text = stringResource(R.string.settings_screen_title))
+                    },
                     navigationIcon = {
                         IconButton(
                             onClick = {
@@ -71,7 +73,7 @@ fun ContentState(
     onAction: (SettingsActions) -> Unit,
     statuses: List<String>,
     showNewStatusDialog: Boolean,
-    showCantDeleteStatusDialog: Boolean,
+    showCantDeleteStatusDialog: SettingsBodyState.Content.ReasonCantDeleteStatus?,
     loadingStatusIndex: Int?
 ) {
 
@@ -170,7 +172,7 @@ fun ContentState(
         }
     }
 
-    if (showCantDeleteStatusDialog) {
+    showCantDeleteStatusDialog?.let { reason ->
         AlertDialog(
             onDismissRequest = {
                 onAction.invoke(SettingsActions.CanselCantDeleteStatusDialog)
@@ -179,7 +181,14 @@ fun ContentState(
                 Text(text = stringResource(R.string.settings_cant_delete_status_dialog_title))
             },
             text = {
-                Text(text = stringResource(R.string.settings_cant_delete_status_dialog_sorry_text))
+                Text(
+                    text = stringResource(
+                        when (reason) {
+                            SettingsBodyState.Content.ReasonCantDeleteStatus.LAST -> R.string.settings_cant_delete_status_dialog_sorry_text_last
+                            SettingsBodyState.Content.ReasonCantDeleteStatus.SAME -> R.string.settings_cant_delete_status_dialog_sorry_text_same
+                        }
+                    )
+                )
             },
             confirmButton = {
                 Button(
@@ -205,10 +214,11 @@ fun ContentState(
             // todo improve UI
             item {
                 Row(
-                    verticalAlignment = Alignment.CenterVertically
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    // todo to res
-                    Text(text = "Statuses")
+                    Text(text = stringResource(R.string.setting_screen_statuses))
                     IconButton(onClick = {
                         onAction.invoke(SettingsActions.ShowNewStatusDialog)
                     }) {
@@ -235,7 +245,7 @@ fun ContentState(
                             }
                         }
                     )
-                    Spacer(modifier = Modifier.size(4.dp))
+                    Spacer(modifier = Modifier.size(8.dp))
                 }
                 Divider()
             }

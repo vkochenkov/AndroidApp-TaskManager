@@ -54,37 +54,44 @@ class SettingsViewModel(
     private fun onCancelCantDeleteStatusDialog() {
         _state.value = SettingsBodyState.Content(
             statuses = currentStatuses,
-            showCantDeleteStatusDialog = false
+            showCantDeleteStatusDialog = null
         )
     }
 
     private fun onDeleteStatus(index: Int) {
-        viewModelScope.launch {
-            _state.value = SettingsBodyState.Content(
-                statuses = currentStatuses,
-                loadingStatusIndex = index
-            )
-            val statusForDelete = currentStatuses.get(index)
-            var isDelete = true
-            taskRepository.getAllTasks().forEach {
-                if (it.status == statusForDelete) {
-                    isDelete = false
+        if (currentStatuses.size > 1) {
+            viewModelScope.launch {
+                _state.value = SettingsBodyState.Content(
+                    statuses = currentStatuses,
+                    loadingStatusIndex = index
+                )
+                val statusForDelete = currentStatuses.get(index)
+                var isDelete = true
+                taskRepository.getAllTasks().forEach {
+                    if (it.status == statusForDelete) {
+                        isDelete = false
+                    }
+                }
+                if (isDelete) {
+                    val modifiedStatuses = currentStatuses.toMutableList()
+                    modifiedStatuses.removeAt(index)
+                    statusRepository.rewriteStatuses(modifiedStatuses)
+                    currentStatuses = modifiedStatuses
+                    _state.value = SettingsBodyState.Content(
+                        statuses = currentStatuses,
+                    )
+                } else {
+                    _state.value = SettingsBodyState.Content(
+                        statuses = currentStatuses,
+                        showCantDeleteStatusDialog = SettingsBodyState.Content.ReasonCantDeleteStatus.SAME
+                    )
                 }
             }
-            if (isDelete) {
-                val modifiedStatuses = currentStatuses.toMutableList()
-                modifiedStatuses.removeAt(index)
-                statusRepository.rewriteStatuses(modifiedStatuses)
-                currentStatuses = modifiedStatuses
-                _state.value = SettingsBodyState.Content(
-                    statuses = currentStatuses,
-                )
-            } else {
-                _state.value = SettingsBodyState.Content(
-                    statuses = currentStatuses,
-                    showCantDeleteStatusDialog = true
-                )
-            }
+        } else {
+            _state.value = SettingsBodyState.Content(
+                statuses = currentStatuses,
+                showCantDeleteStatusDialog = SettingsBodyState.Content.ReasonCantDeleteStatus.LAST
+            )
         }
     }
 

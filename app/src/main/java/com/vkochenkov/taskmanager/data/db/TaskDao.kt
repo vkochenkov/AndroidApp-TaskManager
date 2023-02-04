@@ -10,7 +10,7 @@ import com.vkochenkov.taskmanager.data.model.Task
 @Dao
 interface TaskDao {
 
-    @Query("SELECT * FROM task ORDER BY updateDate DESC")
+    @Query("SELECT * FROM task ORDER BY priority DESC, updateDate DESC")
     suspend fun getAll(): List<Task>
 
     @Insert(onConflict = REPLACE)

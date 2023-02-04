@@ -46,7 +46,7 @@ fun MainBody(
             topBar = {
                 CenterAlignedTopAppBar(
                     title = {
-                        Text(text = stringResource(id = R.string.app_name))
+                        Text(text = stringResource(id = R.string.main_screen_title))
                     },
                     navigationIcon = {
                         IconButton(

@@ -85,13 +85,27 @@ class DetailsViewModel(
             }
         } else {
             showDialogOnBack = true
-            currentTask = taskRepository.getNewTaskSample()
+            currentTask = createNewTask()
             currentTask?.let {
                 _state.value = DetailsBodyState.Content(
                     it, statuses
                 )
             }
         }
+    }
+
+    private fun createNewTask(): Task {
+        val currentDate = System.currentTimeMillis().toString()
+        return Task(
+            id = 0,
+            title = "New task",
+            description = "",
+            priority = Task.Priority.NORMAL,
+            status = statusRepository.getStatuses()[0],
+            creationDate = currentDate,
+            updateDate = currentDate,
+            notificationTime = null
+        )
     }
 
     private fun onCancelBackDialog() {
