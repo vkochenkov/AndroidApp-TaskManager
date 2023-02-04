@@ -201,7 +201,6 @@ fun ContentState(
         )
     }
 
-
     Column(
         modifier = Modifier.padding(paddingValues = padding)
 
@@ -210,8 +209,8 @@ fun ContentState(
             item {
                 Divider()
             }
-            // todo add click and drop
-            // todo improve UI
+            // todo change status position
+            // todo change status name
             item {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
