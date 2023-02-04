@@ -17,7 +17,7 @@ class StatusRepository(
             .split(COMMON_DELIMITER)
     }
 
-    fun saveStatuses(newStatuses: List<String>) {
+    fun rewriteStatuses(newStatuses: List<String>) {
         statusPrefs.edit().putString(STATUSES_LIST_KEY, newStatuses.asString(COMMON_DELIMITER)).apply()
     }
 

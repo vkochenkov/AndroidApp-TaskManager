@@ -1,6 +1,8 @@
 <resources>
     <string name="app_name">Task Manager</string>
 
+    <string name="error_wrong_number">Wrong number of characters</string>
+
     <string name="main_btn_add_task">Add task</string>
     <string name="main_btn_settings">Settings</string>
 
@@ -27,6 +29,17 @@
     <string name="main_error_text">Something went wrong. Please, reopen application</string>
     <string name="main_empty_text">You have no tasks</string>
     <string name="main_empty_text_status">You don\'t have any task\nin this status yet</string>
+
+    <string name="settings_new_status_dialog_title">New status</string>
+    <string name="settings_new_status_dialog_sorry_text">Sorry, you can\'t have more than five statuses</string>
+    <string name="settings_new_status_dialog_btn_confirm">Add</string>
+    <string name="settings_new_status_dialog_btn_dismiss">Cancel</string>
+
+    <string name="settings_cant_delete_status_dialog_title">Can\'t delete this status</string>
+    <string name="settings_cant_delete_status_dialog_sorry_text">Some tasks are in this status. Change their status, for delete the status</string>
+
+    <string name="settings_new_status_same">This status already exists</string>
+    <string name="settings_status_btn_ok">Okay</string>
 
     <string name="toast_set_notification">Notification was created</string>
     <string name="toast_remove_notification">Notification was removed</string>

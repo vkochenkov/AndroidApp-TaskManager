@@ -4,40 +4,97 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.viewModelScope
 import com.vkochenkov.taskmanager.data.repos.StatusRepository
+import com.vkochenkov.taskmanager.data.repos.TaskRepository
 import com.vkochenkov.taskmanager.presentation.base.BaseViewModel
+import kotlinx.coroutines.launch
 
 class SettingsViewModel(
     savedStateHandle: SavedStateHandle,
-    val statusRepository: StatusRepository
+    private val taskRepository: TaskRepository,
+    private val statusRepository: StatusRepository
 ) : BaseViewModel() {
 
-    private var _state: MutableState<SettingsBodyState> = mutableStateOf(SettingsBodyState.Content)
-    val state: State<SettingsBodyState> get() = _state
+    var currentStatuses: List<String> = statusRepository.getStatuses()
 
-    // todo set true after change some data
-    private var showDialogOnBack: Boolean = false
+    private var _state: MutableState<SettingsBodyState> =
+        mutableStateOf(SettingsBodyState.Content(statuses = currentStatuses))
+    val state: State<SettingsBodyState> get() = _state
 
     val onAction = { action: SettingsActions ->
         when (action) {
-            is SettingsActions.BackPressed -> onBackPressed(action.showDialog)
-//            is SettingsActions.OpenDetails -> onOpenDetails(action.id)
-//            is SettingsActions.AddNewTask -> onAddNewTask()
-//            is SettingsActions.UpdateData -> onUpdateData()
+            is SettingsActions.BackPressed -> onBackPressed()
+            is SettingsActions.AddNewStatus -> onAddNewStatus(action.status)
+            is SettingsActions.DeleteStatus -> onDeleteStatus(action.index)
+            is SettingsActions.ShowNewStatusDialog -> onShowNewStatusDialog()
+            is SettingsActions.CanselNewStatusDialog -> onCancelNewStatusDialog()
+            is SettingsActions.CanselCantDeleteStatusDialog -> onCancelCantDeleteStatusDialog()
         }
     }
 
-    private fun onBackPressed(showDialog: Boolean?) {
-        showDialog?.let { showDialogOnBack = it }
-        if (showDialogOnBack) {
-            // todo
-//            _state.value = DetailsBodyState.Content(
-//                task = currentTask!!,
-//                statuses = statuses,
-//                showOnBackDialog = true
-//            )
-        } else {
-            navController.popBackStack()
+    private fun onBackPressed() {
+        navController.popBackStack()
+    }
+
+    private fun onShowNewStatusDialog() {
+        _state.value = SettingsBodyState.Content(
+            statuses = currentStatuses,
+            showNewStatusDialog = true
+        )
+    }
+
+    private fun onCancelNewStatusDialog() {
+        _state.value = SettingsBodyState.Content(
+            statuses = currentStatuses,
+            showNewStatusDialog = false
+        )
+    }
+
+    private fun onCancelCantDeleteStatusDialog() {
+        _state.value = SettingsBodyState.Content(
+            statuses = currentStatuses,
+            showCantDeleteStatusDialog = false
+        )
+    }
+
+    private fun onDeleteStatus(index: Int) {
+        viewModelScope.launch {
+            _state.value = SettingsBodyState.Content(
+                statuses = currentStatuses,
+                loadingStatusIndex = index
+            )
+            val statusForDelete = currentStatuses.get(index)
+            var isDelete = true
+            taskRepository.getAllTasks().forEach {
+                if (it.status == statusForDelete) {
+                    isDelete = false
+                }
+            }
+            if (isDelete) {
+                val modifiedStatuses = currentStatuses.toMutableList()
+                modifiedStatuses.removeAt(index)
+                statusRepository.rewriteStatuses(modifiedStatuses)
+                currentStatuses = modifiedStatuses
+                _state.value = SettingsBodyState.Content(
+                    statuses = currentStatuses,
+                )
+            } else {
+                _state.value = SettingsBodyState.Content(
+                    statuses = currentStatuses,
+                    showCantDeleteStatusDialog = true
+                )
+            }
         }
+    }
+
+    private fun onAddNewStatus(status: String) {
+        val modifiedStatuses = currentStatuses.toMutableList()
+        modifiedStatuses.add(status)
+        statusRepository.rewriteStatuses(modifiedStatuses)
+        currentStatuses = modifiedStatuses
+        _state.value = SettingsBodyState.Content(
+            statuses = currentStatuses
+        )
     }
 }

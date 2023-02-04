@@ -22,7 +22,6 @@ import com.vkochenkov.taskmanager.presentation.base.ShowNotificationReceiver.Com
 import com.vkochenkov.taskmanager.presentation.base.ShowNotificationReceiver.Companion.TASK_ID
 import com.vkochenkov.taskmanager.presentation.navigation.Destination
 import com.vkochenkov.taskmanager.presentation.utils.isNotNull
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.*
 import kotlin.NoSuchElementException
@@ -31,7 +30,7 @@ class DetailsViewModel(
     savedStateHandle: SavedStateHandle,
     private val taskRepository: TaskRepository,
     val statusRepository: StatusRepository,
-    // there is no leak
+    // There is no leak
     private val applicationContext: Context
 ) : BaseViewModel() {
 
@@ -40,7 +39,6 @@ class DetailsViewModel(
 
     private val taskIdFromNav: String? = savedStateHandle[Destination.Details.argument1]
 
-    // todo to think about subscription on DB
     private var currentTask: Task? = null
 
     private var showDialogOnBack: Boolean = false
@@ -49,7 +47,7 @@ class DetailsViewModel(
         mutableStateOf(DetailsBodyState.Loading)
     val state get() = _state
 
-    // todo refactor!!! and fix clickable tob bar buttons when loading etc...
+    // todo refactor! and fix clickable tob bar buttons when loading etc...
     private val statuses = statusRepository.getStatuses()
 
     val onAction = { action: DetailsActions ->
@@ -60,7 +58,6 @@ class DetailsViewModel(
             is DetailsActions.CancelBackDialog -> onCancelBackDialog()
             is DetailsActions.CancelDeleteDialog -> onCancelDeleteDialog()
             is DetailsActions.DeleteTask -> onDeleteTask(action.showDialog)
-
             is DetailsActions.CancelNotificationDialog -> onCancelNotificationDialog()
             is DetailsActions.ShowNotificationDialog -> onShowNotificationDialog()
             is DetailsActions.RemoveNotification -> onRemoveNotification()
@@ -77,7 +74,6 @@ class DetailsViewModel(
             viewModelScope.launch {
                 runCatching {
                     _state.value = DetailsBodyState.Loading
-                    delay(10000)
                     taskRepository.getTask(taskIdFromNav!!.toInt())
                         ?: throw NoSuchElementException()
                 }.onFailure {

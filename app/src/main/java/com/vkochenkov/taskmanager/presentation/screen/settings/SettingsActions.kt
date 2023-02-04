@@ -3,11 +3,19 @@ package com.vkochenkov.taskmanager.presentation.screen.settings
 
 sealed class SettingsActions {
 
-    data class BackPressed(val showDialog: Boolean? = null) : SettingsActions()
+    object BackPressed : SettingsActions()
 
-//    data class OpenDetails(val id: Int) : SettingsActions()
-//
-//    object AddNewTask : SettingsActions()
-//
-//    object UpdateData : SettingsActions()
+    object ShowNewStatusDialog : SettingsActions()
+
+    object CanselNewStatusDialog : SettingsActions()
+
+    object CanselCantDeleteStatusDialog : SettingsActions()
+
+    data class AddNewStatus(
+        val status: String
+    ) : SettingsActions()
+
+    data class DeleteStatus(
+        val index: Int
+    ) : SettingsActions()
 }

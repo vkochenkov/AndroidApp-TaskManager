@@ -32,6 +32,7 @@ val presentationModule = module {
     viewModel {
         SettingsViewModel(
             savedStateHandle = get(),
+            taskRepository = get(),
             statusRepository = get()
         )
     }
