@@ -15,6 +15,11 @@ sealed class Destination : Route {
 
         override val route: String = "Details"
     }
+
+    object Settings: Destination() {
+
+        override val route: String = "Settings"
+    }
 }
 
 fun buildDeeplink(route: String): String {

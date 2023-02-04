@@ -6,6 +6,7 @@ sealed class DetailsBodyState {
 
     data class Content(
         val task: Task,
+        val statuses: List<String>,
         val showOnBackDialog: Boolean = false,
         val showOnDeleteDialog: Boolean = false,
         val showNotificationDialog: Boolean = false,

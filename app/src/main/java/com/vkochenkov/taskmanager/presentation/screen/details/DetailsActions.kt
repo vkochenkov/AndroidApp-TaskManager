@@ -26,5 +26,4 @@ sealed class DetailsActions {
     ) : DetailsActions()
 
     object RemoveNotification : DetailsActions()
-
 }

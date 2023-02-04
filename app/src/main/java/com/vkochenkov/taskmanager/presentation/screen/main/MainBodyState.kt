@@ -5,7 +5,8 @@ import com.vkochenkov.taskmanager.data.model.Task
 sealed class MainBodyState {
 
     data class Content(
-        var tasksList: List<Task>
+        val tasksList: List<Task>,
+        val statusesList: List<String>
     ) : MainBodyState()
 
     object Empty: MainBodyState()

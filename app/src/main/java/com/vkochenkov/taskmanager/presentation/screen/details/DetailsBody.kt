@@ -113,6 +113,7 @@ fun DetailsBody(
                     ContentState(
                         padding,
                         state.task,
+                        state.statuses,
                         state.showOnBackDialog,
                         state.showOnDeleteDialog,
                         state.showNotificationDialog,
@@ -121,7 +122,7 @@ fun DetailsBody(
                         onAction
                     )
                 }
-                is DetailsBodyState.Error -> ErrorState(padding)
+                is DetailsBodyState.Error -> ErrorState(Modifier.padding(padding))
                 is DetailsBodyState.Loading -> LoadingState(padding)
             }
         }
@@ -133,6 +134,7 @@ fun DetailsBody(
 private fun ContentState(
     padding: PaddingValues,
     task: Task,
+    statuses: List<String>,
     showOnBackDialog: Boolean,
     showOnDeleteDialog: Boolean,
     showNotificationDialog: Boolean,
@@ -379,7 +381,7 @@ private fun ContentState(
                 .padding(vertical = 8.dp)
             ) {
                 Text(
-                    text = stringResource(R.string.details_status) + task.status.getNameForUi(),
+                    text = stringResource(R.string.details_status) + task.status,
                     fontSize = 14.sp
                 )
 
@@ -387,7 +389,7 @@ private fun ContentState(
                     expanded = statusDropDownIsExpanded,
                     onDismissRequest = { statusDropDownIsExpanded = false }
                 ) {
-                    Task.Status.values().forEach { status ->
+                    statuses.forEach { status ->
                         DropdownMenuItem(
                             onClick = {
                                 onAction.invoke(DetailsActions.TaskChanged(task.copy(status = status)))
@@ -395,7 +397,7 @@ private fun ContentState(
                             },
                             interactionSource = MutableInteractionSource(),
                             text = {
-                                Text(text = status.getNameForUi())
+                                Text(text = status)
                             }
                         )
                     }
@@ -435,9 +437,10 @@ fun Preview() {
                     "1 number number number number number number number number number number number number number",
                     "dddd ddd dd",
                     Task.Priority.NORMAL,
-                    Task.Status.IN_PROGRESS,
+                    "In progress",
                     100500
-                )
+                ),
+                listOf("status1", "status2")
             )
         ) {}
     }

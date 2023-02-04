@@ -25,11 +25,6 @@ fun Task.Priority.getColor(): Color {
     }
 }
 
-fun Task.Status.getNameForUi(): String {
-    return this.toString().lowercase().replace("_", " ")
-        .replaceFirstChar { it.titlecase(Locale.ROOT) }
-}
-
 fun Task.Priority.getNameForUi(): String {
     return this.toString().lowercase()
         .replaceFirstChar { it.titlecase(Locale.ROOT) }
