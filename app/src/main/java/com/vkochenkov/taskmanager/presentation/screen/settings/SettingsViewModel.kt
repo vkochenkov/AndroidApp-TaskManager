@@ -30,6 +30,9 @@ class SettingsViewModel(
             is SettingsActions.ShowNewStatusDialog -> onShowNewStatusDialog()
             is SettingsActions.CanselNewStatusDialog -> onCancelNewStatusDialog()
             is SettingsActions.CanselCantDeleteStatusDialog -> onCancelCantDeleteStatusDialog()
+            is SettingsActions.CanselRenameStatusDialog -> onCancelRenameStatusDialog()
+            is SettingsActions.RenameStatus -> onRenameStatus(action.status, action.index)
+            is SettingsActions.ShowRenameStatusDialog -> onShowRenameStatusDialog(action.index)
         }
     }
 
@@ -44,10 +47,24 @@ class SettingsViewModel(
         )
     }
 
+    private fun onShowRenameStatusDialog(index: Int) {
+        _state.value = SettingsBodyState.Content(
+            statuses = currentStatuses,
+            renameStatusIndex = index
+        )
+    }
+
     private fun onCancelNewStatusDialog() {
         _state.value = SettingsBodyState.Content(
             statuses = currentStatuses,
             showNewStatusDialog = false
+        )
+    }
+
+    private fun onCancelRenameStatusDialog() {
+        _state.value = SettingsBodyState.Content(
+            statuses = currentStatuses,
+            renameStatusIndex = null
         )
     }
 
@@ -98,6 +115,17 @@ class SettingsViewModel(
     private fun onAddNewStatus(status: String) {
         val modifiedStatuses = currentStatuses.toMutableList()
         modifiedStatuses.add(status)
+        statusRepository.rewriteStatuses(modifiedStatuses)
+        currentStatuses = modifiedStatuses
+        _state.value = SettingsBodyState.Content(
+            statuses = currentStatuses
+        )
+    }
+
+    private fun onRenameStatus(status: String, index: Int) {
+        val modifiedStatuses = currentStatuses.toMutableList()
+        modifiedStatuses.removeAt(index)
+        modifiedStatuses.add(index, status)
         statusRepository.rewriteStatuses(modifiedStatuses)
         currentStatuses = modifiedStatuses
         _state.value = SettingsBodyState.Content(

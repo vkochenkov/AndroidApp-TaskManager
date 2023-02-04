@@ -7,7 +7,11 @@ sealed class SettingsActions {
 
     object ShowNewStatusDialog : SettingsActions()
 
+    data class ShowRenameStatusDialog(val index: Int) : SettingsActions()
+
     object CanselNewStatusDialog : SettingsActions()
+
+    object CanselRenameStatusDialog : SettingsActions()
 
     object CanselCantDeleteStatusDialog : SettingsActions()
 
@@ -18,4 +22,6 @@ sealed class SettingsActions {
     data class DeleteStatus(
         val index: Int
     ) : SettingsActions()
+
+    data class RenameStatus(val status: String, val index: Int) : SettingsActions()
 }
