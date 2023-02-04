@@ -59,7 +59,8 @@ fun SettingsBody(
                     state.statuses,
                     state.showNewStatusDialog,
                     state.showCantDeleteStatusDialog,
-                    state.loadingStatusIndex
+                    state.loadingStatusIndex,
+                    state.renameStatusIndex
                 )
             }
         }
@@ -74,7 +75,8 @@ fun ContentState(
     statuses: List<String>,
     showNewStatusDialog: Boolean,
     showCantDeleteStatusDialog: SettingsBodyState.Content.ReasonCantDeleteStatus?,
-    loadingStatusIndex: Int?
+    loadingStatusIndex: Int?,
+    renameStatusIndex: Int?
 ) {
 
     if (showNewStatusDialog) {
@@ -201,6 +203,78 @@ fun ContentState(
         )
     }
 
+    renameStatusIndex?.let { index ->
+        var statusStr by remember {
+            mutableStateOf(statuses[index])
+        }
+        var isErrorSymbols by remember {
+            mutableStateOf(false)
+        }
+        var isErrorSameItem by remember {
+            mutableStateOf(false)
+        }
+        AlertDialog(
+            onDismissRequest = {
+                onAction.invoke(SettingsActions.CanselNewStatusDialog)
+            },
+            title = {
+                Text(text = stringResource(R.string.settings_rename_status_dialog_title))
+            },
+            text = {
+                Column {
+                    OutlinedTextField(
+                        isError = isErrorSymbols || isErrorSameItem,
+                        label = {
+                            if (isErrorSymbols) {
+                                Text(
+                                    text = stringResource(R.string.error_wrong_number),
+                                    color = MaterialTheme.colorScheme.error,
+                                )
+                            } else if (isErrorSameItem) {
+                                Text(
+                                    text = stringResource(R.string.settings_new_status_same),
+                                    color = MaterialTheme.colorScheme.error,
+                                )
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        value = statusStr,
+                        onValueChange = {
+                            isErrorSymbols = false
+                            isErrorSameItem = false
+                            statusStr = it
+                        }
+                    )
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        onAction.invoke(SettingsActions.CanselRenameStatusDialog)
+                    }) {
+                    Text(stringResource(R.string.settings_new_status_dialog_btn_dismiss))
+                }
+
+                Button(
+                    onClick = {
+                        if (statusStr.length in 1..19) {
+                            isErrorSymbols = false
+                            if (!statuses.contains(statusStr)) {
+                                isErrorSameItem = false
+                                onAction.invoke(SettingsActions.RenameStatus(statusStr, index))
+                            } else {
+                                isErrorSameItem = true
+                            }
+                        } else {
+                            isErrorSymbols = true
+                        }
+                    }
+                ) {
+                    Text(stringResource(R.string.settings_rename_status_dialog_btn_confirm))
+                }
+            }
+        )
+    }
 
     Column(
         modifier = Modifier.padding(paddingValues = padding)
@@ -210,8 +284,7 @@ fun ContentState(
             item {
                 Divider()
             }
-            // todo add click and drop
-            // todo improve UI
+            // todo add drag and drop for change status position
             item {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -227,7 +300,9 @@ fun ContentState(
                 }
                 statuses.forEachIndexed { index, status ->
                     AssistChip(
-                        onClick = { /* Do something! */ },
+                        onClick = {
+                            onAction.invoke(SettingsActions.ShowRenameStatusDialog(index))
+                        },
                         label = { Text(status) },
                         trailingIcon = {
                             if (loadingStatusIndex == index) {

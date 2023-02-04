@@ -284,10 +284,17 @@ private fun ContentState(
             OutlinedTextField(
                 isError = showTitleValidation,
                 label = {
-                    Text(
-                        modifier = Modifier.background(color = MaterialTheme.colorScheme.background),
-                        text = stringResource(R.string.details_title_hint)
-                    )
+                    if (showTitleValidation) {
+                        Text(
+                            text = stringResource(R.string.error_wrong_number),
+                            color = MaterialTheme.colorScheme.error,
+                        )
+                    } else {
+                        Text(
+                            modifier = Modifier.background(color = MaterialTheme.colorScheme.background),
+                            text = stringResource(R.string.details_title_hint)
+                        )
+                    }
                 },
                 modifier = Modifier.fillMaxWidth(),
                 value = title,
@@ -305,10 +312,17 @@ private fun ContentState(
             OutlinedTextField(
                 isError = showDescriptionValidation,
                 label = {
-                    Text(
-                        modifier = Modifier.background(color = MaterialTheme.colorScheme.background),
-                        text = stringResource(R.string.details_description_hint)
-                    )
+                    if (showDescriptionValidation) {
+                        Text(
+                            text = stringResource(R.string.error_wrong_number),
+                            color = MaterialTheme.colorScheme.error,
+                        )
+                    } else {
+                        Text(
+                            modifier = Modifier.background(color = MaterialTheme.colorScheme.background),
+                            text = stringResource(R.string.details_description_hint)
+                        )
+                    }
                 },
                 modifier = Modifier.fillMaxWidth(),
                 value = description,

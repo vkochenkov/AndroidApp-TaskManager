@@ -32,8 +32,10 @@
     <string name="main_empty_text">You have no tasks</string>
     <string name="main_empty_text_status">You don\'t have any task\nin this status yet</string>
 
+    <string name="settings_rename_status_dialog_title">Change status</string>
     <string name="settings_new_status_dialog_title">New status</string>
     <string name="settings_new_status_dialog_sorry_text">Sorry, you can\'t have more than five statuses</string>
+    <string name="settings_rename_status_dialog_btn_confirm">Save</string>
     <string name="settings_new_status_dialog_btn_confirm">Add</string>
     <string name="settings_new_status_dialog_btn_dismiss">Cancel</string>
 
