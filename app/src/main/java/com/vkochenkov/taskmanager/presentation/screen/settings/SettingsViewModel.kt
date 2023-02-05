@@ -171,7 +171,6 @@ class SettingsViewModel(
     }
 
     private fun onSaveNewStatusesOrder(statuses: List<String>) {
-        Log.d("vladd", "statuses = ${statuses.toString()}")
         currentStatuses = statuses
         statusRepository.rewriteStatuses(statuses)
         _state.value = SettingsBodyState(

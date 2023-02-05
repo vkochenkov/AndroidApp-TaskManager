@@ -1,6 +1,7 @@
 package com.vkochenkov.taskmanager.presentation.screen.settings
 
 import android.content.res.Configuration
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.*
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -281,11 +282,13 @@ fun SettingsBody(
                             }
                         }
 
-                        var currentStatuses by remember {
-                            mutableStateOf(state.statuses)
-                        }
+                        // какая-то магическая херня. После удаления и перемещения, удаленная ячейка снова появляется!
 
-                        currentStatuses.forEachIndexed { index, status ->
+                        Log.d("vladd", "state.statuses before for = ${state.statuses}")
+
+                        state.statuses.forEachIndexed { index, status ->
+
+                            Log.d("vladd", "state.statuses after for = ${state.statuses}")
 
                             var offsetY by remember { mutableStateOf(0f) }
 
@@ -314,7 +317,10 @@ fun SettingsBody(
                                                         if (offsetY > columnHeightPx) {
                                                             try {
                                                                 val newStatuses =
-                                                                    currentStatuses.toMutableList()
+                                                                    state.statuses.toMutableList()
+
+                                                                Log.d("vladd", "newStatuses = $newStatuses")
+
                                                                 val currentStatus =
                                                                     newStatuses.get(index)
                                                                 newStatuses.removeAt(index)
@@ -327,8 +333,6 @@ fun SettingsBody(
                                                                         newStatuses
                                                                     )
                                                                 )
-                                                                // there is something strange, but I don't understand. Without reassign working incorrect
-                                                                currentStatuses = newStatuses
                                                             } catch (ex: Exception) {
                                                                 // do nothing
                                                             } finally {
@@ -338,7 +342,10 @@ fun SettingsBody(
                                                         } else if (offsetY < -columnHeightPx) {
                                                             try {
                                                                 val newStatuses =
-                                                                    currentStatuses.toMutableList()
+                                                                    state.statuses.toMutableList()
+
+                                                                Log.d("vladd", "newStatuses = $newStatuses")
+
                                                                 val currentStatus =
                                                                     newStatuses.get(index)
                                                                 newStatuses.removeAt(index)
@@ -351,8 +358,6 @@ fun SettingsBody(
                                                                         newStatuses
                                                                     )
                                                                 )
-                                                                // there is something strange, but I don't understand. Without reassign working incorrect
-                                                                currentStatuses = newStatuses
                                                             } catch (ex: Exception) {
                                                                 // do nothing
                                                             } finally {
