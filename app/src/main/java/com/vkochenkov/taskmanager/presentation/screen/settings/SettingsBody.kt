@@ -1,8 +1,6 @@
 package com.vkochenkov.taskmanager.presentation.screen.settings
 
 import android.content.res.Configuration
-import android.view.MotionEvent
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.*
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -15,10 +13,8 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Devices
@@ -29,20 +25,12 @@ import com.vkochenkov.taskmanager.R
 import com.vkochenkov.taskmanager.presentation.theme.TaskManagerTheme
 import kotlin.math.roundToInt
 
-@OptIn(
-    ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class,
-    ExperimentalComposeUiApi::class
-)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsBody(
     state: SettingsBodyState,
     onAction: (SettingsActions) -> Unit
 ) {
-
-    var stats by remember {
-        mutableStateOf(state.statuses)
-    }
-
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
@@ -293,7 +281,11 @@ fun SettingsBody(
                             }
                         }
 
-                        stats.forEachIndexed { index, status ->
+                        var currentStatuses by remember {
+                            mutableStateOf(state.statuses)
+                        }
+
+                        currentStatuses.forEachIndexed { index, status ->
 
                             var offsetY by remember { mutableStateOf(0f) }
 
@@ -321,11 +313,22 @@ fun SettingsBody(
                                                         offsetY += dragAmount.y
                                                         if (offsetY > columnHeightPx) {
                                                             try {
-                                                                val newStats = stats.toMutableList()
-                                                                val cur = newStats.get(index)
-                                                                newStats.removeAt(index)
-                                                                newStats.add(index + 1, cur)
-                                                                stats = newStats
+                                                                val newStatuses =
+                                                                    currentStatuses.toMutableList()
+                                                                val currentStatus =
+                                                                    newStatuses.get(index)
+                                                                newStatuses.removeAt(index)
+                                                                newStatuses.add(
+                                                                    index + 1,
+                                                                    currentStatus
+                                                                )
+                                                                onAction.invoke(
+                                                                    SettingsActions.SaveNewStatusesOrder(
+                                                                        newStatuses
+                                                                    )
+                                                                )
+                                                                // there is something strange, but I don't understand. Without reassign working incorrect
+                                                                currentStatuses = newStatuses
                                                             } catch (ex: Exception) {
                                                                 // do nothing
                                                             } finally {
@@ -334,11 +337,22 @@ fun SettingsBody(
                                                             }
                                                         } else if (offsetY < -columnHeightPx) {
                                                             try {
-                                                                val newStats = stats.toMutableList()
-                                                                val cur = newStats.get(index)
-                                                                newStats.removeAt(index)
-                                                                newStats.add(index - 1, cur)
-                                                                stats = newStats
+                                                                val newStatuses =
+                                                                    currentStatuses.toMutableList()
+                                                                val currentStatus =
+                                                                    newStatuses.get(index)
+                                                                newStatuses.removeAt(index)
+                                                                newStatuses.add(
+                                                                    index - 1,
+                                                                    currentStatus
+                                                                )
+                                                                onAction.invoke(
+                                                                    SettingsActions.SaveNewStatusesOrder(
+                                                                        newStatuses
+                                                                    )
+                                                                )
+                                                                // there is something strange, but I don't understand. Without reassign working incorrect
+                                                                currentStatuses = newStatuses
                                                             } catch (ex: Exception) {
                                                                 // do nothing
                                                             } finally {
