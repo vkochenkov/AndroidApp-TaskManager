@@ -5,6 +5,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import com.vkochenkov.taskmanager.data.model.Task
 import com.vkochenkov.taskmanager.data.repos.StatusRepository
 import com.vkochenkov.taskmanager.data.repos.TaskRepository
 import com.vkochenkov.taskmanager.presentation.base.BaseViewModel
@@ -123,13 +124,47 @@ class SettingsViewModel(
     }
 
     private fun onRenameStatus(status: String, index: Int) {
-        val modifiedStatuses = currentStatuses.toMutableList()
-        modifiedStatuses.removeAt(index)
-        modifiedStatuses.add(index, status)
-        statusRepository.rewriteStatuses(modifiedStatuses)
-        currentStatuses = modifiedStatuses
-        _state.value = SettingsBodyState.Content(
-            statuses = currentStatuses
-        )
+        val oldStatusName = currentStatuses.get(index)
+
+        viewModelScope.launch {
+            _state.value = SettingsBodyState.Content(
+                statuses = currentStatuses,
+                loadingStatusIndex = index
+            )
+            runCatching {
+                taskRepository.getTasksByStatus(oldStatusName)
+            }.onFailure {
+                // ignore error
+                _state.value = SettingsBodyState.Content(
+                    statuses = currentStatuses
+                )
+            }.onSuccess { tasks ->
+                val updatedTasks = ArrayList<Task>()
+                tasks.forEach {
+                    updatedTasks.add(
+                        it.copy(
+                            status = status
+                        )
+                    )
+                }
+                runCatching {
+                    taskRepository.saveTasks(updatedTasks)
+                }.onFailure {
+                    // ignore error
+                    _state.value = SettingsBodyState.Content(
+                        statuses = currentStatuses
+                    )
+                }.onSuccess {
+                    val modifiedStatuses = currentStatuses.toMutableList()
+                    modifiedStatuses.removeAt(index)
+                    modifiedStatuses.add(index, status)
+                    currentStatuses = modifiedStatuses
+                    statusRepository.rewriteStatuses(modifiedStatuses)
+                    _state.value = SettingsBodyState.Content(
+                        statuses = currentStatuses
+                    )
+                }
+            }
+        }
     }
 }

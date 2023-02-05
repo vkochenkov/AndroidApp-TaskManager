@@ -33,15 +33,15 @@
     <string name="main_empty_text_status">You don\'t have any task\nin this status yet</string>
 
     <string name="settings_rename_status_dialog_title">Change status</string>
-    <string name="settings_new_status_dialog_title">New status</string>
+    <string name="settings_new_status_dialog_title">Create new status</string>
     <string name="settings_new_status_dialog_sorry_text">Sorry, you can\'t have more than five statuses</string>
     <string name="settings_rename_status_dialog_btn_confirm">Save</string>
     <string name="settings_new_status_dialog_btn_confirm">Add</string>
     <string name="settings_new_status_dialog_btn_dismiss">Cancel</string>
 
     <string name="settings_cant_delete_status_dialog_title">Can\'t delete this status</string>
-    <string name="settings_cant_delete_status_dialog_sorry_text_same">Some tasks are in this status. Change their status, for delete the status</string>
-    <string name="settings_cant_delete_status_dialog_sorry_text_last">You can\'t delete the last status</string>
+    <string name="settings_cant_delete_status_dialog_sorry_text_same">Some tasks are in this status. For delete, remove all tasks from this status</string>
+    <string name="settings_cant_delete_status_dialog_sorry_text_last">You should have at least one status</string>
 
     <string name="settings_new_status_same">This status already exists</string>
     <string name="settings_status_btn_ok">Okay</string>
