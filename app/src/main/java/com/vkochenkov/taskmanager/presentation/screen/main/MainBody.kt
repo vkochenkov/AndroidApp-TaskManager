@@ -129,7 +129,13 @@ private fun ContentState(
     pagerState: PagerState,
     onAction: (MainActions) -> Unit
 ) {
-    var selectedTabIndex by rememberSaveable { mutableStateOf(pagerState.currentPage) }
+    var selectedTabIndex by rememberSaveable(statusesList) {
+        if (pagerState.currentPage < statusesList.size) {
+            mutableStateOf(pagerState.currentPage)
+        } else {
+            mutableStateOf(0)
+        }
+    }
     val coroutineScope = rememberCoroutineScope()
 
     Column(
