@@ -299,12 +299,9 @@ fun SettingsBody(
 
                             var wasDragged by remember { mutableStateOf(false) }
 
-                            // Create element height in pixel state
                             var columnHeightPx by remember {
                                 mutableStateOf(0f)
                             }
-
-                            // todo improve grug and drop solution
 
                             AssistChip(
                                 modifier = Modifier
@@ -312,64 +309,47 @@ fun SettingsBody(
                                         columnHeightPx = coordinates.size.height.toFloat()
                                     }
                                     .offset { IntOffset(0, offsetY.roundToInt()) }
-//                                    .draggable(
-//                                        orientation = Orientation.Vertical,
-//                                        state = rememberDraggableState { delta ->
-//                                            if (!wasDragged) {
-//                                                offsetY += delta
-//                                                Log.d("vladd", offsetY.toString())
-//                                                if (offsetY > columnHeightPx / 2) {
-//                                                    val newStats = stats.toMutableList()
-//                                                    val cur = newStats.get(index)
-//                                                    newStats.removeAt(index)
-//                                                    newStats.add(index + 1, cur)
-//                                                    stats = newStats
-//                                                    offsetY = 0f
-//                                                    wasDragged = true
-//                                                } else if (offsetY < -columnHeightPx / 2) {
-//                                                    val newStats = stats.toMutableList()
-//                                                    val cur = newStats.get(index)
-//                                                    newStats.removeAt(index)
-//                                                    newStats.add(index - 1, cur)
-//                                                    stats = newStats
-//                                                    offsetY = 0f
-//                                                    wasDragged = true
-//                                                }
-//                                            }
-//                                        }
-//                                    )
-
                                     .pointerInput(Unit) {
-                                        detectDragGestures { change, dragAmount ->
-                                            if (!wasDragged) {
-                                                offsetY += dragAmount.y
-                                                if (offsetY > columnHeightPx / 1.5) {
-                                                    val newStats = stats.toMutableList()
-                                                    val cur = newStats.get(index)
-                                                    newStats.removeAt(index)
-                                                    newStats.add(index + 1, cur)
-                                                    stats = newStats
-                                                    offsetY = 0f
-                                                    wasDragged = true
-                                                } else if (offsetY < -columnHeightPx / 1.5) {
-                                                    val newStats = stats.toMutableList()
-                                                    val cur = newStats.get(index)
-                                                    newStats.removeAt(index)
-                                                    newStats.add(index - 1, cur)
-                                                    stats = newStats
-                                                    offsetY = 0f
-                                                    wasDragged = true
+                                        detectDragGestures(
+                                            onDragEnd = {
+                                                offsetY = 0f
+                                                wasDragged = false
+                                            },
+                                            onDrag = { change, dragAmount ->
+                                                if (change.pressed) {
+                                                    if (!wasDragged) {
+                                                        offsetY += dragAmount.y
+                                                        if (offsetY > columnHeightPx) {
+                                                            try {
+                                                                val newStats = stats.toMutableList()
+                                                                val cur = newStats.get(index)
+                                                                newStats.removeAt(index)
+                                                                newStats.add(index + 1, cur)
+                                                                stats = newStats
+                                                            } catch (ex: Exception) {
+                                                                // do nothing
+                                                            } finally {
+                                                                offsetY = 0f
+                                                                wasDragged = true
+                                                            }
+                                                        } else if (offsetY < -columnHeightPx) {
+                                                            try {
+                                                                val newStats = stats.toMutableList()
+                                                                val cur = newStats.get(index)
+                                                                newStats.removeAt(index)
+                                                                newStats.add(index - 1, cur)
+                                                                stats = newStats
+                                                            } catch (ex: Exception) {
+                                                                // do nothing
+                                                            } finally {
+                                                                offsetY = 0f
+                                                                wasDragged = true
+                                                            }
+                                                        }
+                                                    }
                                                 }
                                             }
-                                        }
-                                    }
-                                    // todo fix clickable
-                                    .pointerInteropFilter {
-                                        wasDragged = when (it.action) {
-                                            MotionEvent.ACTION_UP -> false
-                                            else -> false
-                                        }
-                                        true
+                                        )
                                     },
                                 onClick = {
                                     onAction.invoke(SettingsActions.ShowRenameStatusDialog(index))

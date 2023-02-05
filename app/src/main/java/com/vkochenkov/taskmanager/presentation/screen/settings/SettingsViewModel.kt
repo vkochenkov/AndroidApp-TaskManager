@@ -34,6 +34,7 @@ class SettingsViewModel(
             is SettingsActions.CanselRenameStatusDialog -> onCancelRenameStatusDialog()
             is SettingsActions.RenameStatus -> onRenameStatus(action.status, action.index)
             is SettingsActions.ShowRenameStatusDialog -> onShowRenameStatusDialog(action.index)
+            is SettingsActions.SaveNewStatusesOrder -> onSaveNewStatusesOrder(action.statuses)
         }
     }
 
@@ -166,5 +167,13 @@ class SettingsViewModel(
                 }
             }
         }
+    }
+
+    private fun onSaveNewStatusesOrder(statuses: List<String>) {
+        currentStatuses = statuses
+        statusRepository.rewriteStatuses(statuses)
+        _state.value = SettingsBodyState(
+            statuses = currentStatuses
+        )
     }
 }

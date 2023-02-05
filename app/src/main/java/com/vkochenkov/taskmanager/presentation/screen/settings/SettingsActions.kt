@@ -9,6 +9,8 @@ sealed class SettingsActions {
 
     data class ShowRenameStatusDialog(val index: Int) : SettingsActions()
 
+    data class SaveNewStatusesOrder(val statuses: List<String>) : SettingsActions()
+
     object CanselNewStatusDialog : SettingsActions()
 
     object CanselRenameStatusDialog : SettingsActions()
