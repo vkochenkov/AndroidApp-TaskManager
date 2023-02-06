@@ -85,7 +85,7 @@ class ShowNotificationReceiver : BroadcastReceiver() {
             .setAutoCancel(true)
             .build()
 
-        val notificationId = (Calendar.getInstance().timeInMillis / 1000).toInt() // create unic id
+        val notificationId = (Calendar.getInstance().timeInMillis / 1000).toInt() // create uniq id
         notificationManager.notify(notificationId, notification)
 
         CoroutineScope(SupervisorJob()).launch {

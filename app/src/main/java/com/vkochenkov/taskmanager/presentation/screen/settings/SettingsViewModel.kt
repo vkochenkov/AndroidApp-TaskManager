@@ -20,7 +20,7 @@ class SettingsViewModel(
     var currentStatuses: List<String> = statusRepository.getStatuses()
 
     private var _state: MutableState<SettingsBodyState> =
-        mutableStateOf(SettingsBodyState.Content(statuses = currentStatuses))
+        mutableStateOf(SettingsBodyState(statuses = currentStatuses))
     val state: State<SettingsBodyState> get() = _state
 
     val onAction = { action: SettingsActions ->
@@ -42,35 +42,35 @@ class SettingsViewModel(
     }
 
     private fun onShowNewStatusDialog() {
-        _state.value = SettingsBodyState.Content(
+        _state.value = SettingsBodyState(
             statuses = currentStatuses,
             showNewStatusDialog = true
         )
     }
 
     private fun onShowRenameStatusDialog(index: Int) {
-        _state.value = SettingsBodyState.Content(
+        _state.value = SettingsBodyState(
             statuses = currentStatuses,
             renameStatusIndex = index
         )
     }
 
     private fun onCancelNewStatusDialog() {
-        _state.value = SettingsBodyState.Content(
+        _state.value = SettingsBodyState(
             statuses = currentStatuses,
             showNewStatusDialog = false
         )
     }
 
     private fun onCancelRenameStatusDialog() {
-        _state.value = SettingsBodyState.Content(
+        _state.value = SettingsBodyState(
             statuses = currentStatuses,
             renameStatusIndex = null
         )
     }
 
     private fun onCancelCantDeleteStatusDialog() {
-        _state.value = SettingsBodyState.Content(
+        _state.value = SettingsBodyState(
             statuses = currentStatuses,
             showCantDeleteStatusDialog = null
         )
@@ -79,7 +79,7 @@ class SettingsViewModel(
     private fun onDeleteStatus(index: Int) {
         if (currentStatuses.size > 1) {
             viewModelScope.launch {
-                _state.value = SettingsBodyState.Content(
+                _state.value = SettingsBodyState(
                     statuses = currentStatuses,
                     loadingStatusIndex = index
                 )
@@ -95,20 +95,20 @@ class SettingsViewModel(
                     modifiedStatuses.removeAt(index)
                     statusRepository.rewriteStatuses(modifiedStatuses)
                     currentStatuses = modifiedStatuses
-                    _state.value = SettingsBodyState.Content(
+                    _state.value = SettingsBodyState(
                         statuses = currentStatuses,
                     )
                 } else {
-                    _state.value = SettingsBodyState.Content(
+                    _state.value = SettingsBodyState(
                         statuses = currentStatuses,
-                        showCantDeleteStatusDialog = SettingsBodyState.Content.ReasonCantDeleteStatus.SAME
+                        showCantDeleteStatusDialog = SettingsBodyState.ReasonCantDeleteStatus.SAME
                     )
                 }
             }
         } else {
-            _state.value = SettingsBodyState.Content(
+            _state.value = SettingsBodyState(
                 statuses = currentStatuses,
-                showCantDeleteStatusDialog = SettingsBodyState.Content.ReasonCantDeleteStatus.LAST
+                showCantDeleteStatusDialog = SettingsBodyState.ReasonCantDeleteStatus.LAST
             )
         }
     }
@@ -118,7 +118,7 @@ class SettingsViewModel(
         modifiedStatuses.add(status)
         statusRepository.rewriteStatuses(modifiedStatuses)
         currentStatuses = modifiedStatuses
-        _state.value = SettingsBodyState.Content(
+        _state.value = SettingsBodyState(
             statuses = currentStatuses
         )
     }
@@ -127,7 +127,7 @@ class SettingsViewModel(
         val oldStatusName = currentStatuses.get(index)
 
         viewModelScope.launch {
-            _state.value = SettingsBodyState.Content(
+            _state.value = SettingsBodyState(
                 statuses = currentStatuses,
                 loadingStatusIndex = index
             )
@@ -135,7 +135,7 @@ class SettingsViewModel(
                 taskRepository.getTasksByStatus(oldStatusName)
             }.onFailure {
                 // ignore error
-                _state.value = SettingsBodyState.Content(
+                _state.value = SettingsBodyState(
                     statuses = currentStatuses
                 )
             }.onSuccess { tasks ->
@@ -151,7 +151,7 @@ class SettingsViewModel(
                     taskRepository.saveTasks(updatedTasks)
                 }.onFailure {
                     // ignore error
-                    _state.value = SettingsBodyState.Content(
+                    _state.value = SettingsBodyState(
                         statuses = currentStatuses
                     )
                 }.onSuccess {
@@ -160,7 +160,7 @@ class SettingsViewModel(
                     modifiedStatuses.add(index, status)
                     currentStatuses = modifiedStatuses
                     statusRepository.rewriteStatuses(modifiedStatuses)
-                    _state.value = SettingsBodyState.Content(
+                    _state.value = SettingsBodyState(
                         statuses = currentStatuses
                     )
                 }

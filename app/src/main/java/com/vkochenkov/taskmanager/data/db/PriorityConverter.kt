@@ -3,7 +3,7 @@ package com.vkochenkov.taskmanager.data.db
 import androidx.room.TypeConverter
 import com.vkochenkov.taskmanager.data.model.Task
 
-class Converters {
+class PriorityConverter {
 
     @TypeConverter
     fun toPriority(value: Int) = enumValues<Task.Priority>()[value]
