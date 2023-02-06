@@ -18,6 +18,7 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.vkochenkov.taskmanager.R
+import com.vkochenkov.taskmanager.presentation.components.CustomScaffold
 import com.vkochenkov.taskmanager.presentation.theme.TaskManagerTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -30,7 +31,7 @@ fun SettingsBody(
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
     ) {
-        Scaffold(
+        CustomScaffold(
             topBar = {
                 CenterAlignedTopAppBar(
                     title = {
@@ -50,7 +51,8 @@ fun SettingsBody(
                         )
                     }
                 )
-            }
+            },
+            isBlockInteractionContent = state.loadingStatusIndex != null
         ) { padding ->
             if (state.showNewStatusDialog) {
                 if (state.statuses.size < 5) {
@@ -298,21 +300,6 @@ fun SettingsBody(
                         Divider()
                     }
                 }
-            }
-            // Block interaction when loading
-            // todo move to scaffold
-            if (state.loadingStatusIndex != null) {
-                Box(
-                    Modifier
-                        .fillMaxSize()
-                        .clickable(
-                            indication = null, // Disable ripple effect
-                            interactionSource = remember { MutableInteractionSource() },
-                            onClick = {
-                                // Do nothing
-                            }
-                        ),
-                )
             }
         }
     }
