@@ -2,16 +2,10 @@ package com.vkochenkov.taskmanager.presentation.screen.main
 
 import com.vkochenkov.taskmanager.data.model.Task
 
-sealed class MainBodyState {
+data class MainBodyState(
+    val tasksList: List<Task> = listOf(),
+    val statusesList: List<String> = listOf(),
+    val isLoadingPage: Boolean = false,
+    val isErrorPage: Boolean = false
+)
 
-    data class Content(
-        val tasksList: List<Task>,
-        val statusesList: List<String>
-    ) : MainBodyState()
-
-    object Empty: MainBodyState()
-
-    object Error: MainBodyState()
-
-    object Loading: MainBodyState()
-}

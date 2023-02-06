@@ -19,7 +19,7 @@ class MainViewModel(
 ) : BaseViewModel() {
 
     private var _state: MutableState<MainBodyState> =
-        mutableStateOf(MainBodyState.Loading)
+        mutableStateOf(MainBodyState(isLoadingPage = true))
     val state: State<MainBodyState> get() = _state
 
     val onAction = { action: MainActions ->
@@ -37,16 +37,12 @@ class MainViewModel(
 
         viewModelScope.launch {
             runCatching {
-                _state.value = MainBodyState.Loading
+                _state.value = MainBodyState(isLoadingPage = true)
                 taskRepository.getAllTasks()
             }.onFailure {
-                _state.value = MainBodyState.Error
+                _state.value = MainBodyState(isErrorPage = true)
             }.onSuccess {
-                if (it.isNotEmpty()) {
-                    _state.value = MainBodyState.Content(it, statuses)
-                } else {
-                    _state.value = MainBodyState.Empty
-                }
+                _state.value = MainBodyState(it, statuses)
             }
         }
     }
@@ -59,9 +55,7 @@ class MainViewModel(
         navController.navigate(Destination.Details.passArguments(id.toString()))
     }
 
-
     private fun onOpenSettings() {
         navController.navigate(Destination.Settings.route)
     }
-
 }

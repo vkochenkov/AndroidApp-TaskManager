@@ -24,7 +24,8 @@ fun CustomScaffold(
     contentColor: Color = contentColorFor(containerColor),
     contentWindowInsets: WindowInsets = ScaffoldDefaults.contentWindowInsets,
     isBlockInteractionContent: Boolean = false,
-    isLoading: Boolean = false,
+    isLoadingPage: Boolean = false,
+    isErrorPage: Boolean = false,
     content: @Composable (PaddingValues) -> Unit
 ) {
     Scaffold(
@@ -38,9 +39,9 @@ fun CustomScaffold(
         contentColor = contentColor,
         contentWindowInsets = contentWindowInsets,
         content = {
-            if (isLoading) {
+            if (isLoadingPage) {
                 Column(
-                    modifier = modifier
+                    modifier = Modifier.padding(it)
                         .fillMaxSize(),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
@@ -49,6 +50,8 @@ fun CustomScaffold(
                         modifier = Modifier.size(60.dp)
                     )
                 }
+            } else if (isErrorPage) {
+                ErrorState(modifier = Modifier.padding(it))
             } else {
                 content.invoke(it)
             }
