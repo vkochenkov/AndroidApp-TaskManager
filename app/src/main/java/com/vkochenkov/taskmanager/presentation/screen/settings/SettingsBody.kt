@@ -18,6 +18,7 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.vkochenkov.taskmanager.R
+import com.vkochenkov.taskmanager.presentation.components.CustomScaffold
 import com.vkochenkov.taskmanager.presentation.theme.TaskManagerTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -30,7 +31,7 @@ fun SettingsBody(
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
     ) {
-        Scaffold(
+        CustomScaffold(
             topBar = {
                 CenterAlignedTopAppBar(
                     title = {
@@ -50,297 +51,260 @@ fun SettingsBody(
                         )
                     }
                 )
-            }
+            },
+            isBlockInteractionContent = state.loadingStatusIndex != null
         ) { padding ->
-            when (state) {
-                is SettingsBodyState.Content -> ContentState(
-                    padding,
-                    onAction,
-                    state.statuses,
-                    state.showNewStatusDialog,
-                    state.showCantDeleteStatusDialog,
-                    state.loadingStatusIndex,
-                    state.renameStatusIndex
-                )
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun ContentState(
-    padding: PaddingValues,
-    onAction: (SettingsActions) -> Unit,
-    statuses: List<String>,
-    showNewStatusDialog: Boolean,
-    showCantDeleteStatusDialog: SettingsBodyState.Content.ReasonCantDeleteStatus?,
-    loadingStatusIndex: Int?,
-    renameStatusIndex: Int?
-) {
-
-    if (showNewStatusDialog) {
-        if (statuses.size < 5) {
-            var statusStr by remember {
-                mutableStateOf("")
-            }
-            var isErrorSymbols by remember {
-                mutableStateOf(false)
-            }
-            var isErrorSameItem by remember {
-                mutableStateOf(false)
-            }
-            AlertDialog(
-                onDismissRequest = {
-                    onAction.invoke(SettingsActions.CanselNewStatusDialog)
-                },
-                title = {
-                    Text(text = stringResource(R.string.settings_new_status_dialog_title))
-                },
-                text = {
-                    Column {
-                        OutlinedTextField(
-                            isError = isErrorSymbols || isErrorSameItem,
-                            label = {
-                                if (isErrorSymbols) {
-                                    Text(
-                                        text = stringResource(R.string.error_wrong_number),
-                                        color = MaterialTheme.colorScheme.error,
-                                    )
-                                } else if (isErrorSameItem) {
-                                    Text(
-                                        text = stringResource(R.string.settings_new_status_same),
-                                        color = MaterialTheme.colorScheme.error,
-                                    )
-                                }
-                            },
-                            modifier = Modifier.fillMaxWidth(),
-                            value = statusStr,
-                            onValueChange = {
-                                isErrorSymbols = false
-                                isErrorSameItem = false
-                                statusStr = it
-                            }
-                        )
+            if (state.showNewStatusDialog) {
+                if (state.statuses.size < 5) {
+                    var statusStr by remember {
+                        mutableStateOf("")
                     }
-                },
-                confirmButton = {
-                    Button(
-                        onClick = {
+                    var isErrorSymbols by remember {
+                        mutableStateOf(false)
+                    }
+                    var isErrorSameItem by remember {
+                        mutableStateOf(false)
+                    }
+                    AlertDialog(
+                        onDismissRequest = {
                             onAction.invoke(SettingsActions.CanselNewStatusDialog)
-                        }) {
-                        Text(stringResource(R.string.settings_new_status_dialog_btn_dismiss))
-                    }
-
-                    Button(
-                        onClick = {
-                            if (statusStr.length in 1..19) {
-                                isErrorSymbols = false
-                                if (!statuses.contains(statusStr)) {
-                                    isErrorSameItem = false
-                                    onAction.invoke(SettingsActions.AddNewStatus(statusStr))
-                                } else {
-                                    isErrorSameItem = true
-                                }
-                            } else {
-                                isErrorSymbols = true
+                        },
+                        title = {
+                            Text(text = stringResource(R.string.settings_new_status_dialog_title))
+                        },
+                        text = {
+                            Column {
+                                OutlinedTextField(
+                                    isError = isErrorSymbols || isErrorSameItem,
+                                    label = {
+                                        if (isErrorSymbols) {
+                                            Text(
+                                                text = stringResource(R.string.error_wrong_number),
+                                                color = MaterialTheme.colorScheme.error,
+                                            )
+                                        } else if (isErrorSameItem) {
+                                            Text(
+                                                text = stringResource(R.string.settings_new_status_same),
+                                                color = MaterialTheme.colorScheme.error,
+                                            )
+                                        }
+                                    },
+                                    modifier = Modifier.fillMaxWidth(),
+                                    value = statusStr,
+                                    onValueChange = {
+                                        isErrorSymbols = false
+                                        isErrorSameItem = false
+                                        statusStr = it
+                                    }
+                                )
                             }
-                        }
-                    ) {
-                        Text(stringResource(R.string.settings_new_status_dialog_btn_confirm))
-                    }
-                }
-            )
-        } else {
-            AlertDialog(
-                onDismissRequest = {
-                    onAction.invoke(SettingsActions.CanselNewStatusDialog)
-                },
-                title = {
-                    Text(text = stringResource(R.string.settings_new_status_dialog_title))
-                },
-                text = {
-                    Text(text = stringResource(R.string.settings_new_status_dialog_sorry_text))
-                },
-                confirmButton = {
-                    Button(
-                        onClick = {
-                            onAction.invoke(SettingsActions.CanselNewStatusDialog)
-                        }) {
-                        Text(stringResource(R.string.settings_status_btn_ok))
-                    }
-                }
-            )
-        }
-    }
+                        },
+                        confirmButton = {
+                            Button(
+                                onClick = {
+                                    onAction.invoke(SettingsActions.CanselNewStatusDialog)
+                                }) {
+                                Text(stringResource(R.string.settings_new_status_dialog_btn_dismiss))
+                            }
 
-    showCantDeleteStatusDialog?.let { reason ->
-        AlertDialog(
-            onDismissRequest = {
-                onAction.invoke(SettingsActions.CanselCantDeleteStatusDialog)
-            },
-            title = {
-                Text(text = stringResource(R.string.settings_cant_delete_status_dialog_title))
-            },
-            text = {
-                Text(
-                    text = stringResource(
-                        when (reason) {
-                            SettingsBodyState.Content.ReasonCantDeleteStatus.LAST -> R.string.settings_cant_delete_status_dialog_sorry_text_last
-                            SettingsBodyState.Content.ReasonCantDeleteStatus.SAME -> R.string.settings_cant_delete_status_dialog_sorry_text_same
+                            Button(
+                                onClick = {
+                                    if (statusStr.length in 1..19) {
+                                        isErrorSymbols = false
+                                        if (!state.statuses.contains(statusStr)) {
+                                            isErrorSameItem = false
+                                            onAction.invoke(SettingsActions.AddNewStatus(statusStr))
+                                        } else {
+                                            isErrorSameItem = true
+                                        }
+                                    } else {
+                                        isErrorSymbols = true
+                                    }
+                                }
+                            ) {
+                                Text(stringResource(R.string.settings_new_status_dialog_btn_confirm))
+                            }
                         }
                     )
-                )
-            },
-            confirmButton = {
-                Button(
-                    onClick = {
+                } else {
+                    AlertDialog(
+                        onDismissRequest = {
+                            onAction.invoke(SettingsActions.CanselNewStatusDialog)
+                        },
+                        title = {
+                            Text(text = stringResource(R.string.settings_new_status_dialog_title))
+                        },
+                        text = {
+                            Text(text = stringResource(R.string.settings_new_status_dialog_sorry_text))
+                        },
+                        confirmButton = {
+                            Button(
+                                onClick = {
+                                    onAction.invoke(SettingsActions.CanselNewStatusDialog)
+                                }) {
+                                Text(stringResource(R.string.settings_status_btn_ok))
+                            }
+                        }
+                    )
+                }
+            }
+
+            state.showCantDeleteStatusDialog?.let { reason ->
+                AlertDialog(
+                    onDismissRequest = {
                         onAction.invoke(SettingsActions.CanselCantDeleteStatusDialog)
-                    }) {
-                    Text(stringResource(R.string.settings_status_btn_ok))
-                }
-            }
-        )
-    }
-
-    renameStatusIndex?.let { index ->
-        var statusStr by remember {
-            mutableStateOf(statuses[index])
-        }
-        var isErrorSymbols by remember {
-            mutableStateOf(false)
-        }
-        var isErrorSameItem by remember {
-            mutableStateOf(false)
-        }
-        AlertDialog(
-            onDismissRequest = {
-                onAction.invoke(SettingsActions.CanselNewStatusDialog)
-            },
-            title = {
-                Text(text = stringResource(R.string.settings_rename_status_dialog_title))
-            },
-            text = {
-                Column {
-                    OutlinedTextField(
-                        isError = isErrorSymbols || isErrorSameItem,
-                        label = {
-                            if (isErrorSymbols) {
-                                Text(
-                                    text = stringResource(R.string.error_wrong_number),
-                                    color = MaterialTheme.colorScheme.error,
-                                )
-                            } else if (isErrorSameItem) {
-                                Text(
-                                    text = stringResource(R.string.settings_new_status_same),
-                                    color = MaterialTheme.colorScheme.error,
-                                )
-                            }
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                        value = statusStr,
-                        onValueChange = {
-                            isErrorSymbols = false
-                            isErrorSameItem = false
-                            statusStr = it
-                        }
-                    )
-                }
-            },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        onAction.invoke(SettingsActions.CanselRenameStatusDialog)
-                    }) {
-                    Text(stringResource(R.string.settings_new_status_dialog_btn_dismiss))
-                }
-
-                Button(
-                    onClick = {
-                        if (statusStr.length in 1..19) {
-                            isErrorSymbols = false
-                            if (!statuses.contains(statusStr)) {
-                                isErrorSameItem = false
-                                onAction.invoke(SettingsActions.RenameStatus(statusStr, index))
-                            } else {
-                                isErrorSameItem = true
-                            }
-                        } else {
-                            isErrorSymbols = true
-                        }
-                    }
-                ) {
-                    Text(stringResource(R.string.settings_rename_status_dialog_btn_confirm))
-                }
-            }
-        )
-    }
-
-    Column(
-        modifier = Modifier.padding(paddingValues = padding)
-
-    ) {
-        LazyColumn(modifier = Modifier.padding(horizontal = 16.dp)) {
-            item {
-                Divider()
-            }
-            // todo add drag and drop for change status position
-            item {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(text = stringResource(R.string.setting_screen_statuses))
-                    IconButton(onClick = {
-                        onAction.invoke(SettingsActions.ShowNewStatusDialog)
-                    }) {
-                        Icon(Icons.Default.Add, contentDescription = null)
-                    }
-                }
-                statuses.forEachIndexed { index, status ->
-                    AssistChip(
-                        onClick = {
-                            onAction.invoke(SettingsActions.ShowRenameStatusDialog(index))
-                        },
-                        label = { Text(status) },
-                        trailingIcon = {
-                            if (loadingStatusIndex == index) {
-                                IconButton(onClick = {
-                                    // do nothing
-                                }) {
-                                    CircularProgressIndicator(modifier = Modifier.size(25.dp))
+                    },
+                    title = {
+                        Text(text = stringResource(R.string.settings_cant_delete_status_dialog_title))
+                    },
+                    text = {
+                        Text(
+                            text = stringResource(
+                                when (reason) {
+                                    SettingsBodyState.ReasonCantDeleteStatus.LAST -> R.string.settings_cant_delete_status_dialog_sorry_text_last
+                                    SettingsBodyState.ReasonCantDeleteStatus.SAME -> R.string.settings_cant_delete_status_dialog_sorry_text_same
                                 }
-                            } else {
-                                IconButton(onClick = {
-                                    onAction.invoke(SettingsActions.DeleteStatus(index))
-                                }) {
-                                    Icon(Icons.Default.Delete, contentDescription = null)
+                            )
+                        )
+                    },
+                    confirmButton = {
+                        Button(
+                            onClick = {
+                                onAction.invoke(SettingsActions.CanselCantDeleteStatusDialog)
+                            }) {
+                            Text(stringResource(R.string.settings_status_btn_ok))
+                        }
+                    }
+                )
+            }
+
+            state.renameStatusIndex?.let { index ->
+                var statusStr by remember {
+                    mutableStateOf(state.statuses[index])
+                }
+                var isErrorSymbols by remember {
+                    mutableStateOf(false)
+                }
+                var isErrorSameItem by remember {
+                    mutableStateOf(false)
+                }
+                AlertDialog(
+                    onDismissRequest = {
+                        onAction.invoke(SettingsActions.CanselNewStatusDialog)
+                    },
+                    title = {
+                        Text(text = stringResource(R.string.settings_rename_status_dialog_title))
+                    },
+                    text = {
+                        Column {
+                            OutlinedTextField(
+                                isError = isErrorSymbols || isErrorSameItem,
+                                label = {
+                                    if (isErrorSymbols) {
+                                        Text(
+                                            text = stringResource(R.string.error_wrong_number),
+                                            color = MaterialTheme.colorScheme.error,
+                                        )
+                                    } else if (isErrorSameItem) {
+                                        Text(
+                                            text = stringResource(R.string.settings_new_status_same),
+                                            color = MaterialTheme.colorScheme.error,
+                                        )
+                                    }
+                                },
+                                modifier = Modifier.fillMaxWidth(),
+                                value = statusStr,
+                                onValueChange = {
+                                    isErrorSymbols = false
+                                    isErrorSameItem = false
+                                    statusStr = it
+                                }
+                            )
+                        }
+                    },
+                    confirmButton = {
+                        Button(
+                            onClick = {
+                                onAction.invoke(SettingsActions.CanselRenameStatusDialog)
+                            }) {
+                            Text(stringResource(R.string.settings_new_status_dialog_btn_dismiss))
+                        }
+
+                        Button(
+                            onClick = {
+                                if (statusStr.length in 1..19) {
+                                    isErrorSymbols = false
+                                    if (!state.statuses.contains(statusStr)) {
+                                        isErrorSameItem = false
+                                        onAction.invoke(SettingsActions.RenameStatus(statusStr, index))
+                                    } else {
+                                        isErrorSameItem = true
+                                    }
+                                } else {
+                                    isErrorSymbols = true
                                 }
                             }
+                        ) {
+                            Text(stringResource(R.string.settings_rename_status_dialog_btn_confirm))
                         }
-                    )
-                    Spacer(modifier = Modifier.size(8.dp))
+                    }
+                )
+            }
+
+            Column(
+                modifier = Modifier.padding(paddingValues = padding)
+
+            ) {
+                LazyColumn(modifier = Modifier.padding(horizontal = 16.dp)) {
+                    item {
+                        Divider()
+                    }
+                    // todo add change status position
+                    item {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(text = stringResource(R.string.setting_screen_statuses))
+                            IconButton(onClick = {
+                                onAction.invoke(SettingsActions.ShowNewStatusDialog)
+                            }) {
+                                Icon(Icons.Default.Add, contentDescription = null)
+                            }
+                        }
+                        state.statuses.forEachIndexed { index, status ->
+                            AssistChip(
+                                onClick = {
+                                    onAction.invoke(SettingsActions.ShowRenameStatusDialog(index))
+                                },
+                                label = { Text(status) },
+                                trailingIcon = {
+                                    if (state.loadingStatusIndex == index) {
+                                        IconButton(onClick = {
+                                            // do nothing
+                                        }) {
+                                            CircularProgressIndicator(modifier = Modifier.size(25.dp))
+                                        }
+                                    } else {
+                                        IconButton(onClick = {
+                                            onAction.invoke(SettingsActions.DeleteStatus(index))
+                                        }) {
+                                            Icon(Icons.Default.Delete, contentDescription = null)
+                                        }
+                                    }
+                                }
+                            )
+                            Spacer(modifier = Modifier.size(8.dp))
+                        }
+                        Divider()
+                    }
                 }
-                Divider()
             }
         }
-    }
-    // Block interaction when loading
-    if (loadingStatusIndex != null) {
-        Box(
-            Modifier
-                .fillMaxSize()
-                .clickable(
-                    indication = null, // Disable ripple effect
-                    interactionSource = remember { MutableInteractionSource() },
-                    onClick = {
-                        // Do nothing
-                    }
-                ),
-        )
     }
 }
+
 
 
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_NO, device = Devices.PIXEL_4)
@@ -348,7 +312,7 @@ fun ContentState(
 fun Preview() {
     TaskManagerTheme {
         SettingsBody(
-            state = SettingsBodyState.Content(listOf("status1", "status2"))
+            state = SettingsBodyState(listOf("status1", "status2"))
         ) {}
     }
 }

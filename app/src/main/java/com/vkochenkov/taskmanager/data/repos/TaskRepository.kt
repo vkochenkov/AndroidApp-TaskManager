@@ -4,7 +4,7 @@ import com.vkochenkov.taskmanager.data.model.Task
 import com.vkochenkov.taskmanager.data.db.TaskDao
 
 class TaskRepository(
-    val dao: TaskDao
+    private val dao: TaskDao
 ) {
     suspend fun getAllTasks(): List<Task> {
         return dao.getAll()

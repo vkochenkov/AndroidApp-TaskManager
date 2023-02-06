@@ -9,6 +9,7 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
@@ -45,7 +46,7 @@ class DetailsViewModel(
 
     private var _state: MutableState<DetailsBodyState> =
         mutableStateOf(DetailsBodyState.Loading)
-    val state get() = _state
+    val state: State<DetailsBodyState> get() = _state
 
     // todo refactor! and fix clickable tob bar buttons when loading etc...
     private val statuses = statusRepository.getStatuses()

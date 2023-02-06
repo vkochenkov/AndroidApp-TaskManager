@@ -9,7 +9,6 @@ import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
@@ -25,6 +24,7 @@ import com.google.accompanist.pager.PagerState
 import com.google.accompanist.pager.rememberPagerState
 import com.vkochenkov.taskmanager.R
 import com.vkochenkov.taskmanager.data.model.Task
+import com.vkochenkov.taskmanager.presentation.components.CustomScaffold
 import com.vkochenkov.taskmanager.presentation.components.ErrorState
 import com.vkochenkov.taskmanager.presentation.theme.TaskManagerTheme
 import com.vkochenkov.taskmanager.presentation.utils.getColor
@@ -42,7 +42,7 @@ fun MainBody(
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
     ) {
-        Scaffold(
+        CustomScaffold(
             topBar = {
                 CenterAlignedTopAppBar(
                     title = {
@@ -99,111 +99,81 @@ fun MainBody(
                         contentDescription = stringResource(R.string.main_btn_add_task)
                     )
                 }
-            }
+            },
+            isLoadingPage = state.isLoadingPage,
+            isErrorPage = state.isErrorPage
         ) { padding ->
-            when (state) {
-                is MainBodyState.Content -> ContentState(
-                    padding,
-                    state.tasksList,
-                    state.statusesList,
-                    pagerState,
-                    onAction
-                )
-                is MainBodyState.Empty -> ErrorState(
+
+            if (state.tasksList.isEmpty() || state.statusesList.isEmpty()) {
+                ErrorState(
                     Modifier.padding(padding),
                     text = stringResource(id = R.string.main_empty_text)
                 )
-                is MainBodyState.Error -> ErrorState(Modifier.padding(padding))
-                is MainBodyState.Loading -> LoadingState(Modifier.padding(padding))
-            }
-        }
-    }
-}
+            } else {
 
-@OptIn(ExperimentalPagerApi::class)
-@Composable
-private fun ContentState(
-    padding: PaddingValues,
-    tasksList: List<Task>,
-    statusesList: List<String>,
-    pagerState: PagerState,
-    onAction: (MainActions) -> Unit
-) {
-    var selectedTabIndex by rememberSaveable(statusesList) {
-        if (pagerState.currentPage < statusesList.size) {
-            mutableStateOf(pagerState.currentPage)
-        } else {
-            mutableStateOf(0)
-        }
-    }
-    val coroutineScope = rememberCoroutineScope()
-
-    Column(
-        modifier = Modifier.padding(padding)
-    ) {
-        Divider()
-        TabRow(
-            selectedTabIndex = selectedTabIndex
-        ) {
-            statusesList.forEachIndexed { index, status ->
-                Tab(
-                    selected = false,
-                    onClick = {
-                        selectedTabIndex = index
-                        coroutineScope.launch {
-                            pagerState.animateScrollToPage(selectedTabIndex)
-                        }
+                var selectedTabIndex by rememberSaveable(state.statusesList) {
+                    if (pagerState.currentPage < state.statusesList.size) {
+                        mutableStateOf(pagerState.currentPage)
+                    } else {
+                        mutableStateOf(0)
                     }
+                }
+                val coroutineScope = rememberCoroutineScope()
+
+                Column(
+                    modifier = Modifier.padding(padding)
                 ) {
-                    Spacer(modifier = Modifier.size(12.dp))
-                    Text(text = status)
-                    Spacer(modifier = Modifier.size(12.dp))
-                }
-            }
-        }
-        HorizontalPager(
-            state = pagerState,
-            count = statusesList.size
-        ) { pageIndex ->
-            selectedTabIndex = pagerState.currentPage
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxHeight(),
-                contentPadding = PaddingValues(vertical = 16.dp, horizontal = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                val filtered = tasksList.filter { it.status == statusesList[pageIndex] }
-                if (filtered.isNotEmpty()) {
-                    for (task in filtered) {
-                        item {
-                            TaskCard(task, onAction)
+                    Divider()
+                    TabRow(
+                        selectedTabIndex = selectedTabIndex
+                    ) {
+                        state.statusesList.forEachIndexed { index, status ->
+                            Tab(
+                                selected = false,
+                                onClick = {
+                                    selectedTabIndex = index
+                                    coroutineScope.launch {
+                                        pagerState.animateScrollToPage(selectedTabIndex)
+                                    }
+                                }
+                            ) {
+                                Spacer(modifier = Modifier.size(12.dp))
+                                Text(text = status)
+                                Spacer(modifier = Modifier.size(12.dp))
+                            }
                         }
                     }
-                } else {
-                    item {
-                        ErrorState(
-                            text = stringResource(id = R.string.main_empty_text_status)
-                        )
+                    HorizontalPager(
+                        state = pagerState,
+                        count = state.statusesList.size
+                    ) { pageIndex ->
+                        selectedTabIndex = pagerState.currentPage
+                        LazyColumn(
+                            modifier = Modifier
+                                .fillMaxHeight(),
+                            contentPadding = PaddingValues(vertical = 16.dp, horizontal = 16.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            val filtered =
+                                state.tasksList.filter { it.status == state.statusesList[pageIndex] }
+                            if (filtered.isNotEmpty()) {
+                                for (task in filtered) {
+                                    item {
+                                        TaskCard(task, onAction)
+                                    }
+                                }
+                            } else {
+                                item {
+                                    ErrorState(
+                                        text = stringResource(id = R.string.main_empty_text_status)
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
             }
         }
-    }
-}
-
-@Composable
-private fun LoadingState(
-    modifier: Modifier = Modifier
-) {
-    Column(
-        modifier = modifier
-            .fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        CircularProgressIndicator(
-            modifier = Modifier.size(60.dp)
-        )
     }
 }
 
@@ -238,7 +208,7 @@ private fun TaskCard(
 fun PreviewFull() {
     TaskManagerTheme {
         MainBody(
-            MainBodyState.Content(
+            MainBodyState(
                 listOf(
                     Task(
                         id = 0,
@@ -272,7 +242,7 @@ fun PreviewFull() {
 fun PreviewEmpty() {
     TaskManagerTheme {
         MainBody(
-            MainBodyState.Content(
+            MainBodyState(
                 listOf(),
                 listOf()
             )

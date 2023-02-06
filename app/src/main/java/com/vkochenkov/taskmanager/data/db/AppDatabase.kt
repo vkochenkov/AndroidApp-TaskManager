@@ -6,7 +6,7 @@ import androidx.room.TypeConverters
 import com.vkochenkov.taskmanager.data.model.Task
 
 @Database(entities = [Task::class], version = 4)
-@TypeConverters(Converters::class)
+@TypeConverters(PriorityConverter::class)
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun taskDao(): TaskDao
