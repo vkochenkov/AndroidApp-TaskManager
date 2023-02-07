@@ -30,27 +30,35 @@ fun Task.Priority.getNameForUi(): String {
         .replaceFirstChar { it.titlecase(Locale.ROOT) }
 }
 
-// hh:mm
 fun Task.getFormattedNotificationTime(): String {
-    notificationTime?.let {
-        val calendar = Calendar.getInstance()
-        calendar.timeInMillis = notificationTime
-        val hour: Int = calendar.get(Calendar.HOUR_OF_DAY)
-        val minute: Int = calendar.get(Calendar.MINUTE)
-        return "${zeroPresence(hour)}:${zeroPresence(minute)}"
-    } ?: return ""
+    return notificationTime?.getFormattedTime() ?: return ""
+}
+
+fun Task.getFormattedNotificationDate(): String {
+    return notificationTime?.getFormattedDate() ?: ""
 }
 
 // dd.mm.yyyy
-fun Task.getFormattedNotificationDate(): String {
-    notificationTime?.let {
+fun Long.getFormattedDate(): String {
+    this.let {
         val calendar = Calendar.getInstance()
-        calendar.timeInMillis = notificationTime
+        calendar.timeInMillis = this
         val year: Int = calendar.get(Calendar.YEAR)
         val month: Int = calendar.get(Calendar.MONTH) + 1
         val day: Int = calendar.get(Calendar.DAY_OF_MONTH)
         return "${zeroPresence(day)}.${zeroPresence(month)}.$year"
-    } ?: return ""
+    }
+}
+
+// hh:mm
+fun Long.getFormattedTime(): String {
+    this.let {
+        val calendar = Calendar.getInstance()
+        calendar.timeInMillis = this
+        val hour: Int = calendar.get(Calendar.HOUR_OF_DAY)
+        val minute: Int = calendar.get(Calendar.MINUTE)
+        return "${zeroPresence(hour)}:${zeroPresence(minute)}"
+    }
 }
 
 private fun zeroPresence(int: Int): String {

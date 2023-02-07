@@ -27,10 +27,7 @@ import com.vkochenkov.taskmanager.R
 import com.vkochenkov.taskmanager.data.model.Task
 import com.vkochenkov.taskmanager.presentation.components.ErrorState
 import com.vkochenkov.taskmanager.presentation.theme.TaskManagerTheme
-import com.vkochenkov.taskmanager.presentation.utils.getColor
-import com.vkochenkov.taskmanager.presentation.utils.getFormattedNotificationDate
-import com.vkochenkov.taskmanager.presentation.utils.getFormattedNotificationTime
-import com.vkochenkov.taskmanager.presentation.utils.getNameForUi
+import com.vkochenkov.taskmanager.presentation.utils.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -225,6 +222,16 @@ private fun ContentState(
                         value = notificationTime,
                         onValueChange = {
                             notificationTime = it
+                        },
+                        trailingIcon = {
+                            IconButton(onClick = {
+                                notificationTime = System.currentTimeMillis().getFormattedTime()
+                            }) {
+                                Icon(
+                                    imageVector = Icons.Default.DateRange,
+                                    contentDescription = null
+                                )
+                            }
                         }
                     )
 
@@ -238,6 +245,16 @@ private fun ContentState(
                         value = notificationDate,
                         onValueChange = {
                             notificationDate = it
+                        },
+                        trailingIcon = {
+                            IconButton(onClick = {
+                                notificationDate = System.currentTimeMillis().getFormattedDate()
+                            }) {
+                                Icon(
+                                    imageVector = Icons.Default.DateRange,
+                                    contentDescription = null
+                                )
+                            }
                         }
                     )
                 }
