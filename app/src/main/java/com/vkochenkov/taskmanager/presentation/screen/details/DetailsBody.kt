@@ -228,7 +228,7 @@ private fun ContentState(
                                 notificationTime = System.currentTimeMillis().getFormattedTime()
                             }) {
                                 Icon(
-                                    imageVector = Icons.Default.DateRange,
+                                    painter = painterResource(id = R.drawable.ic_baseline_access_time_24),
                                     contentDescription = null
                                 )
                             }
