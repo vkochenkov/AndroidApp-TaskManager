@@ -26,4 +26,9 @@ sealed class DetailsActions {
     ) : DetailsActions()
 
     object RemoveNotification : DetailsActions()
+
+    object OpenStorageForAttach : DetailsActions()
+
+    data class OpenAttachment(val id: Int) : DetailsActions()
+
 }

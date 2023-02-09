@@ -9,10 +9,11 @@ data class Task(
     val creationDate: String,
     val updateDate: String,
     val title: String,
-    val description: String?,
+    val description: String? = null,
     val priority: Priority,
     val status: String,
-    val notificationTime: Long?
+    val notificationTime: Long? = null,
+    val attachments: List<String> = listOf()
 ) {
 
     enum class Priority {

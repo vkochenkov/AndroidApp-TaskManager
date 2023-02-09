@@ -5,7 +5,7 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.vkochenkov.taskmanager.data.model.Task
 
-@Database(entities = [Task::class], version = 4)
+@Database(entities = [Task::class], version = 5)
 @TypeConverters(PriorityConverter::class)
 abstract class AppDatabase : RoomDatabase() {
 

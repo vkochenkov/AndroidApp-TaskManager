@@ -2,27 +2,25 @@ package com.vkochenkov.taskmanager.presentation.screen.details
 
 import android.content.res.Configuration
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.vkochenkov.taskmanager.R
 import com.vkochenkov.taskmanager.data.model.Task
 import com.vkochenkov.taskmanager.presentation.components.ErrorState
@@ -368,7 +366,6 @@ private fun ContentState(
                 ) {
                     Text(
                         text = stringResource(R.string.details_priority) + task.priority.getNameForUi(),
-                        fontSize = 14.sp
                     )
                     Spacer(modifier = Modifier.size(4.dp))
                     Box(
@@ -413,7 +410,6 @@ private fun ContentState(
             ) {
                 Text(
                     text = stringResource(R.string.details_status) + task.status,
-                    fontSize = 14.sp
                 )
 
                 DropdownMenu(
@@ -433,6 +429,53 @@ private fun ContentState(
                         )
                     }
                 }
+            }
+        }
+
+        item {
+            Spacer(modifier = Modifier.size(8.dp))
+        }
+
+        item {
+            Box(modifier = Modifier
+                .fillMaxWidth()
+                .clickable {
+                    onAction.invoke(DetailsActions.OpenStorageForAttach)
+                }
+                .padding(vertical = 8.dp)
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_baseline_attachment_24),
+                        contentDescription = null
+                    )
+                    Spacer(modifier = Modifier.size(8.dp))
+                    Text(text = "Attach file")
+
+                }
+            }
+        }
+
+        item {
+            Spacer(modifier = Modifier.size(8.dp))
+        }
+
+        item {
+            // todo get id from attachments list
+            val id = 123
+            Row {
+                Box(
+                    modifier = Modifier
+                        .clickable {
+                            onAction.invoke(DetailsActions.OpenAttachment(id))
+                        }
+                        .clip(
+                            RoundedCornerShape(20.dp)
+                        )
+                        .size(72.dp)
+                        // todo change color
+                        .background(color = Color.Gray)
+                ) {}
             }
         }
     }
