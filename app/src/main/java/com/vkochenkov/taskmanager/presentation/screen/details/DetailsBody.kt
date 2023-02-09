@@ -10,12 +10,14 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -319,7 +321,13 @@ fun DetailsBody(
                             value = description,
                             onValueChange = {
                                 description = it
-                                onAction.invoke(DetailsActions.TaskChanged(state.task.copy(description = it)))
+                                onAction.invoke(
+                                    DetailsActions.TaskChanged(
+                                        state.task.copy(
+                                            description = it
+                                        )
+                                    )
+                                )
                             }
                         )
                     }
@@ -425,6 +433,53 @@ fun DetailsBody(
                                     )
                                 }
                             }
+                        }
+                    }
+
+                    item {
+                        Spacer(modifier = Modifier.size(8.dp))
+                    }
+
+                    item {
+                        Box(modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                onAction.invoke(DetailsActions.OpenStorageForAttach)
+                            }
+                            .padding(vertical = 8.dp)
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.ic_baseline_attachment_24),
+                                    contentDescription = null
+                                )
+                                Spacer(modifier = Modifier.size(8.dp))
+                                Text(text = "Attach file")
+
+                            }
+                        }
+                    }
+
+                    item {
+                        Spacer(modifier = Modifier.size(8.dp))
+                    }
+
+                    item {
+                        // todo get id from attachments list
+                        val id = 123
+                        Row {
+                            Box(
+                                modifier = Modifier
+                                    .clickable {
+                                        onAction.invoke(DetailsActions.OpenAttachment(id))
+                                    }
+                                    .clip(
+                                        RoundedCornerShape(20.dp)
+                                    )
+                                    .size(72.dp)
+                                    // todo change color
+                                    .background(color = Color.Gray)
+                            ) {}
                         }
                     }
                 }
