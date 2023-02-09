@@ -8,7 +8,6 @@ import org.koin.androidx.compose.koinViewModel
 fun DetailsScreen(
     navController: NavHostController
 ) {
-
     val viewModel: DetailsViewModel = koinViewModel()
     viewModel.navController = navController
 

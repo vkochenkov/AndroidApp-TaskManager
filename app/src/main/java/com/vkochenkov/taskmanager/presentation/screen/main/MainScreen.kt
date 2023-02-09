@@ -9,7 +9,6 @@ import org.koin.androidx.compose.koinViewModel
 fun MainScreen(
     navController: NavHostController
 ) {
-
     val viewModel: MainViewModel = koinViewModel()
     viewModel.navController = navController
 
