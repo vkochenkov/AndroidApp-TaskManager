@@ -42,14 +42,13 @@ class DetailsViewModel(
 
     private var currentTask: Task? = null
 
+    private val statuses = statusRepository.getStatuses()
+
     private var showDialogOnBack: Boolean = false
 
     private var _state: MutableState<DetailsBodyState> =
-        mutableStateOf(DetailsBodyState.Loading)
+        mutableStateOf(DetailsBodyState(currentTask, statuses))
     val state: State<DetailsBodyState> get() = _state
-
-    // todo refactor! and fix clickable tob bar buttons when loading etc...
-    private val statuses = statusRepository.getStatuses()
 
     val onAction = { action: DetailsActions ->
         when (action) {
@@ -74,21 +73,21 @@ class DetailsViewModel(
         if (taskIdFromNav.isNotNull()) {
             viewModelScope.launch {
                 runCatching {
-                    _state.value = DetailsBodyState.Loading
+                    _state.value = _state.value.copy(isLoadingPage = true)
                     taskRepository.getTask(taskIdFromNav!!.toInt())
                         ?: throw NoSuchElementException()
                 }.onFailure {
-                    _state.value = DetailsBodyState.Error
+                    _state.value = _state.value.copy(isLoadingPage = false, isErrorPage = true)
                 }.onSuccess {
                     currentTask = it
-                    _state.value = DetailsBodyState.Content(it, statuses)
+                    _state.value = DetailsBodyState(it, statuses)
                 }
             }
         } else {
             showDialogOnBack = true
             currentTask = createNewTask()
             currentTask?.let {
-                _state.value = DetailsBodyState.Content(
+                _state.value = DetailsBodyState(
                     it, statuses
                 )
             }
@@ -111,7 +110,7 @@ class DetailsViewModel(
 
     private fun onCancelBackDialog() {
         currentTask?.let { task ->
-            _state.value = DetailsBodyState.Content(
+            _state.value = DetailsBodyState(
                 task = task,
                 statuses = statuses,
                 showOnBackDialog = false
@@ -121,7 +120,7 @@ class DetailsViewModel(
 
     private fun onCancelDeleteDialog() {
         currentTask?.let { task ->
-            _state.value = DetailsBodyState.Content(
+            _state.value = DetailsBodyState(
                 task = task,
                 statuses = statuses,
                 showOnDeleteDialog = false
@@ -132,13 +131,13 @@ class DetailsViewModel(
     private fun onSaveTask() {
         currentTask?.let { task ->
             if (task.title.isEmpty() || task.title.length > TITLE_MAX_LENGTH) {
-                _state.value = DetailsBodyState.Content(
+                _state.value = DetailsBodyState(
                     task,
                     statuses = statuses,
                     showTitleValidation = true
                 )
             } else if (task.description != null && task.description.length > DESCRIPTION_MAX_LENGTH) {
-                _state.value = DetailsBodyState.Content(
+                _state.value = DetailsBodyState(
                     task,
                     statuses = statuses,
                     showDescriptionValidation = true
@@ -148,9 +147,9 @@ class DetailsViewModel(
                     runCatching {
                         taskRepository.saveTask(task)
                     }.onFailure {
-                        _state.value = DetailsBodyState.Error
+                        _state.value = _state.value.copy(isErrorPage = true)
                     }.onSuccess {
-                        _state.value = DetailsBodyState.Content(task, statuses)
+                        _state.value = DetailsBodyState(task, statuses)
                         navController.popBackStack()
                     }
                 }
@@ -161,7 +160,7 @@ class DetailsViewModel(
     private fun onBackPressed(showDialog: Boolean?) {
         showDialog?.let { showDialogOnBack = it }
         if (showDialogOnBack && currentTask != null) {
-            _state.value = DetailsBodyState.Content(
+            _state.value = DetailsBodyState(
                 task = currentTask!!,
                 statuses = statuses,
                 showOnBackDialog = true
@@ -173,13 +172,13 @@ class DetailsViewModel(
 
     private fun onTaskChanged(task: Task) {
         currentTask = task
-        _state.value = DetailsBodyState.Content(task, statuses)
+        _state.value = DetailsBodyState(task, statuses)
         showDialogOnBack = true
     }
 
     private fun onDeleteTask(showDialog: Boolean?) {
         if (showDialog == true && currentTask != null) {
-            _state.value = DetailsBodyState.Content(
+            _state.value = DetailsBodyState(
                 task = currentTask!!,
                 statuses = statuses,
                 showOnDeleteDialog = true
@@ -194,7 +193,7 @@ class DetailsViewModel(
                         taskRepository.deleteTask(it)
                     }
                 }.onFailure {
-                    _state.value = DetailsBodyState.Error
+                    _state.value = _state.value.copy(isErrorPage = true)
                 }.onSuccess {
                     navController.popBackStack()
                 }
@@ -204,7 +203,7 @@ class DetailsViewModel(
 
     private fun onCancelNotificationDialog() {
         currentTask?.let { task ->
-            _state.value = DetailsBodyState.Content(
+            _state.value = DetailsBodyState(
                 task = task,
                 statuses = statuses,
                 showNotificationDialog = false
@@ -214,7 +213,7 @@ class DetailsViewModel(
 
     private fun onShowNotificationDialog() {
         currentTask?.let { task ->
-            _state.value = DetailsBodyState.Content(
+            _state.value = DetailsBodyState(
                 task = task,
                 statuses = statuses,
                 showNotificationDialog = true
@@ -232,9 +231,9 @@ class DetailsViewModel(
                     taskRepository.saveTask(it)
                 }
             }.onFailure {
-                _state.value = DetailsBodyState.Error
+                _state.value = _state.value.copy(isErrorPage = true)
             }.onSuccess {
-                _state.value = DetailsBodyState.Content(
+                _state.value = DetailsBodyState(
                     task = currentTask!!,
                     statuses = statuses,
                     showNotificationDialog = false
@@ -321,13 +320,13 @@ class DetailsViewModel(
                     taskRepository.saveTask(task)
                 }.onSuccess {
                     showDialogOnBack = false
-                    _state.value = DetailsBodyState.Content(
+                    _state.value = DetailsBodyState(
                         task = task,
                         statuses = statuses,
                         showNotificationDialog = false
                     )
                 }.onFailure {
-                    _state.value = DetailsBodyState.Error
+                    _state.value = _state.value.copy(isErrorPage = true)
                 }
             }
         }

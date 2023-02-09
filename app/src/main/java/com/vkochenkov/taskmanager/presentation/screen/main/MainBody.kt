@@ -9,6 +9,7 @@ import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
@@ -192,14 +193,28 @@ private fun TaskCard(
         },
         colors = CardDefaults.cardColors(task.priority.getColor())
     ) {
-        Text(
-            modifier = Modifier.padding(16.dp),
-            text = task.title,
-            fontSize = 18.sp,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis,
-            color = Color.Black
-        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                modifier = Modifier.padding(16.dp).weight(1f),
+                text = task.title,
+                fontSize = 18.sp,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                color = Color.Black
+            )
+            if (task.notificationTime != null) {
+                Icon(
+                    modifier = Modifier.padding(16.dp),
+                    painter = painterResource(id = R.drawable.ic_baseline_notifications_active_24),
+                    contentDescription = null,
+                    tint = Color.Black
+                )
+            }
+        }
     }
 }
 
@@ -217,17 +232,17 @@ fun PreviewFull() {
                         title = "1 number number number number number number number number number number number number number",
                         description = "dddd ddd dd",
                         priority = Task.Priority.NORMAL,
-                        status = "In progress",
+                        status = "status1",
                         notificationTime = null
                     ),
                     Task(
                         1,
                         System.currentTimeMillis().toString(),
                         System.currentTimeMillis().toString(),
-                        "2 number number",
+                        "2 number numbdd dfffdf eeer",
                         "dddde rere dd",
                         Task.Priority.LOW,
-                        "In progress",
+                        "status1",
                         notificationTime = 100500
                     )
                 ),
