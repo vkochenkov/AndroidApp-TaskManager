@@ -1,5 +1,6 @@
 package com.vkochenkov.taskmanager.presentation.screen.details
 
+import android.net.Uri
 import com.vkochenkov.taskmanager.data.model.Task
 
 sealed class DetailsActions {
@@ -27,8 +28,7 @@ sealed class DetailsActions {
 
     object RemoveNotification : DetailsActions()
 
-    object OpenStorageForAttach : DetailsActions()
+    data class AttachFile(val uri: Uri) : DetailsActions()
 
-    data class OpenAttachment(val id: Int) : DetailsActions()
-
+    data class OpenAttachment(val attachment: String) : DetailsActions()
 }

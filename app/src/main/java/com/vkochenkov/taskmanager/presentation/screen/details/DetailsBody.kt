@@ -2,6 +2,8 @@ package com.vkochenkov.taskmanager.presentation.screen.details
 
 import android.content.res.Configuration
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -9,6 +11,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -17,7 +20,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -441,10 +443,16 @@ fun DetailsBody(
                     }
 
                     item {
+                        val launcher =
+                            rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+                                uri?.let { onAction.invoke(DetailsActions.AttachFile(uri)) }
+                            }
+
                         Box(modifier = Modifier
                             .fillMaxWidth()
                             .clickable {
-                                onAction.invoke(DetailsActions.OpenStorageForAttach)
+                                // todo add ability make a photo or get file from dir like now
+                                launcher.launch(arrayOf("*/*"))
                             }
                             .padding(vertical = 8.dp)
                         ) {
@@ -454,8 +462,8 @@ fun DetailsBody(
                                     contentDescription = null
                                 )
                                 Spacer(modifier = Modifier.size(8.dp))
+                                // todo to res
                                 Text(text = "Attach file")
-
                             }
                         }
                     }
@@ -465,21 +473,40 @@ fun DetailsBody(
                     }
 
                     item {
-                        // todo get id from attachments list
-                        val id = 123
-                        Row {
-                            Box(
-                                modifier = Modifier
-                                    .clickable {
-                                        onAction.invoke(DetailsActions.OpenAttachment(id))
+                        // todo to res
+                        Text(text = "Attachments:", fontSize = 14.sp)
+                        Spacer(modifier = Modifier.size(8.dp))
+                        LazyRow {
+                            state.task.attachments.forEach { attachment ->
+                                item {
+                                    Card(
+                                        modifier = Modifier.size(72.dp),
+                                        shape = RoundedCornerShape(20.dp)
+                                    ) {
+                                        Box(modifier = Modifier
+                                            .fillMaxSize()
+                                            .clickable {
+                                                onAction.invoke(
+                                                    DetailsActions.OpenAttachment(
+                                                        attachment
+                                                    )
+                                                )
+                                            },
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            //todo to strings res
+                                            val fileType = when{
+                                                attachment.contains(".pdf") -> "pdf"
+                                                attachment.contains(".txt") -> "text"
+                                                attachment.contains(".png|.jpg|.jpeg|.gif".toRegex()) -> "image"
+                                                else -> "other"
+                                            }
+                                            Text(text = fileType)
+                                        }
                                     }
-                                    .clip(
-                                        RoundedCornerShape(20.dp)
-                                    )
-                                    .size(72.dp)
-                                    // todo change color
-                                    .background(color = Color.Gray)
-                            ) {}
+                                    Spacer(modifier = Modifier.size(8.dp))
+                                }
+                            }
                         }
                     }
                 }
@@ -502,7 +529,8 @@ fun Preview() {
                     "dddd ddd dd",
                     Task.Priority.NORMAL,
                     "In progress",
-                    100500
+                    100500,
+                    attachments = listOf("one.png", "two.pdf", "three.jpg", "other")
                 ),
                 listOf("status1", "status2")
             )
