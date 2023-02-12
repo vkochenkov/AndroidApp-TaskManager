@@ -1,6 +1,5 @@
 package com.vkochenkov.taskmanager.presentation.screen.details
 
-import android.annotation.SuppressLint
 import android.app.AlarmManager
 import android.app.PendingIntent
 import android.app.PendingIntent.FLAG_IMMUTABLE
@@ -72,6 +71,7 @@ class DetailsViewModel(
             is DetailsActions.SetNotification -> onSetNotification(action.time, action.date)
             is DetailsActions.AttachFile -> onAttachFile(action.uri)
             is DetailsActions.OpenAttachment -> onOpenAttachment(action.attachment)
+            is DetailsActions.DeleteAttachment -> onDeleteAttachment(action.attachment)
         }
     }
 
@@ -187,7 +187,6 @@ class DetailsViewModel(
     }
 
     private fun onDeleteTask(showDialog: Boolean?) {
-        // todo also delete all connected files from files dir
         if (showDialog == true && currentTask != null) {
             _state.value = DetailsBodyState(
                 task = currentTask!!,
@@ -197,6 +196,17 @@ class DetailsViewModel(
         } else {
             // cancel notification if exists
             alarmManager.cancel(getAlarmPendingIntent())
+
+            // delete attachments if exists
+            val attachments = currentTask?.attachments
+            attachments?.forEach {
+                try {
+                    val file = File(applicationContext.filesDir, it)
+                    file.delete()
+                } catch (ex: Exception) {
+                    // do nothing
+                }
+            }
 
             viewModelScope.launch {
                 runCatching {
@@ -219,19 +229,23 @@ class DetailsViewModel(
                 MimeTypeMap.getSingleton()
                     .getExtensionFromMimeType(applicationContext.contentResolver.getType(uri))
             } else {
-                MimeTypeMap.getFileExtensionFromUrl(Uri.fromFile(uri.path?.let { File(it) }).toString())
+                MimeTypeMap.getFileExtensionFromUrl(
+                    Uri.fromFile(uri.path?.let { File(it) }).toString()
+                )
             }
 
-            val bytes = applicationContext.contentResolver.openInputStream(uri)?.use {
+            val inputBytes = applicationContext.contentResolver.openInputStream(uri)?.use {
                 it.readBytes()
             }
+
             val ending = if (extensionType != null) {
                 ".$extensionType"
             } else ""
             val fileName = "attached_file_${System.currentTimeMillis()}" + ending
             val file = File(applicationContext.filesDir, fileName)
+
             FileOutputStream(file).use { stream ->
-                bytes?.let { bytes ->
+                inputBytes?.let { bytes ->
                     stream.write(bytes)
                 }
             }
@@ -256,30 +270,58 @@ class DetailsViewModel(
                 }
             }
         } catch (ex: Exception) {
-            // todo show error shack can't attach file
+            showToast(R.string.toast_ex)
         }
     }
 
     private fun onOpenAttachment(attachment: String) {
         try {
-        val file = File(applicationContext.filesDir, attachment)
+            val file = File(applicationContext.filesDir, attachment)
 
-        val i = Intent(
-            Intent.ACTION_VIEW,
-            FileProvider.getUriForFile(
-                applicationContext,
-                applicationContext.packageName + ".provider", // same as in manifest
-                file
+            val i = Intent(
+                Intent.ACTION_VIEW,
+                FileProvider.getUriForFile(
+                    applicationContext,
+                    applicationContext.packageName + ".provider", // same as in manifest
+                    file
+                )
             )
-        )
 
-        i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        i.addFlags(FLAG_ACTIVITY_NEW_TASK)
+            i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            i.addFlags(FLAG_ACTIVITY_NEW_TASK)
 
             applicationContext.startActivity(i)
 
         } catch (ex: Exception) {
-            // todo show shack can't open file
+            showToast(R.string.toast_no_app_for_type)
+        }
+    }
+
+    private fun onDeleteAttachment(attachment: String) {
+        try {
+            val file = File(applicationContext.filesDir, attachment)
+            file.delete()
+            val attachments = (currentTask?.attachments ?: listOf()).toMutableList()
+            attachments.remove(attachment)
+            viewModelScope.launch {
+                runCatching {
+                    currentTask = currentTask?.copy(
+                        attachments = attachments
+                    )
+                    currentTask?.let {
+                        taskRepository.saveTask(it)
+                    }
+                }.onFailure {
+                    _state.value = _state.value.copy(isErrorPage = true)
+                }.onSuccess {
+                    _state.value = _state.value.copy(
+                        task = currentTask
+                    )
+                    showDialogOnBack = false
+                }
+            }
+        } catch (ex: Exception) {
+            showToast(R.string.toast_cant_delete_file)
         }
     }
 

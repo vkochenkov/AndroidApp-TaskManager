@@ -31,4 +31,6 @@ sealed class DetailsActions {
     data class AttachFile(val uri: Uri) : DetailsActions()
 
     data class OpenAttachment(val attachment: String) : DetailsActions()
+
+    data class DeleteAttachment(val attachment: String) : DetailsActions()
 }

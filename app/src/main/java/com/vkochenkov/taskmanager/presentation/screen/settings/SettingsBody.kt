@@ -1,8 +1,6 @@
 package com.vkochenkov.taskmanager.presentation.screen.settings
 
 import android.content.res.Configuration
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
@@ -259,7 +257,6 @@ fun SettingsBody(
                     item {
                         Divider()
                     }
-                    // todo add change status position
                     item {
                         Row(
                             modifier = Modifier.fillMaxWidth(),

@@ -451,7 +451,6 @@ fun DetailsBody(
                         Box(modifier = Modifier
                             .fillMaxWidth()
                             .clickable {
-                                // todo add ability make a photo or get file from dir like now
                                 launcher.launch(arrayOf("*/*"))
                             }
                             .padding(vertical = 8.dp)
@@ -462,8 +461,7 @@ fun DetailsBody(
                                     contentDescription = null
                                 )
                                 Spacer(modifier = Modifier.size(8.dp))
-                                // todo to res
-                                Text(text = "Attach file")
+                                Text(text = stringResource(R.string.details_attach_file_title))
                             }
                         }
                     }
@@ -473,38 +471,64 @@ fun DetailsBody(
                     }
 
                     item {
-                        // todo to res
-                        Text(text = "Attachments:", fontSize = 14.sp)
-                        Spacer(modifier = Modifier.size(8.dp))
-                        LazyRow {
-                            state.task.attachments.forEach { attachment ->
-                                item {
-                                    Card(
-                                        modifier = Modifier.size(72.dp),
-                                        shape = RoundedCornerShape(20.dp)
-                                    ) {
-                                        Box(modifier = Modifier
-                                            .fillMaxSize()
-                                            .clickable {
-                                                onAction.invoke(
-                                                    DetailsActions.OpenAttachment(
-                                                        attachment
-                                                    )
-                                                )
-                                            },
-                                            contentAlignment = Alignment.Center
+                        if (state.task.attachments.isNotEmpty()) {
+                            Text(
+                                text = stringResource(R.string.details_attachments_content),
+                                fontSize = 14.sp
+                            )
+                            Spacer(modifier = Modifier.size(8.dp))
+                            LazyRow {
+                                state.task.attachments.forEach { attachment ->
+                                    item {
+                                        Card(
+                                            modifier = Modifier.size(72.dp),
+                                            shape = RoundedCornerShape(12.dp)
                                         ) {
-                                            //todo to strings res
-                                            val fileType = when{
-                                                attachment.contains(".pdf") -> "pdf"
-                                                attachment.contains(".txt") -> "text"
-                                                attachment.contains(".png|.jpg|.jpeg|.gif".toRegex()) -> "image"
-                                                else -> "other"
+                                            Box(
+                                                modifier = Modifier
+                                                    .fillMaxSize()
+                                                    .clickable {
+                                                        onAction.invoke(
+                                                            DetailsActions.OpenAttachment(
+                                                                attachment
+                                                            )
+                                                        )
+                                                    },
+                                                contentAlignment = Alignment.Center
+                                            ) {
+                                                Box(
+                                                    modifier = Modifier.fillMaxSize(),
+                                                    contentAlignment = Alignment.TopEnd
+                                                ) {
+                                                    IconButton(
+                                                        modifier = Modifier.size(24.dp),
+                                                        onClick = {
+                                                            onAction.invoke(
+                                                                DetailsActions.DeleteAttachment(
+                                                                    attachment
+                                                                )
+                                                            )
+                                                        }
+                                                    ) {
+                                                        Icon(
+                                                            modifier = Modifier.size(16.dp),
+                                                            imageVector = Icons.Default.Close,
+                                                            contentDescription = null
+                                                        )
+                                                    }
+                                                }
+                                                val fileType = when {
+                                                    attachment.contains(".pdf") -> stringResource(R.string.details_attach_pdf)
+                                                    attachment.contains(".txt") -> stringResource(R.string.details_attach_text)
+                                                    attachment.contains(".png|.jpg|.jpeg|.gif".toRegex()) ->
+                                                        stringResource(R.string.details_attach_picture)
+                                                    else -> stringResource(R.string.details_attach_other)
+                                                }
+                                                Text(text = fileType)
                                             }
-                                            Text(text = fileType)
                                         }
+                                        Spacer(modifier = Modifier.size(8.dp))
                                     }
-                                    Spacer(modifier = Modifier.size(8.dp))
                                 }
                             }
                         }
