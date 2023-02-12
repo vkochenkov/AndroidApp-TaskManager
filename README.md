@@ -1,8 +1,11 @@
 # AndroidApp-TaskManager
 
+## Writen by using Jetpac Compose, ViewModel, Room DB. Uses the MVI pattern as the author of the application sees it.
+
 ### You can create task, add description, attach files, change priority or status and create notification in exact time. 
 ### The application automatically adjusts to the selected color scheme of the device.
-### See some screens below:
+
+#### See some screens below:
 
 <p align="left">
   <img src='https://user-images.githubusercontent.com/107124959/218312610-004ab8b6-8956-472c-bde5-595da03be3d3.jpg' width='20%'>
