@@ -2,6 +2,8 @@ package com.vkochenkov.taskmanager.presentation.screen.details
 
 import android.content.res.Configuration
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -9,7 +11,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -319,7 +323,13 @@ fun DetailsBody(
                             value = description,
                             onValueChange = {
                                 description = it
-                                onAction.invoke(DetailsActions.TaskChanged(state.task.copy(description = it)))
+                                onAction.invoke(
+                                    DetailsActions.TaskChanged(
+                                        state.task.copy(
+                                            description = it
+                                        )
+                                    )
+                                )
                             }
                         )
                     }
@@ -427,6 +437,102 @@ fun DetailsBody(
                             }
                         }
                     }
+
+                    item {
+                        Spacer(modifier = Modifier.size(8.dp))
+                    }
+
+                    item {
+                        val launcher =
+                            rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+                                uri?.let { onAction.invoke(DetailsActions.AttachFile(uri)) }
+                            }
+
+                        Box(modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                launcher.launch(arrayOf("*/*"))
+                            }
+                            .padding(vertical = 8.dp)
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.ic_baseline_attachment_24),
+                                    contentDescription = null
+                                )
+                                Spacer(modifier = Modifier.size(8.dp))
+                                Text(text = stringResource(R.string.details_attach_file_title))
+                            }
+                        }
+                    }
+
+                    item {
+                        Spacer(modifier = Modifier.size(8.dp))
+                    }
+
+                    item {
+                        if (state.task.attachments.isNotEmpty()) {
+                            Text(
+                                text = stringResource(R.string.details_attachments_content),
+                                fontSize = 14.sp
+                            )
+                            Spacer(modifier = Modifier.size(8.dp))
+                            LazyRow {
+                                state.task.attachments.forEach { attachment ->
+                                    item {
+                                        Card(
+                                            modifier = Modifier.size(72.dp),
+                                            shape = RoundedCornerShape(12.dp)
+                                        ) {
+                                            Box(
+                                                modifier = Modifier
+                                                    .fillMaxSize()
+                                                    .clickable {
+                                                        onAction.invoke(
+                                                            DetailsActions.OpenAttachment(
+                                                                attachment
+                                                            )
+                                                        )
+                                                    },
+                                                contentAlignment = Alignment.Center
+                                            ) {
+                                                Box(
+                                                    modifier = Modifier.fillMaxSize(),
+                                                    contentAlignment = Alignment.TopEnd
+                                                ) {
+                                                    IconButton(
+                                                        modifier = Modifier.size(24.dp),
+                                                        onClick = {
+                                                            onAction.invoke(
+                                                                DetailsActions.DeleteAttachment(
+                                                                    attachment
+                                                                )
+                                                            )
+                                                        }
+                                                    ) {
+                                                        Icon(
+                                                            modifier = Modifier.size(16.dp),
+                                                            imageVector = Icons.Default.Close,
+                                                            contentDescription = null
+                                                        )
+                                                    }
+                                                }
+                                                val fileType = when {
+                                                    attachment.contains(".pdf") -> stringResource(R.string.details_attach_pdf)
+                                                    attachment.contains(".txt") -> stringResource(R.string.details_attach_text)
+                                                    attachment.contains(".png|.jpg|.jpeg|.gif".toRegex()) ->
+                                                        stringResource(R.string.details_attach_picture)
+                                                    else -> stringResource(R.string.details_attach_other)
+                                                }
+                                                Text(text = fileType)
+                                            }
+                                        }
+                                        Spacer(modifier = Modifier.size(8.dp))
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -447,7 +553,8 @@ fun Preview() {
                     "dddd ddd dd",
                     Task.Priority.NORMAL,
                     "In progress",
-                    100500
+                    100500,
+                    attachments = listOf("one.png", "two.pdf", "three.jpg", "other")
                 ),
                 listOf("status1", "status2")
             )

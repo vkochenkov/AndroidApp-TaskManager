@@ -2,21 +2,27 @@ package com.vkochenkov.taskmanager.presentation.screen.details
 
 import android.app.AlarmManager
 import android.app.PendingIntent
-import android.app.PendingIntent.*
+import android.app.PendingIntent.FLAG_IMMUTABLE
+import android.app.PendingIntent.getBroadcast
+import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
+import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
+import android.net.Uri
 import android.os.Bundle
+import android.webkit.MimeTypeMap
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import androidx.core.content.FileProvider
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.vkochenkov.taskmanager.R
+import com.vkochenkov.taskmanager.data.model.Task
 import com.vkochenkov.taskmanager.data.repos.StatusRepository
 import com.vkochenkov.taskmanager.data.repos.TaskRepository
-import com.vkochenkov.taskmanager.data.model.Task
 import com.vkochenkov.taskmanager.presentation.base.BaseViewModel
 import com.vkochenkov.taskmanager.presentation.base.ShowNotificationReceiver
 import com.vkochenkov.taskmanager.presentation.base.ShowNotificationReceiver.Companion.BUNDLE_FOR_NOTIFICATION
@@ -24,8 +30,9 @@ import com.vkochenkov.taskmanager.presentation.base.ShowNotificationReceiver.Com
 import com.vkochenkov.taskmanager.presentation.navigation.Destination
 import com.vkochenkov.taskmanager.presentation.utils.isNotNull
 import kotlinx.coroutines.launch
+import java.io.File
+import java.io.FileOutputStream
 import java.util.*
-import kotlin.NoSuchElementException
 
 class DetailsViewModel(
     savedStateHandle: SavedStateHandle,
@@ -62,6 +69,9 @@ class DetailsViewModel(
             is DetailsActions.ShowNotificationDialog -> onShowNotificationDialog()
             is DetailsActions.RemoveNotification -> onRemoveNotification()
             is DetailsActions.SetNotification -> onSetNotification(action.time, action.date)
+            is DetailsActions.AttachFile -> onAttachFile(action.uri)
+            is DetailsActions.OpenAttachment -> onOpenAttachment(action.attachment)
+            is DetailsActions.DeleteAttachment -> onDeleteAttachment(action.attachment)
         }
     }
 
@@ -187,6 +197,17 @@ class DetailsViewModel(
             // cancel notification if exists
             alarmManager.cancel(getAlarmPendingIntent())
 
+            // delete attachments if exists
+            val attachments = currentTask?.attachments
+            attachments?.forEach {
+                try {
+                    val file = File(applicationContext.filesDir, it)
+                    file.delete()
+                } catch (ex: Exception) {
+                    // do nothing
+                }
+            }
+
             viewModelScope.launch {
                 runCatching {
                     currentTask?.let {
@@ -198,6 +219,109 @@ class DetailsViewModel(
                     navController.popBackStack()
                 }
             }
+        }
+    }
+
+    private fun onAttachFile(uri: Uri) {
+        try {
+            // from https://stackoverflow.com/questions/12473851/how-i-can-get-the-mime-type-of-a-file-having-its-uri
+            val extensionType = if (uri.scheme == ContentResolver.SCHEME_CONTENT) {
+                MimeTypeMap.getSingleton()
+                    .getExtensionFromMimeType(applicationContext.contentResolver.getType(uri))
+            } else {
+                MimeTypeMap.getFileExtensionFromUrl(
+                    Uri.fromFile(uri.path?.let { File(it) }).toString()
+                )
+            }
+
+            val inputBytes = applicationContext.contentResolver.openInputStream(uri)?.use {
+                it.readBytes()
+            }
+
+            val ending = if (extensionType != null) {
+                ".$extensionType"
+            } else ""
+            val fileName = "attached_file_${System.currentTimeMillis()}" + ending
+            val file = File(applicationContext.filesDir, fileName)
+
+            FileOutputStream(file).use { stream ->
+                inputBytes?.let { bytes ->
+                    stream.write(bytes)
+                }
+            }
+
+            viewModelScope.launch {
+                runCatching {
+                    currentTask = currentTask?.copy(
+                        attachments = currentTask?.attachments?.plus(listOf(fileName)) ?: listOf(
+                            fileName
+                        )
+                    )
+                    currentTask?.let {
+                        taskRepository.saveTask(it)
+                    }
+                }.onFailure {
+                    _state.value = _state.value.copy(isErrorPage = true)
+                }.onSuccess {
+                    _state.value = _state.value.copy(
+                        task = currentTask
+                    )
+                    showDialogOnBack = false
+                }
+            }
+        } catch (ex: Exception) {
+            showToast(R.string.toast_ex)
+        }
+    }
+
+    private fun onOpenAttachment(attachment: String) {
+        try {
+            val file = File(applicationContext.filesDir, attachment)
+
+            val i = Intent(
+                Intent.ACTION_VIEW,
+                FileProvider.getUriForFile(
+                    applicationContext,
+                    applicationContext.packageName + ".provider", // same as in manifest
+                    file
+                )
+            )
+
+            i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            i.addFlags(FLAG_ACTIVITY_NEW_TASK)
+
+            applicationContext.startActivity(i)
+
+        } catch (ex: Exception) {
+            showToast(R.string.toast_no_app_for_type)
+        }
+    }
+
+    private fun onDeleteAttachment(attachment: String) {
+        try {
+            val file = File(applicationContext.filesDir, attachment)
+            file.delete()
+            val attachments = (currentTask?.attachments ?: listOf()).toMutableList()
+            attachments.remove(attachment)
+            viewModelScope.launch {
+                runCatching {
+                    currentTask = currentTask?.copy(
+                        attachments = attachments
+                    )
+                    currentTask?.let {
+                        taskRepository.saveTask(it)
+                    }
+                }.onFailure {
+                    _state.value = _state.value.copy(isErrorPage = true)
+                }.onSuccess {
+                    _state.value = _state.value.copy(
+                        task = currentTask
+                    )
+                    showDialogOnBack = false
+                }
+            }
+        } catch (ex: Exception) {
+            showToast(R.string.toast_cant_delete_file)
         }
     }
 

@@ -28,6 +28,13 @@
     <string name="details_notification_dialog_time_field_label">hh:mm</string>
     <string name="details_notification_dialog_date_field_label">dd.mm.yyyy</string>
 
+    <string name="details_attachments_content">Attachments:</string>
+    <string name="details_attach_file_title">Attach file</string>
+    <string name="details_attach_pdf">pdf</string>
+    <string name="details_attach_text">text</string>
+    <string name="details_attach_picture">picture</string>
+    <string name="details_attach_other">other</string>
+
     <string name="main_error_text">Something went wrong. Please, reopen application</string>
     <string name="main_empty_text">You have no tasks</string>
     <string name="main_empty_text_status">You don\'t have any task\nin this status yet</string>
@@ -49,11 +56,13 @@
     <string name="toast_set_notification">Notification was created</string>
     <string name="toast_remove_notification">Notification was removed</string>
     <string name="toast_past">Time in the past!</string>
-    <string name="toast_ex">Something went wrong!</string>
+    <string name="toast_ex">Something went wrong</string>
     <string name="toast_wrong_date">Wrong date format</string>
     <string name="toast_wrong_time">Wrong time format</string>
     <string name="toast_empty_date">Date is empty!</string>
     <string name="toast_empty_time">Time is empty!</string>
+    <string name="toast_no_app_for_type">You have no application for open this file type</string>
+    <string name="toast_cant_delete_file">Something went wrong, can\'t delete file</string>
 
     <string name="settings_screen_title">Settings</string>
     <string name="setting_screen_statuses">Set up statuses</string>
