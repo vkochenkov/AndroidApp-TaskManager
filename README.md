@@ -5,6 +5,8 @@
 ### You can create task, add description, attach files, change priority or status and create notification in exact time. 
 ### The application automatically adjusts to the selected color scheme of the device.
 
+#### Install from Google Play: https://play.google.com/store/apps/details?id=com.vkochenkov.taskmanager
+
 #### See some screens below:
 
 <p align="left">
