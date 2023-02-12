@@ -16,13 +16,13 @@ class MainViewModel(
     savedStateHandle: SavedStateHandle,
     val taskRepository: TaskRepository,
     val statusRepository: StatusRepository
-) : BaseViewModel() {
+) : BaseViewModel<MainBodyState, MainActions>() {
 
     private var _state: MutableState<MainBodyState> =
         mutableStateOf(MainBodyState(isLoadingPage = true))
-    val state: State<MainBodyState> get() = _state
+    override val state: State<MainBodyState> get() = _state
 
-    val onAction = { action: MainActions ->
+    override val onAction = { action: MainActions ->
         when (action) {
             is MainActions.OpenDetails -> onOpenDetails(action.id)
             is MainActions.AddNewTask -> onAddNewTask()

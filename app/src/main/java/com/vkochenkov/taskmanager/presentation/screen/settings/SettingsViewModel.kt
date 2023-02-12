@@ -15,15 +15,15 @@ class SettingsViewModel(
     savedStateHandle: SavedStateHandle,
     private val taskRepository: TaskRepository,
     private val statusRepository: StatusRepository
-) : BaseViewModel() {
+) : BaseViewModel<SettingsBodyState, SettingsActions>() {
 
     var currentStatuses: List<String> = statusRepository.getStatuses()
 
     private var _state: MutableState<SettingsBodyState> =
         mutableStateOf(SettingsBodyState(statuses = currentStatuses))
-    val state: State<SettingsBodyState> get() = _state
+    override val state: State<SettingsBodyState> get() = _state
 
-    val onAction = { action: SettingsActions ->
+    override val onAction = { action: SettingsActions ->
         when (action) {
             is SettingsActions.BackPressed -> onBackPressed()
             is SettingsActions.AddNewStatus -> onAddNewStatus(action.status)

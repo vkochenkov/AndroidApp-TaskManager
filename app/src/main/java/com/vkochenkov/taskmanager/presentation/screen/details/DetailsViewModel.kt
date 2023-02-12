@@ -40,7 +40,7 @@ class DetailsViewModel(
     val statusRepository: StatusRepository,
     // There is no leak
     private val applicationContext: Context
-) : BaseViewModel() {
+) : BaseViewModel<DetailsBodyState, DetailsActions>() {
 
     private val alarmManager =
         applicationContext.getSystemService(AppCompatActivity.ALARM_SERVICE) as AlarmManager
@@ -55,9 +55,9 @@ class DetailsViewModel(
 
     private var _state: MutableState<DetailsBodyState> =
         mutableStateOf(DetailsBodyState(currentTask, statuses))
-    val state: State<DetailsBodyState> get() = _state
+    override val state: State<DetailsBodyState> get() = _state
 
-    val onAction = { action: DetailsActions ->
+    override val onAction = { action: DetailsActions ->
         when (action) {
             is DetailsActions.BackPressed -> onBackPressed(action.showDialog)
             is DetailsActions.TaskChanged -> onTaskChanged(action.task)
