@@ -5,8 +5,8 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import com.vkochenkov.taskmanager.data.repos.StatusRepository
-import com.vkochenkov.taskmanager.data.repos.TaskRepository
+import com.vkochenkov.taskmanager.data.StatusPreferences
+import com.vkochenkov.taskmanager.data.TaskDataService
 import com.vkochenkov.taskmanager.presentation.base.BaseViewModel
 import com.vkochenkov.taskmanager.presentation.navigation.Destination
 import kotlinx.coroutines.launch
@@ -14,8 +14,8 @@ import kotlin.system.exitProcess
 
 class MainViewModel(
     savedStateHandle: SavedStateHandle,
-    val taskRepository: TaskRepository,
-    val statusRepository: StatusRepository
+    val taskDataService: TaskDataService,
+    val statusPreferences: StatusPreferences
 ) : BaseViewModel<MainBodyState, MainActions>() {
 
     private var _state: MutableState<MainBodyState> =
@@ -33,12 +33,12 @@ class MainViewModel(
     }
 
     private fun onUpdateData() {
-        val statuses = statusRepository.getStatuses()
+        val statuses = statusPreferences.getStatuses()
 
         viewModelScope.launch {
             runCatching {
                 _state.value = MainBodyState(isLoadingPage = true)
-                taskRepository.getAllTasks()
+                taskDataService.getAllTasks()
             }.onFailure {
                 _state.value = MainBodyState(isErrorPage = true)
             }.onSuccess {

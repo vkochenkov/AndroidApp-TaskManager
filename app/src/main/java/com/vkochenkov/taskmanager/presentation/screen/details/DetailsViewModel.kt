@@ -21,8 +21,8 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.vkochenkov.taskmanager.R
 import com.vkochenkov.taskmanager.data.model.Task
-import com.vkochenkov.taskmanager.data.repos.StatusRepository
-import com.vkochenkov.taskmanager.data.repos.TaskRepository
+import com.vkochenkov.taskmanager.data.StatusPreferences
+import com.vkochenkov.taskmanager.data.TaskDataService
 import com.vkochenkov.taskmanager.presentation.base.BaseViewModel
 import com.vkochenkov.taskmanager.presentation.base.ShowNotificationReceiver
 import com.vkochenkov.taskmanager.presentation.base.ShowNotificationReceiver.Companion.BUNDLE_FOR_NOTIFICATION
@@ -36,8 +36,8 @@ import java.util.*
 
 class DetailsViewModel(
     savedStateHandle: SavedStateHandle,
-    private val taskRepository: TaskRepository,
-    val statusRepository: StatusRepository,
+    private val taskDataService: TaskDataService,
+    val statusPreferences: StatusPreferences,
     // There is no leak
     private val applicationContext: Context
 ) : BaseViewModel<DetailsBodyState, DetailsActions>() {
@@ -49,7 +49,7 @@ class DetailsViewModel(
 
     private var currentTask: Task? = null
 
-    private val statuses = statusRepository.getStatuses()
+    private val statuses = statusPreferences.getStatuses()
 
     private var showDialogOnBack: Boolean = false
 
@@ -84,7 +84,7 @@ class DetailsViewModel(
             viewModelScope.launch {
                 runCatching {
                     _state.value = _state.value.copy(isLoadingPage = true)
-                    taskRepository.getTask(taskIdFromNav!!.toInt())
+                    taskDataService.getTask(taskIdFromNav!!.toInt())
                         ?: throw NoSuchElementException()
                 }.onFailure {
                     _state.value = _state.value.copy(isLoadingPage = false, isErrorPage = true)
@@ -111,7 +111,7 @@ class DetailsViewModel(
             title = "New task",
             description = "",
             priority = Task.Priority.NORMAL,
-            status = statusRepository.getStatuses()[0],
+            status = statusPreferences.getStatuses()[0],
             creationDate = currentDate,
             updateDate = currentDate,
             notificationTime = null
@@ -155,7 +155,7 @@ class DetailsViewModel(
             } else {
                 viewModelScope.launch {
                     runCatching {
-                        taskRepository.saveTask(task)
+                        taskDataService.saveTask(task)
                     }.onFailure {
                         _state.value = _state.value.copy(isErrorPage = true)
                     }.onSuccess {
@@ -211,7 +211,7 @@ class DetailsViewModel(
             viewModelScope.launch {
                 runCatching {
                     currentTask?.let {
-                        taskRepository.deleteTask(it)
+                        taskDataService.deleteTask(it)
                     }
                 }.onFailure {
                     _state.value = _state.value.copy(isErrorPage = true)
@@ -258,7 +258,7 @@ class DetailsViewModel(
                         )
                     )
                     currentTask?.let {
-                        taskRepository.saveTask(it)
+                        taskDataService.saveTask(it)
                     }
                 }.onFailure {
                     _state.value = _state.value.copy(isErrorPage = true)
@@ -309,7 +309,7 @@ class DetailsViewModel(
                         attachments = attachments
                     )
                     currentTask?.let {
-                        taskRepository.saveTask(it)
+                        taskDataService.saveTask(it)
                     }
                 }.onFailure {
                     _state.value = _state.value.copy(isErrorPage = true)
@@ -352,7 +352,7 @@ class DetailsViewModel(
                     notificationTime = null
                 )
                 currentTask?.let {
-                    taskRepository.saveTask(it)
+                    taskDataService.saveTask(it)
                 }
             }.onFailure {
                 _state.value = _state.value.copy(isErrorPage = true)
@@ -441,7 +441,7 @@ class DetailsViewModel(
         viewModelScope.launch {
             currentTask?.let { task ->
                 runCatching {
-                    taskRepository.saveTask(task)
+                    taskDataService.saveTask(task)
                 }.onSuccess {
                     showDialogOnBack = false
                     _state.value = DetailsBodyState(

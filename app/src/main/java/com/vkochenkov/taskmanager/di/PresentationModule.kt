@@ -13,8 +13,8 @@ val presentationModule = module {
     viewModel {
         MainViewModel(
             savedStateHandle = get(),
-            taskRepository = get(),
-            statusRepository = get()
+            taskDataService = get(),
+            statusPreferences = get()
         )
     }
 
@@ -22,8 +22,8 @@ val presentationModule = module {
     viewModel {
         DetailsViewModel(
             savedStateHandle = get(),
-            taskRepository = get(),
-            statusRepository = get(),
+            taskDataService = get(),
+            statusPreferences = get(),
             applicationContext = androidContext()
         )
     }
@@ -32,8 +32,8 @@ val presentationModule = module {
     viewModel {
         SettingsViewModel(
             savedStateHandle = get(),
-            taskRepository = get(),
-            statusRepository = get()
+            taskDataService = get(),
+            statusPreferences = get()
         )
     }
 }

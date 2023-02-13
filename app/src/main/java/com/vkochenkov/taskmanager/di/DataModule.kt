@@ -3,9 +3,9 @@ package com.vkochenkov.taskmanager.di
 import android.content.Context
 import androidx.room.Room
 import com.vkochenkov.taskmanager.data.db.AppDatabase
-import com.vkochenkov.taskmanager.data.repos.StatusRepository
-import com.vkochenkov.taskmanager.data.repos.StatusRepository.Companion.STATUSES_PREFS_KEY
-import com.vkochenkov.taskmanager.data.repos.TaskRepository
+import com.vkochenkov.taskmanager.data.StatusPreferences
+import com.vkochenkov.taskmanager.data.StatusPreferences.Companion.STATUSES_PREFS_KEY
+import com.vkochenkov.taskmanager.data.TaskDataService
 import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
 
@@ -27,7 +27,7 @@ val dataModule = module {
     }
 
     // TaskRepository
-    single { TaskRepository(get()) }
+    single { TaskDataService(get()) }
 
     // Status prefs
     single {
@@ -36,6 +36,6 @@ val dataModule = module {
 
     // StatusRepository
     single {
-        StatusRepository(get())
+        StatusPreferences(get())
     }
 }
