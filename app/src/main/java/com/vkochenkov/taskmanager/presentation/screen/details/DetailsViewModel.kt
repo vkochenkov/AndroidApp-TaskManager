@@ -107,9 +107,8 @@ class DetailsViewModel(
     private fun createNewTask(): Task {
         val currentDate = System.currentTimeMillis().toString()
         return Task(
-            id = 0,
             title = "New task",
-            description = "",
+            description = null,
             priority = Task.Priority.NORMAL,
             status = statusPreferences.getStatuses()[0],
             creationDate = currentDate,
