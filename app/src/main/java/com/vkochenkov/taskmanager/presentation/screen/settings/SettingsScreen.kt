@@ -1,6 +1,8 @@
 package com.vkochenkov.taskmanager.presentation.screen.settings
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.navigation.NavHostController
 import org.koin.androidx.compose.koinViewModel
 
@@ -11,8 +13,10 @@ fun SettingsScreen(
     val viewModel: SettingsViewModel = koinViewModel()
     viewModel.navController = navController
 
+    val bodyState by viewModel.state.collectAsState()
+
     SettingsBody(
-        viewModel.state.value,
+        bodyState,
         viewModel.onAction
     )
 }

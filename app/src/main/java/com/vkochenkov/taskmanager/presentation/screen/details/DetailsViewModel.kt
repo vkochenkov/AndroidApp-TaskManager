@@ -13,9 +13,6 @@ import android.os.Bundle
 import android.webkit.MimeTypeMap
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateOf
 import androidx.core.content.FileProvider
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
@@ -29,6 +26,9 @@ import com.vkochenkov.taskmanager.presentation.base.ShowNotificationReceiver.Com
 import com.vkochenkov.taskmanager.presentation.base.ShowNotificationReceiver.Companion.TASK_ID
 import com.vkochenkov.taskmanager.presentation.navigation.Destination
 import com.vkochenkov.taskmanager.presentation.utils.isNotNull
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.io.File
 import java.io.FileOutputStream
@@ -53,9 +53,9 @@ class DetailsViewModel(
 
     private var showDialogOnBack: Boolean = false
 
-    private var _state: MutableState<DetailsBodyState> =
-        mutableStateOf(DetailsBodyState(currentTask, statuses))
-    override val state: State<DetailsBodyState> get() = _state
+    private var _state: MutableStateFlow<DetailsBodyState> =
+        MutableStateFlow(DetailsBodyState(currentTask, statuses))
+    override val state: StateFlow<DetailsBodyState> get() = _state.asStateFlow()
 
     override val onAction = { action: DetailsActions ->
         when (action) {

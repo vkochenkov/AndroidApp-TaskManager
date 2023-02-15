@@ -1,14 +1,14 @@
 package com.vkochenkov.taskmanager.presentation.screen.settings
 
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.vkochenkov.taskmanager.data.model.Task
 import com.vkochenkov.taskmanager.data.StatusPreferences
 import com.vkochenkov.taskmanager.data.TaskDataService
 import com.vkochenkov.taskmanager.presentation.base.BaseViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class SettingsViewModel(
@@ -19,9 +19,9 @@ class SettingsViewModel(
 
     var currentStatuses: List<String> = statusPreferences.getStatuses()
 
-    private var _state: MutableState<SettingsBodyState> =
-        mutableStateOf(SettingsBodyState(statuses = currentStatuses))
-    override val state: State<SettingsBodyState> get() = _state
+    private var _state: MutableStateFlow<SettingsBodyState> =
+        MutableStateFlow(SettingsBodyState(statuses = currentStatuses))
+    override val state: StateFlow<SettingsBodyState> get() = _state.asStateFlow()
 
     override val onAction = { action: SettingsActions ->
         when (action) {

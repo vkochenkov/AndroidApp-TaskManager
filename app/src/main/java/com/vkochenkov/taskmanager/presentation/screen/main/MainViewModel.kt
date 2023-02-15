@@ -1,14 +1,14 @@
 package com.vkochenkov.taskmanager.presentation.screen.main
 
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.vkochenkov.taskmanager.data.StatusPreferences
 import com.vkochenkov.taskmanager.data.TaskDataService
 import com.vkochenkov.taskmanager.presentation.base.BaseViewModel
 import com.vkochenkov.taskmanager.presentation.navigation.Destination
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlin.system.exitProcess
 
@@ -18,9 +18,9 @@ class MainViewModel(
     val statusPreferences: StatusPreferences
 ) : BaseViewModel<MainBodyState, MainActions>() {
 
-    private var _state: MutableState<MainBodyState> =
-        mutableStateOf(MainBodyState(isLoadingPage = true))
-    override val state: State<MainBodyState> get() = _state
+    private var _state: MutableStateFlow<MainBodyState> =
+        MutableStateFlow(MainBodyState(isLoadingPage = true))
+    override val state: StateFlow<MainBodyState> get() = _state.asStateFlow()
 
     override val onAction = { action: MainActions ->
         when (action) {
