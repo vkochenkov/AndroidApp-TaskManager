@@ -2,46 +2,22 @@ package com.vkochenkov.taskmanager.presentation.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
-import androidx.navigation.navDeepLink
-import com.vkochenkov.taskmanager.presentation.screen.details.DetailsScreen
-import com.vkochenkov.taskmanager.presentation.screen.main.MainScreen
-import com.vkochenkov.taskmanager.presentation.screen.settings.SettingsScreen
+import com.vkochenkov.taskmanager.base.presentation.navigation.CoreDestination
+import com.vkochenkov.taskmanager.feature.main.presentation.navigation.mainNavigation
+import com.vkochenkov.taskmanager.feature.settings.presentation.navigation.settingsNavDestination
 
 @Composable
 fun AppNavHost(
     navController: NavHostController = rememberNavController(),
-    startDestination: String = Destination.Main.route,
+    startDestination: String = CoreDestination.Main.route,
 ) {
     NavHost(
         navController = navController,
         startDestination = startDestination
     ) {
-        composable(
-            Destination.Main.route
-        ) {
-            MainScreen(navController)
-        }
-        composable(
-            route = Destination.Details.routeWithArgs,
-            arguments = listOf(navArgument(Destination.Details.argument1) {
-                type = NavType.StringType
-                nullable = true
-            }),
-            deepLinks = listOf(navDeepLink {
-                uriPattern = buildDeeplink(Destination.Details.routeWithArgs)
-            })
-        ) {
-            DetailsScreen(navController)
-        }
-        composable(
-            Destination.Settings.route
-        ) {
-            SettingsScreen(navController)
-        }
+        mainNavigation(this, navController)
+        settingsNavDestination(this, navController)
     }
 }
