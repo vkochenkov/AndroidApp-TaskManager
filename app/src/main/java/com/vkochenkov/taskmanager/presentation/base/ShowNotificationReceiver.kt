@@ -13,7 +13,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationCompat.PRIORITY_DEFAULT
 import androidx.core.net.toUri
 import com.vkochenkov.taskmanager.R
-import com.vkochenkov.taskmanager.data.repos.TaskRepository
+import com.vkochenkov.taskmanager.data.TaskDataService
 import com.vkochenkov.taskmanager.data.model.Task
 import com.vkochenkov.taskmanager.presentation.navigation.Destination
 import com.vkochenkov.taskmanager.presentation.navigation.buildDeeplink
@@ -26,7 +26,7 @@ import java.util.*
 
 class ShowNotificationReceiver : BroadcastReceiver() {
 
-    private val repository: TaskRepository by inject(TaskRepository::class.java)
+    private val repository: TaskDataService by inject(TaskDataService::class.java)
 
     companion object {
         const val TASK_ID = "TASK_ID"

@@ -1,29 +1,29 @@
 package com.vkochenkov.taskmanager.presentation.screen.settings
 
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.vkochenkov.taskmanager.data.model.Task
-import com.vkochenkov.taskmanager.data.repos.StatusRepository
-import com.vkochenkov.taskmanager.data.repos.TaskRepository
+import com.vkochenkov.taskmanager.data.StatusPreferences
+import com.vkochenkov.taskmanager.data.TaskDataService
 import com.vkochenkov.taskmanager.presentation.base.BaseViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class SettingsViewModel(
     savedStateHandle: SavedStateHandle,
-    private val taskRepository: TaskRepository,
-    private val statusRepository: StatusRepository
-) : BaseViewModel() {
+    private val taskDataService: TaskDataService,
+    private val statusPreferences: StatusPreferences
+) : BaseViewModel<SettingsBodyState, SettingsActions>() {
 
-    var currentStatuses: List<String> = statusRepository.getStatuses()
+    var currentStatuses: List<String> = statusPreferences.getStatuses()
 
-    private var _state: MutableState<SettingsBodyState> =
-        mutableStateOf(SettingsBodyState(statuses = currentStatuses))
-    val state: State<SettingsBodyState> get() = _state
+    private var _state: MutableStateFlow<SettingsBodyState> =
+        MutableStateFlow(SettingsBodyState(statuses = currentStatuses))
+    override val state: StateFlow<SettingsBodyState> get() = _state.asStateFlow()
 
-    val onAction = { action: SettingsActions ->
+    override val onAction = { action: SettingsActions ->
         when (action) {
             is SettingsActions.BackPressed -> onBackPressed()
             is SettingsActions.AddNewStatus -> onAddNewStatus(action.status)
@@ -85,7 +85,7 @@ class SettingsViewModel(
                 )
                 val statusForDelete = currentStatuses.get(index)
                 var isDelete = true
-                taskRepository.getAllTasks().forEach {
+                taskDataService.getAllTasks().forEach {
                     if (it.status == statusForDelete) {
                         isDelete = false
                     }
@@ -93,7 +93,7 @@ class SettingsViewModel(
                 if (isDelete) {
                     val modifiedStatuses = currentStatuses.toMutableList()
                     modifiedStatuses.removeAt(index)
-                    statusRepository.rewriteStatuses(modifiedStatuses)
+                    statusPreferences.rewriteStatuses(modifiedStatuses)
                     currentStatuses = modifiedStatuses
                     _state.value = SettingsBodyState(
                         statuses = currentStatuses,
@@ -116,7 +116,7 @@ class SettingsViewModel(
     private fun onAddNewStatus(status: String) {
         val modifiedStatuses = currentStatuses.toMutableList()
         modifiedStatuses.add(status)
-        statusRepository.rewriteStatuses(modifiedStatuses)
+        statusPreferences.rewriteStatuses(modifiedStatuses)
         currentStatuses = modifiedStatuses
         _state.value = SettingsBodyState(
             statuses = currentStatuses
@@ -132,7 +132,7 @@ class SettingsViewModel(
                 loadingStatusIndex = index
             )
             runCatching {
-                taskRepository.getTasksByStatus(oldStatusName)
+                taskDataService.getTasksByStatus(oldStatusName)
             }.onFailure {
                 // ignore error
                 _state.value = SettingsBodyState(
@@ -148,7 +148,7 @@ class SettingsViewModel(
                     )
                 }
                 runCatching {
-                    taskRepository.saveTasks(updatedTasks)
+                    taskDataService.saveTasks(updatedTasks)
                 }.onFailure {
                     // ignore error
                     _state.value = SettingsBodyState(
@@ -159,7 +159,7 @@ class SettingsViewModel(
                     modifiedStatuses.removeAt(index)
                     modifiedStatuses.add(index, status)
                     currentStatuses = modifiedStatuses
-                    statusRepository.rewriteStatuses(modifiedStatuses)
+                    statusPreferences.rewriteStatuses(modifiedStatuses)
                     _state.value = SettingsBodyState(
                         statuses = currentStatuses
                     )

@@ -1,11 +1,11 @@
-package com.vkochenkov.taskmanager.data.repos
+package com.vkochenkov.taskmanager.data
 
 import android.content.SharedPreferences
 import com.vkochenkov.taskmanager.data.DefaultData.COMMON_DELIMITER
 import com.vkochenkov.taskmanager.data.DefaultData.defaultStatuses
 import com.vkochenkov.taskmanager.data.utils.asString
 
-class StatusRepository(
+class StatusPreferences(
     private val statusPrefs: SharedPreferences
 ) {
 

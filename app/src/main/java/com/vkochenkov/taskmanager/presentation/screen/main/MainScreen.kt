@@ -2,6 +2,8 @@ package com.vkochenkov.taskmanager.presentation.screen.main
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.navigation.NavHostController
 import org.koin.androidx.compose.koinViewModel
 
@@ -16,8 +18,10 @@ fun MainScreen(
         viewModel.onAction.invoke(MainActions.UpdateData)
     }
 
+    val bodyState by viewModel.state.collectAsState()
+
     MainBody(
-        viewModel.state.value,
+        bodyState,
         viewModel.onAction
     )
 }

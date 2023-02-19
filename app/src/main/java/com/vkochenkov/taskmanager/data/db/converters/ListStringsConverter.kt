@@ -1,4 +1,4 @@
-package com.vkochenkov.taskmanager.data.db
+package com.vkochenkov.taskmanager.data.db.converters
 
 import androidx.room.TypeConverter
 import com.vkochenkov.taskmanager.data.DefaultData.COMMON_DELIMITER

@@ -1,6 +1,8 @@
 package com.vkochenkov.taskmanager.presentation.screen.details
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.navigation.NavHostController
 import org.koin.androidx.compose.koinViewModel
 
@@ -11,8 +13,10 @@ fun DetailsScreen(
     val viewModel: DetailsViewModel = koinViewModel()
     viewModel.navController = navController
 
+    val bodyState by viewModel.state.collectAsState()
+
     DetailsBody(
-        viewModel.state.value,
+        bodyState,
         viewModel.onAction
     )
 }

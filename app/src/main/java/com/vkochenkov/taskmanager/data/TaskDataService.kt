@@ -1,9 +1,9 @@
-package com.vkochenkov.taskmanager.data.repos
+package com.vkochenkov.taskmanager.data
 
 import com.vkochenkov.taskmanager.data.model.Task
 import com.vkochenkov.taskmanager.data.db.TaskDao
 
-class TaskRepository(
+class TaskDataService(
     private val dao: TaskDao
 ) {
     suspend fun getAllTasks(): List<Task> {

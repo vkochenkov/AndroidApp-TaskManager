@@ -13,22 +13,22 @@ import android.os.Bundle
 import android.webkit.MimeTypeMap
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateOf
 import androidx.core.content.FileProvider
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.vkochenkov.taskmanager.R
 import com.vkochenkov.taskmanager.data.model.Task
-import com.vkochenkov.taskmanager.data.repos.StatusRepository
-import com.vkochenkov.taskmanager.data.repos.TaskRepository
+import com.vkochenkov.taskmanager.data.StatusPreferences
+import com.vkochenkov.taskmanager.data.TaskDataService
 import com.vkochenkov.taskmanager.presentation.base.BaseViewModel
 import com.vkochenkov.taskmanager.presentation.base.ShowNotificationReceiver
 import com.vkochenkov.taskmanager.presentation.base.ShowNotificationReceiver.Companion.BUNDLE_FOR_NOTIFICATION
 import com.vkochenkov.taskmanager.presentation.base.ShowNotificationReceiver.Companion.TASK_ID
 import com.vkochenkov.taskmanager.presentation.navigation.Destination
 import com.vkochenkov.taskmanager.presentation.utils.isNotNull
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.io.File
 import java.io.FileOutputStream
@@ -36,11 +36,11 @@ import java.util.*
 
 class DetailsViewModel(
     savedStateHandle: SavedStateHandle,
-    private val taskRepository: TaskRepository,
-    val statusRepository: StatusRepository,
+    private val taskDataService: TaskDataService,
+    val statusPreferences: StatusPreferences,
     // There is no leak
     private val applicationContext: Context
-) : BaseViewModel() {
+) : BaseViewModel<DetailsBodyState, DetailsActions>() {
 
     private val alarmManager =
         applicationContext.getSystemService(AppCompatActivity.ALARM_SERVICE) as AlarmManager
@@ -49,15 +49,15 @@ class DetailsViewModel(
 
     private var currentTask: Task? = null
 
-    private val statuses = statusRepository.getStatuses()
+    private val statuses = statusPreferences.getStatuses()
 
     private var showDialogOnBack: Boolean = false
 
-    private var _state: MutableState<DetailsBodyState> =
-        mutableStateOf(DetailsBodyState(currentTask, statuses))
-    val state: State<DetailsBodyState> get() = _state
+    private var _state: MutableStateFlow<DetailsBodyState> =
+        MutableStateFlow(DetailsBodyState(currentTask, statuses))
+    override val state: StateFlow<DetailsBodyState> get() = _state.asStateFlow()
 
-    val onAction = { action: DetailsActions ->
+    override val onAction = { action: DetailsActions ->
         when (action) {
             is DetailsActions.BackPressed -> onBackPressed(action.showDialog)
             is DetailsActions.TaskChanged -> onTaskChanged(action.task)
@@ -84,7 +84,7 @@ class DetailsViewModel(
             viewModelScope.launch {
                 runCatching {
                     _state.value = _state.value.copy(isLoadingPage = true)
-                    taskRepository.getTask(taskIdFromNav!!.toInt())
+                    taskDataService.getTask(taskIdFromNav!!.toInt())
                         ?: throw NoSuchElementException()
                 }.onFailure {
                     _state.value = _state.value.copy(isLoadingPage = false, isErrorPage = true)
@@ -107,11 +107,10 @@ class DetailsViewModel(
     private fun createNewTask(): Task {
         val currentDate = System.currentTimeMillis().toString()
         return Task(
-            id = 0,
             title = "New task",
-            description = "",
+            description = null,
             priority = Task.Priority.NORMAL,
-            status = statusRepository.getStatuses()[0],
+            status = statusPreferences.getStatuses()[0],
             creationDate = currentDate,
             updateDate = currentDate,
             notificationTime = null
@@ -155,7 +154,7 @@ class DetailsViewModel(
             } else {
                 viewModelScope.launch {
                     runCatching {
-                        taskRepository.saveTask(task)
+                        taskDataService.saveTask(task)
                     }.onFailure {
                         _state.value = _state.value.copy(isErrorPage = true)
                     }.onSuccess {
@@ -211,7 +210,7 @@ class DetailsViewModel(
             viewModelScope.launch {
                 runCatching {
                     currentTask?.let {
-                        taskRepository.deleteTask(it)
+                        taskDataService.deleteTask(it)
                     }
                 }.onFailure {
                     _state.value = _state.value.copy(isErrorPage = true)
@@ -258,7 +257,7 @@ class DetailsViewModel(
                         )
                     )
                     currentTask?.let {
-                        taskRepository.saveTask(it)
+                        taskDataService.saveTask(it)
                     }
                 }.onFailure {
                     _state.value = _state.value.copy(isErrorPage = true)
@@ -309,7 +308,7 @@ class DetailsViewModel(
                         attachments = attachments
                     )
                     currentTask?.let {
-                        taskRepository.saveTask(it)
+                        taskDataService.saveTask(it)
                     }
                 }.onFailure {
                     _state.value = _state.value.copy(isErrorPage = true)
@@ -352,7 +351,7 @@ class DetailsViewModel(
                     notificationTime = null
                 )
                 currentTask?.let {
-                    taskRepository.saveTask(it)
+                    taskDataService.saveTask(it)
                 }
             }.onFailure {
                 _state.value = _state.value.copy(isErrorPage = true)
@@ -441,7 +440,7 @@ class DetailsViewModel(
         viewModelScope.launch {
             currentTask?.let { task ->
                 runCatching {
-                    taskRepository.saveTask(task)
+                    taskDataService.saveTask(task)
                 }.onSuccess {
                     showDialogOnBack = false
                     _state.value = DetailsBodyState(
