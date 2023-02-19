@@ -1,25 +1,19 @@
 plugins {
-    id 'com.android.application'
+    id 'com.android.library'
     id 'org.jetbrains.kotlin.android'
     id 'kotlin-kapt'
 }
 
 android {
-    namespace 'com.vkochenkov.taskmanager'
+    namespace 'com.vkochenkov.taskmanager.feature.settings'
     compileSdk 33
 
     defaultConfig {
-        applicationId "com.vkochenkov.taskmanager"
         minSdk 23
         targetSdk 33
-        versionCode 5
-        versionName "1.4"
-        manifestPlaceholders = [hostName: applicationId]
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        vectorDrawables {
-            useSupportLibrary true
-        }
+        consumerProguardFiles "consumer-rules.pro"
     }
 
     buildTypes {
@@ -52,7 +46,6 @@ dependencies {
 
     implementation 'androidx.core:core-ktx:1.9.0'
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.5.1'
-    implementation 'androidx.activity:activity-compose:1.6.1'
     implementation "androidx.compose.ui:ui:$compose_ui_version"
     implementation "androidx.compose.ui:ui-tooling-preview:$compose_ui_version"
     implementation 'androidx.compose.material3:material3:1.1.0-alpha02'
@@ -68,8 +61,6 @@ dependencies {
     implementation "io.insert-koin:koin-androidx-compose:3.3.0"
 
     implementation project(":base")
-    implementation project(":feature_main")
-    implementation project(":feature_settings")
 }
 
 // Allow references to generated code

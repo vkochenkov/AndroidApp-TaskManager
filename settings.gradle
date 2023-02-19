@@ -13,4 +13,8 @@ dependencyResolutionManagement {
     }
 }
 rootProject.name = "TaskManager"
+
 include ':app'
+include ':feature_settings'
+include ':feature_main'
+include ':base'
