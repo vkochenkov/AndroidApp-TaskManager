@@ -1,15 +1,18 @@
 # AndroidApp-TaskManager
 
-## Description for users 
-> You can create task, add description, attach files, change priority or status and create notification in exact time. 
-> The application automatically adjusts to the selected color scheme of the device.
+### [See on Google Play](https://play.google.com/store/apps/details?id=com.vkochenkov.taskmanager)
 
-## Description for other developers
-> Multi-module application written by using Jetpac Compose (UI and navigation), ViewModel and Room DB. 
-> Uses the MVI pattern as the author of the application sees it. 
-> If you want to improve something - you are welcome. I will glad to see Merge Request from you.
+### Description for users 
+Create a task, add description, change priority. You can add files and create a task notification at a convenient time for you.
+Edit the task, change its status, and then you can delete it after all.
 
-#### Install from Google Play: https://play.google.com/store/apps/details?id=com.vkochenkov.taskmanager
+The application automatically adjusts to the selected color scheme of the device.
+
+### Description for other developers
+Multi-module application written by using `Jetpac Compose` (UI and navigation), `Koin` for DI, `Room` for store data. 
+Uses the MVI pattern (based on `ViewModel`) as the author of the application sees it. 
+
+If you want to improve something - you are welcome. I will glad to see Merge Request from you.
 
 #### See some screens below:
 <p align="left">
