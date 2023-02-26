@@ -5,7 +5,7 @@ import androidx.navigation.compose.composable
 import com.vkochenkov.taskmanager.base.presentation.navigation.CoreDestination
 import com.vkochenkov.taskmanager.feature.settings.presentation.screen.settings.SettingsScreen
 
-fun settingsNavDestination(
+fun settingsNavigation(
     navGraphBuilder: NavGraphBuilder,
     navController: NavHostController
 ) {

@@ -6,7 +6,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import com.vkochenkov.taskmanager.base.presentation.navigation.CoreDestination
 import com.vkochenkov.taskmanager.feature.main.presentation.navigation.mainNavigation
-import com.vkochenkov.taskmanager.feature.settings.presentation.navigation.settingsNavDestination
+import com.vkochenkov.taskmanager.feature.settings.presentation.navigation.settingsNavigation
 
 @Composable
 fun AppNavHost(
@@ -18,6 +18,6 @@ fun AppNavHost(
         startDestination = startDestination
     ) {
         mainNavigation(this, navController)
-        settingsNavDestination(this, navController)
+        settingsNavigation(this, navController)
     }
 }
