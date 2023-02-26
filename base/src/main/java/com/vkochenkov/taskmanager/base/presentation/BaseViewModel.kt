@@ -4,14 +4,14 @@ import androidx.lifecycle.ViewModel
 import androidx.navigation.NavHostController
 import kotlinx.coroutines.flow.StateFlow
 
-abstract class BaseViewModel<St, Act> : ViewModel() {
+abstract class BaseViewModel<State, Action> : ViewModel() {
 
     /**
      * Should initialise in screen, after creating view model
      */
     lateinit var navController: NavHostController
 
-    abstract val state: StateFlow<St>
+    abstract val state: StateFlow<State>
 
-    abstract val onAction: (Act) -> Unit
+    abstract val onAction: (Action) -> Unit
 }
