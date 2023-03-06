@@ -17,7 +17,7 @@ fun AppNavHost(
         navController = navController,
         startDestination = startDestination
     ) {
-        mainNavigation(this, navController)
-        settingsNavigation(this, navController)
+        mainNavigation(navController)
+        settingsNavigation(navController)
     }
 }

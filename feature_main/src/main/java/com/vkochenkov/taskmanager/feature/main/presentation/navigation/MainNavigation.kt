@@ -7,11 +7,10 @@ import com.vkochenkov.taskmanager.base.presentation.navigation.Route.Companion.b
 import com.vkochenkov.taskmanager.feature.main.presentation.screen.details.DetailsScreen
 import com.vkochenkov.taskmanager.feature.main.presentation.screen.main.MainScreen
 
-fun mainNavigation(
-    navGraphBuilder: NavGraphBuilder,
+fun NavGraphBuilder.mainNavigation(
     navController: NavHostController
 ) {
-    navGraphBuilder.navigation(
+    navigation(
         route = CoreDestination.Main.route,
         startDestination = MainDestination.Main.route
     ) {

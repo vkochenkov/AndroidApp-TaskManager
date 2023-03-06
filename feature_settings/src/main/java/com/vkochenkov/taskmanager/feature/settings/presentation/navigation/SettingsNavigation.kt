@@ -5,11 +5,10 @@ import androidx.navigation.compose.composable
 import com.vkochenkov.taskmanager.base.presentation.navigation.CoreDestination
 import com.vkochenkov.taskmanager.feature.settings.presentation.screen.settings.SettingsScreen
 
-fun settingsNavigation(
-    navGraphBuilder: NavGraphBuilder,
+fun NavGraphBuilder.settingsNavigation(
     navController: NavHostController
 ) {
-    navGraphBuilder.navigation(
+    navigation(
         route = CoreDestination.Settings.route,
         startDestination = SettingsDestination.Settings.route
     ) {
